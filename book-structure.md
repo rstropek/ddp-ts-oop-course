@@ -18,9 +18,11 @@ what worked last year:
   standards, and then sends students to MDN, a search engine, or their AI
   tools. When a chapter outline below lists APIs, that is what the chapter
   *names and uses*, not what it documents. Most chapters carry one
-  **research task** (a `::: {.research}` box): something the student must look
-  up before the next exercise, which the book deliberately does not explain.
-  Research tasks marked 🔎 below are examples, not the final set.
+  **research task** (a `::: {.research quiz=...}` box) driven by a novedu
+  research quiz: the student reads a question, answers it if they can,
+  researches if they can't, and repeats until every question is answered. The
+  exercise after the box needs those answers, and the book never supplies
+  them. Research tasks marked 🔎 below are examples, not the final set.
 * **Testing arrives in two steps.** Unit tests (Vitest) as soon as there is logic
   worth testing outside the DOM (Part 5, classes), e2e tests (Playwright) once
   students build apps with real UI flows (Part 8).
@@ -63,7 +65,8 @@ them and then explains the parts of the project they "accepted as magic" last ye
   platform, how a reference page is organized), a search engine (error
   messages, "how do I" questions, the age of a result), an AI (explanations at
   your level, but verify against MDN; how to ask a precise question).
-* How a research task in this book works and what "write it down" means.
+* How a research task in this book works: the quiz drives you. Open it, read
+  a question, answer or go find out, come back, repeat until done.
 * 🔎 First research task: find on MDN what `textContent` and `innerHTML` do
   differently, and ask an AI the same question; note one thing one source said
   that the other didn't.

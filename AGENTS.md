@@ -57,15 +57,24 @@ old enough to research, and learning to research is a course goal. Whenever a
 chapter would start listing what MDN already lists, it stops and points the
 reader to MDN, a search engine, or their AI tutor or coding buddy instead.
 
-The `::: {.research title="..."}` div (extension `_extensions/research`) marks
-the spots where the book deliberately stops explaining. Its contract:
+The `::: {.research quiz="<key>" title="..."}` div (extension
+`_extensions/research`) marks the spots where the book deliberately stops
+explaining. A **research quiz** on novedu drives the task: its questions are
+exactly what the book leaves out, and the student answers what they know,
+researches what they don't, and returns until every question is answered.
+The contract:
 
-* The exercise that follows **needs** what the box asks for, and the prose
-  after the box never supplies it. A research box whose answer appears two
+* The exercise that follows **needs** what the quiz asks, and the prose after
+  the box never supplies it. A research box whose answers appear two
   paragraphs later trains skipping.
-* The task ends in a small deliverable: one sentence in the student's own
-  words, the MDN URL, the edge case an AI answer missed.
-* Where a fact must stick for the exam (no internet, no AI), the box says so.
+* The box's body is framing only: why the next step needs this, and which
+  part must stick for the exam (no internet, no AI). The questions live in the
+  quiz YAML (`<chapter>-research-quiz.yaml`, registered under `quizzes:` in
+  `ddp-activities.yaml`), written to the `writing-quizzes` skill with one
+  twist: each question's evaluation rewards naming the source, and its
+  feedback points to where on MDN (or in which docs) the answer lives.
+* Three to five questions, each answerable from one MDN page or one focused
+  search.
 
 Aim for one research box in most chapters, never more than two.
 
