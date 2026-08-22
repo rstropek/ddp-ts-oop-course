@@ -32,5 +32,5 @@ activities:
   # questions are what the book deliberately leaves to the student to find out.
   quizzes:
     research-nodelist:
-      file: 0010-dom-basics/0010-dummy-research-quiz.yaml
+      file: 0020-dom/0010-dummy-research-quiz.yaml
       note: "Creative Coding 2 book: research quiz, placeholder chapter (0010) — GitHub-hosted"

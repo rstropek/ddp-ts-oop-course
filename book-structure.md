@@ -14,6 +14,15 @@ what worked last year:
   CSS, the project toolchain (package.json, tsconfig, Biome, scripts), and working
   with AI agents (AGENTS.md, skills). Each part has at least one chapter that moves
   each thread one step forward.
+* **Experiments before theory.** Every chapter opens with something to type
+  and watch, and names the concept afterwards. Setup, git, research, and the
+  coding buddy appear as short chapters exactly where an experiment first
+  needs them, not as a block at the front.
+* **Exercises ship as files to copy.** Exercises that need more than the bare
+  starter (HTML, CSS, base classes, half-written tests) live in this repo's
+  `exercises/<name>/` folder. The student creates a fresh app from the general
+  starter and copies those files in, so every exercise starts the same way and
+  the book never hosts a second project template.
 * **The book is not a reference.** It names and motivates concepts, APIs, and
   standards, and then sends students to MDN, a search engine, or their AI
   tools. When a chapter outline below lists APIs, that is what the chapter
@@ -43,22 +52,74 @@ Material legend: **[LY]** = last year's course repo, **[EX]** = exam from
 
 ---
 
-## Part 1 — Welcome back to the workshop
+## Part 1 — Welcome back
 
-Short. Students used VS Code and npm at the end of year one, so this part re-seats
-them and then explains the parts of the project they "accepted as magic" last year.
+One short chapter, then straight into the DOM. Setup, git, research, and the
+coding buddy are not a block of theory at the front; each gets its own chapter
+inside Part 2, placed right after the experiment that makes it necessary.
 
 ### 1.1 From canvas to page [NEW]
-* What changed: p5.js painted pixels on a canvas; now the browser builds a page
-  out of elements, and TypeScript talks to the page.
-* Same language, new world: a two-column "what you know / what is new" table
-  (variables, loops, functions, arrays vs. elements, selectors, events, classes).
-* How this book works: VS Code only, starter template, quizzes, AI tutors, and the
-  exam rule "no internet, no AI, but the course material is allowed".
-* The AI policy of this course (reuse last year's readme text): use agents to get
-  unstuck, be able to explain every line, practise without them before exams.
+* What changed in three sentences: p5.js painted pixels on a canvas; now the
+  browser builds a page out of elements, and TypeScript talks to the page.
+* Same language, new world: a short "what you know / what is new" table.
+* How this book works: experiments first, concepts named afterwards; research
+  tasks; quizzes; the exam rule "no internet, no AI, but the course material
+  is allowed"; the AI policy (use agents to get unstuck, explain every line).
+* Exercise, on page one: unzip or clone `vite-ts-starter`, `npm install`,
+  `npm start`, change the heading text in `src/index.ts`, watch the page
+  reload. Nothing is explained yet; that is the point.
 
-### 1.2 Research is part of the job [NEW; replaces year one's "reading docs" chapters]
+---
+
+## Part 2 — The DOM: a page full of objects
+
+Goal of the part: students can read and change a page through its objects and
+can react to events. Everything is still procedural (functions, no classes).
+This is where the vocabulary of OOP gets introduced *by use*: object,
+property, method, identity, reference. Every chapter opens with an experiment
+and names the concept afterwards.
+
+### 2.1 Elements are objects [LY 10-dom, rewritten]
+* Experiment: two variables, one `getElementById`; change `textContent` through
+  one, read it through the other. Then the DevTools elements panel as a live
+  view of the same tree.
+* Concepts named afterwards: HTML tags, attributes, nesting; the DOM tree
+  (svgbob diagram); *object*, *property*, *identity*; link back to year one's
+  value vs. reference chapter.
+* Exercise: "Hello again" — a paragraph with today's date, a second heading,
+  a button that says how often it was clicked (no events yet: count with
+  `onclick` in HTML, to be replaced in 2.2).
+
+### 2.2 Events: the page talks back [LY 10-dom]
+* Experiment: `addEventListener("click", ...)` on a button; log the `event`
+  object and look inside it.
+* Concepts: the browser calls *your* function later (compare p5.js
+  `mousePressed()`); arrow functions as handlers; `event.target`,
+  `clientX/Y`, `key` for `keydown`; `element.style.*` as the first CSS touch.
+* 🔎 Research: which events besides `click` exist for a button and an input.
+* Exercise: click counter, color box that cycles colors, keyboard echo.
+
+### 2.3 The starter project, file by file [NEW, based on vite-ts-starter]
+* Students have used the starter twice now; this chapter opens the box.
+* `index.html` and the `<script type="module">` bridge; `package.json`
+  (`scripts`, `devDependencies`, `^`); `tsconfig.json` as a list of promises,
+  with the four strict options they will actually hit; `biome.json`, `npm run
+  check` / `check:fix`, format on save; `.vscode/`, `.gitignore`, `assets/`;
+  the `.agents/skills` folder gets a teaser only.
+* Exercise: break the project on purpose three times (remove the script tag,
+  rename `index.ts`, leave a variable unused) and read the three errors.
+
+### 2.4 Types for elements [NEW, merges the `as` casts LY used without explaining]
+* Experiment: `getElementById` of an id that does not exist; read the error.
+* Concepts: `HTMLElement | null` and what to do about it (`if (!el) throw`
+  vs. `!`; connects to 4.6); `HTMLButtonElement`, `HTMLInputElement` as more
+  special versions of `HTMLElement` (plant the word *inheritance*);
+  `querySelector<HTMLInputElement>("#name")` instead of `as`; `input.value` is
+  a string, `Number()`, `Number.isNaN`.
+* Exercise: two-operand calculator with a `<select>` for the operator,
+  division-by-zero error message [LY homework 10-simple-calculator].
+
+### 2.5 Research is part of the job [NEW; replaces year one's "reading docs" chapters]
 * Why this book stops explaining: the job is knowing how to find out, and the
   exam is about what stuck.
 * The three sources and what each is good for: MDN (the truth about the web
@@ -67,139 +128,79 @@ them and then explains the parts of the project they "accepted as magic" last ye
   your level, but verify against MDN; how to ask a precise question).
 * How a research task in this book works: the quiz drives you. Open it, read
   a question, answer or go find out, come back, repeat until done.
-* 🔎 First research task: find on MDN what `textContent` and `innerHTML` do
-  differently, and ask an AI the same question; note one thing one source said
-  that the other didn't.
+* 🔎 First research task: what `textContent` and `innerHTML` do differently;
+  ask an AI the same question and note one thing one source said that the
+  other didn't.
 
-### 1.3 The starter project, file by file [NEW, based on vite-ts-starter]
-* Clone/download `vite-ts-starter`, `npm install`, `npm start`; what `node_modules`
-  is and why it is not in git.
-* `index.html` is the entry point and the `<script type="module">` line is the
-  bridge to `src/index.ts`.
-* `package.json`: name, `scripts` (what `npm start`, `build`, `check` actually
-  run), `devDependencies`, and the `^` in version numbers.
-* `tsconfig.json`: reading it as a list of promises the compiler makes for you.
-  Explain the four strict options students will actually hit
-  (`noUncheckedIndexedAccess`, `noUnusedLocals`, `noImplicitReturns`,
-  `exactOptionalPropertyTypes`) with a one-liner example each.
-* `biome.json`: linter vs. formatter; `npm run check` and `check:fix`; the VS Code
-  extension; "format on save".
-* `.vscode/`, `.gitignore`, `assets/`; the `.agents/skills` folder gets a teaser
-  only (full treatment in 1.4).
-* Exercise: break the project on purpose three times (remove the script tag, rename
-  `index.ts`, use an unused variable) and read the three different error messages.
-
-### 1.4 Git and your course repository [NEW]
-* Last year's required repo layout (`coursework/`, `homework/`, `projects/`) and
-  why a clean repo is part of the grade.
-* The daily loop: `git add`, `commit`, `push`; reading `git status`; the role of
-  `.gitignore` (never commit `node_modules`, `dist`).
-* Exercise: create the course repo, copy the starter into
-  `coursework/<date>-hello`, commit and push.
-
-### 1.5 Your coding buddy: pi on novedu [NEW, drafted as 0010-welcome/0010-coding-buddy.qmd]
-* Recap from year one: asking an AI for help vs. letting an agent edit files.
-* Install `pi`, copy the book's `models.json` to `~/.pi/agent/`, put the
-  activity code from the teacher into `auth.json`, first run in the starter.
-* What the buddy knows (the course rules, the "ladder" of book parts) and the
-  two rules that never change: you must be able to explain every line, and its
-  mistakes are yours. Same novedu coding-activity mechanism as the
-  harness-engineering book for the older students.
-* `AGENTS.md`/`CLAUDE.md`: a file that tells the agent the rules of *this* project
-  (the starter gets one; students read it and add two rules of their own, e.g.
-  "no `any`", "always run `npm run check`").
-* Skills: `.agents/skills/find-docs` is in the starter. What a skill is (a
-  markdown file with instructions the agent loads when it fits), how the agent
-  picks it, and when it is better than searching the web.
-* Exercise: ask the agent, with and without the `find-docs` skill, what
-  `noUncheckedIndexedAccess` does, and compare the answers.
-* The buddy answers questions but points to the source; research tasks are
-  still the student's.
-* This chapter seeds the "harness engineering" thread; 3.6, 5.3, and 8.3 build on
-  it.
-
----
-
-## Part 2 — The DOM: a page full of objects
-
-Goal of the part: students can read and change a page through its objects and can
-react to events. Everything is still procedural (functions, no classes). This is
-where the vocabulary of OOP gets introduced *by use*: object, property, method,
-identity, reference.
-
-### 2.1 Elements are objects [LY 10-dom, rewritten]
-* HTML recap in ten lines: tags, attributes, nesting; the five elements used in
-  this part (`h1`, `p`, `button`, `input`, `div`).
-* The browser builds a tree of objects from the HTML: the DOM. svgbob diagram of
-  `document → html → body → ...`.
-* `document.getElementById` gives you *the* object, not a copy: change
-  `textContent` and the page changes. Link back to year one's value vs. reference
-  chapter. Object identity made visible: two variables, one element.
-* The DevTools elements panel as a live view of the same tree.
-* Exercise: "Hello again" — starter code's `helloWorldHeader`, then a paragraph
-  that shows the current date, then a button that says how often it was clicked.
-
-### 2.2 Events: the page talks back [LY 10-dom]
-* `addEventListener("click", ...)`: the browser calls *your* function later.
-  Compare with p5.js `mousePressed()`, which students know; the difference is that
-  now every element can have its own handler.
-* Arrow functions as handler (year one used named functions; arrow functions get a
-  proper introduction here).
-* The `event` object: `event.target`, `clientX/Y`, `key` for `keydown`.
-* `element.style.*` and the first CSS touch: change a background color from code.
-* Exercise: click counter, color box that cycles colors, keyboard echo.
-
-### 2.3 Types for elements [NEW, merges the `as` casts LY used without explaining]
-* `getElementById` returns `HTMLElement | null`: why `null` is in there and what
-  to do about it (`if (!el) throw ...` vs. `!`); connects to 4.6 exceptions.
-* `HTMLButtonElement`, `HTMLInputElement`, `HTMLHeadingElement`: the first time
-  students see that one type can be a more special version of another. Plant the
-  word *inheritance* here, as last year's selectors lesson did, without teaching it.
-* `querySelector<HTMLInputElement>("#name")` instead of `as` casts.
-* `input.value` is always a string; `Number()`, `parseInt`, `Number.isNaN`.
-* Exercise: two-operand calculator with a `<select>` for the operator, division by
-  zero error message [LY homework 10-simple-calculator].
-
-### 2.4 Creating elements [LY 10-dom, 20-svg]
-* `document.createElement`, `append`, `remove`, `innerHTML` (and why we prefer
-  `textContent` for user input).
-* Building a list from an array with a loop: the array-of-data → elements-on-page
-  pattern that returns in every later project.
-* `classList.add/remove/toggle` with a first real stylesheet: `import "./styles.css"`
-  in Vite, a `.done` class, `:hover`.
+### 2.6 Creating elements [LY 10-dom, 20-svg]
+* Experiment: `createElement` + `append` in a loop over an array of strings.
+* Concepts: the array-of-data → elements-on-page pattern that returns in every
+  later project; `remove`; `textContent` over `innerHTML` for user input;
+  `classList` with a first real stylesheet (`import "./styles.css"`, a `.done`
+  class, `:hover`).
 * 🔎 Research: `classList` has more than `add` and `remove`; find the method
   that flips a class and the one that answers whether a class is set.
 * Exercise: to-do list (add, mark done, delete). Bonus: count of open items.
 
-### 2.5 Selectors: asking for collections [LY 30-selectors, strongest chapter of the part]
-* One selector language, two users: CSS rules and `querySelector(All)`.
-* `#id`, `.class`, `tag`, `tag.class`, descendant `a b` vs. `a.b`, `:hover`,
-  `:nth-child`, attribute selectors `[type="checkbox"]`.
-* `querySelectorAll` returns a `NodeList`: `for...of`, `forEach`, `Array.from`,
-  `.length`; "a collection of objects" as the second OOP idea.
+### 2.7 Your coding buddy: pi on novedu [NEW, drafted as 0020-dom/0070-coding-buddy.qmd]
+* Placed here because the to-do list is the first app big enough that an
+  agent helps and can also mislead.
+* Install `pi`, copy the book's `models.json` to `~/.pi/agent/`, put the
+  activity code from the teacher into `auth.json`, first run in the to-do
+  project.
+* What the buddy knows (the course rules, the "ladder" of book parts) and the
+  two rules that never change: you must be able to explain every line, and its
+  mistakes are yours. The buddy answers questions but points to the source;
+  research tasks are still the student's.
+* Exercise: ask the buddy to add the open-items counter, read its diff, then
+  delete it and write it yourself.
+* Seeds the "harness engineering" thread; 3.6, 5.3, and 8.3 build on it.
+
+### 2.8 Selectors: asking for collections [LY 30-selectors, strongest chapter of the part]
+* Experiment: `querySelectorAll("p")`, change every element in a loop; then
+  the same selector in `styles.css`.
+* Concepts: one selector language, two users; `#id`, `.class`, `tag`,
+  `tag.class`, descendant `a b` vs. `a.b`, `:hover`, `:nth-child`, attribute
+  selectors; *a collection of objects* as the second OOP idea; `for...of`,
+  `forEach`, `Array.from`, `.length`.
 * 🔎 Research: what `querySelectorAll` returns, whether it changes when the page
-  changes, and how to turn it into an array (replaces LY advanced_NodeList.md).
-* Exercise: given a blog page, select and style; then from TypeScript, count and
-  toggle all paragraphs with class `highlight`.
+  changes, and how to turn it into an array (the placeholder chapter's
+  research quiz is the first draft of this).
+* Exercise: given a blog page, select and style; then from TypeScript, count
+  and toggle all paragraphs with class `highlight`.
 
-### 2.6 CSS by doing: layout with Flexbox and Grid [NEW; replaces LY's float lesson]
-* The box model in one figure (content, padding, border, margin).
-* Flexbox for rows and columns, `gap`, `justify-content`, `align-items`.
-* Grid for boards: `grid-template-columns: repeat(8, 1fr)`.
-* Units: `px`, `rem`, `%`; colors; fonts. No more theory than needed for the
-  exercises of this book.
+### 2.9 Git and your course repository [NEW]
+* Placed here because students now have four small projects worth keeping.
+* The required repo layout (`coursework/`, `homework/`, `projects/`) and why
+  a clean repo is part of the grade; the daily loop `add`, `commit`, `push`;
+  reading `git status`; `.gitignore` (never `node_modules`, `dist`).
+* 🔎 Research: what a commit message should look like; find two conventions
+  and pick one.
+* Exercise: create the course repo, move the projects so far into it, commit
+  and push.
+
+### 2.10 CSS by doing: layout with Flexbox and Grid [NEW; replaces LY's float lesson]
+* Experiment: eight `div`s, `display: grid`, `repeat(8, 1fr)`; watch them snap
+  into a board.
+* Concepts: the box model in one figure; Flexbox for rows and columns (`gap`,
+  `justify-content`, `align-items`); Grid for boards; units `px`, `rem`, `%`;
+  colors; fonts. No more theory than the exercises need.
+* 🔎 Research: how to center something horizontally and vertically with
+  Flexbox; find the two properties and the MDN page that explains them.
 * Exercises: style the chessboard markup [LY 30-chessboard]; weather dashboard
-  with condition classes and hover lift [LY 20-weather-dashboard], including the
-  optional TypeScript part that cycles the weather classes.
+  with condition classes and hover lift [LY 20-weather-dashboard], including
+  the optional TypeScript part that cycles the weather classes.
 
-### 2.7 Forms and validation [NEW, prepares the bubble chart exam]
-* `<form>`, `<label for>`, `submit` event and `preventDefault`, `input type=number
-  / color / range`, `change` vs. `input` events.
-* Validating before acting; showing and clearing an error paragraph; `disabled`
-  buttons.
-* Exercise: "Guest list" form that refuses empty names and duplicates, renders the
-  list, and keeps a counter.
-
+### 2.11 Forms and validation [NEW, prepares the bubble chart exam]
+* Experiment: a `<form>` with a submit button; watch the page reload; add
+  `preventDefault`.
+* Concepts: `<label for>`, the `submit` event, `input type=number / color /
+  range`, `change` vs. `input`; validating before acting; showing and clearing
+  an error paragraph; `disabled` buttons.
+* 🔎 Research: which `input` types exist and which three the next part's chart
+  needs (number, color, range); what `valueAsNumber` does.
+* Exercise: "Guest list" form that refuses empty names and duplicates, renders
+  the list, and keeps a counter.
 
 ---
 
@@ -309,7 +310,7 @@ Each chapter introduces exactly one OOP idea and an app that needs it.
 * When to throw (impossible states, invalid input deep inside logic) and when to
   return a result or show a message (expected user mistakes in the UI).
 * Custom error classes via inheritance: `class ValidationError extends Error`.
-* Exercise: refactor the calculator from 2.3 so the logic throws and the UI
+* Exercise: refactor the calculator from 2.4 so the logic throws and the UI
   catches; then add error cases to the shapes calculator (negative side length).
 
 ### 4.7 Objects talking to each other: callbacks and Maps [LY Paint]
@@ -393,7 +394,9 @@ same class twice.
 
 Goal: linked lists, stacks, and queues implemented by hand, tested, and used in an
 app. Every structure is built twice: first on an array (so the interface is clear),
-then with nodes (so the pointers are understood).
+then with nodes (so the pointers are understood). Every structure is built
+**test-first**: the tests from the array version stay green when the nodes replace
+the array.
 
 ### 7.1 Nodes and pointers [LY LinkedList, rewritten]
 * Why arrays are not the end of the story: insert in the middle, remove from the
@@ -406,9 +409,11 @@ then with nodes (so the pointers are understood).
 * Exercise: Playlist app that renders the chain as `[title – artist] → … → null`.
 
 ### 7.2 Iterating your own collection [NEW]
-* `for...of` over your list: `[Symbol.iterator]` in the simplest possible form, or
-  a `forEach(callback)` method as the gentler alternative. Pick one in review.
+* A `forEach(callback: (value: T) => void)` method on the list: the callback
+  idea from 4.7 applied to your own collection. `Symbol.iterator` is
+  deliberately left out; a research task may point curious students to it.
 * `toArray` for rendering, `length` as a getter vs. a counter field (trade-off).
+* Written test-first, like everything in this part.
 
 ### 7.3 Stacks [EX bracelet/train revisited, EX 2026-05 undo]
 * LIFO; `push`, `pop`, `peek`, `isEmpty`; stack on a linked list with only a head
@@ -444,8 +449,8 @@ this part tests them through the browser and ends with a project.
   what the `webServer` block in `playwright.config.ts` does.
 * `page.goto`, `getByRole`, `getByLabel`, `fill`, `click`, `expect(locator)
   .toHaveText/.toBeVisible`. Locators built on roles and labels as the reason
-  semantic HTML and `<label for>` mattered in 2.7.
-* Exercise: three e2e tests for the to-do list from 2.4.
+  semantic HTML and `<label for>` mattered in 2.11.
+* Exercise: three e2e tests for the to-do list from 2.6.
 
 ### 8.2 Testing the apps of this book [NEW]
 * Recording a test with the Playwright codegen tool, then cleaning it up.
@@ -485,28 +490,23 @@ this part tests them through the browser and ends with a project.
   runs ahead of schedule.
 * A standalone CSS theory chapter (by design).
 
-## Open questions for review
+## Decisions taken in review (2026-08-22)
 
-1. **Where does testing go?** Proposal puts unit tests in Part 5, before generics
-   and data structures, so lists/stacks/queues are built test-first. Alternative:
-   keep last year's order (testing only with linked lists) and make Part 5 shorter.
-2. **Exceptions in 4.6 vs. earlier.** Students hit `| null` in 2.3; a tiny
-   `throw` could already appear there, with the full chapter in Part 4.
-3. **Exam reuse.** The proposal maps all seven of last year's exams to exercises
-   (bubble chart, beehive, shapes, mileage, bracelet/sandwich, undo, hairdresser)
-   plus train builder. If some should stay unpublished for reuse as real exams,
-   say which and I'll swap in new exercises of the same shape.
-4. **Iterators (7.2).** `Symbol.iterator` may be one step too far; the `forEach`
-   method alternative is simpler. Decide in review.
-5. **Part 1 length.** Four chapters of setup before the first real DOM code might
-   be too slow after a summer break; 1.3 (git) and 1.4 (agents) could move into
-   Part 2 as interleaved chapters.
-6. **E2E earlier?** Because Playwright ships in the tests starter, a first
-   e2e test could already appear in 5.2 next to the first unit test (the
-   starter's `add.e2e.ts` invites it). I kept e2e in Part 8 so Part 5 stays
-   short, but moving one Playwright chapter forward is cheap.
-7. **Exercise hosting.** Year one linked to the playground. Here exercises need
-   starter code for the bigger tasks (bracelet, train, hairdresser). Options: a
-   companion `ddp-second-exercises` repo with one folder per exercise (my
-   preference, mirrors last year's `starter/`/`solution/` pairs), or inline
-   listings in the book. The `example` shortcode would then point at repo folders.
+1. **Testing before data structures.** Unit tests arrive in Part 5; every
+   structure in Part 7 is built test-first.
+2. **Exceptions** stay a full chapter in 4.6; 2.4 only plants the `throw` for a
+   missing element.
+3. **All of last year's exams** become exercises.
+4. **Iteration (7.2)** uses a `forEach` method. No `Symbol.iterator`.
+5. **Part 1 is one chapter.** Setup, research, buddy, and git are interleaved
+   into Part 2 where an experiment first needs them. Experiments first,
+   concepts named afterwards, everywhere.
+6. **E2E stays in Part 8.**
+7. **Exercise files live in `exercises/<name>/` in this repo.** Students create
+   a fresh app from the general starter and copy the files in.
+
+## Still open
+
+* Exact set of research quizzes per chapter (the 🔎 lines are first drafts).
+* Whether the `example` shortcode is kept (pointing at `exercises/<name>/`) or
+  replaced by a plain "Files for this exercise" callout.

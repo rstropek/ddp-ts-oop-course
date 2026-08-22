@@ -6,7 +6,7 @@
 #   * html -> a book-style website (chapter sidebar + prev/next navigation)
 #   * pdf  -> ONE combined PDF, each `# Chapter` starting on its own page
 #
-# Chapters live in numbered folders (e.g. 0010-dom-basics/) grouped into book
+# Chapters live in numbered folders (e.g. 0020-dom/) grouped into book
 # parts below. See book-structure.md for the planned part/chapter outline.
 # ---------------------------------------------------------------------------
 
@@ -21,12 +21,10 @@ book:
   date: 2026-08-22
   chapters:
     - index.qmd
-    - part: "Welcome back"
-      chapters:
-        - 0010-welcome/0010-coding-buddy.qmd
     - part: "The DOM"
       chapters:
-        - 0010-dom-basics/0010-dummy.qmd
+        - 0020-dom/0010-dummy.qmd
+        - 0020-dom/0070-coding-buddy.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

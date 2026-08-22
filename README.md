@@ -23,7 +23,8 @@ mechanics in detail; this one only lists what is here.
 | `book-structure.md` | The planned outline of parts and chapters |
 | `_quarto.yml` | Book definition: chapter order, output formats, novedu base URL |
 | `index.qmd` | The preface |
-| `0010-dom-basics/`, ... | Book parts. Numbered folders and files: a chapter `.qmd` next to its `<chapter>-quiz.yaml` and images, plus the part's `*-tutor.yaml` |
+| `0010-welcome/`, `0020-dom/`, ... | Book parts. Numbered folders and files: a chapter `.qmd` next to its `<chapter>-quiz.yaml` and images, plus the part's `*-tutor.yaml` |
+| `exercises/<name>/` | Files an exercise needs beyond the general starter (HTML, CSS, base classes, tests). Students copy them into a fresh starter-based app |
 | `_extensions/` | Quarto extensions: the `example`, `playground`, `quiz`, and `tutor` shortcodes, and the `research` filter that renders `::: {.research quiz="<key>"}` divs as "Research task" callouts linking to the research quiz that drives the task |
 | `ddp-activities.yaml` | The novedu activity registry: every quiz and tutor under a stable key. Hand-written |
 | `ddp-activities.lock.yaml` | Generated key → activity code map. Regenerate with `npx @novedu/cli codes sync ddp-activities.yaml`; do not edit |
@@ -54,9 +55,11 @@ PDF, and `rsvg-convert` so SVG diagrams survive the LaTeX pass.
   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter) and work in
   VS Code; from the testing part on, the
   [vite-ts-starter-tests](https://github.com/Teaching-HTL-Leonding/vite-ts-starter-tests)
-  variant with Vitest and Playwright. Where an exercise needs starter code beyond the template, the chapter shows
-  it inline or links to a repository. The `example`/`playground` shortcodes are kept
-  for now but may be replaced.
+  variant with Vitest and Playwright. Where an exercise needs files beyond the
+  template, they live in `exercises/<name>/` here and the chapter says which to copy.
+  The `example`/`playground` shortcodes are kept for now but may be replaced.
+* The book is tested by letting a smaller LLM work through it, so every exercise
+  must be fully specified from the chapter text and its `exercises/` files alone.
 * The `base-url` in `ddp-activities.yaml` must point at this repository's public URL
   before the first novedu activity is minted: `codes sync` fetches each activity file
   from that URL and fails with `FETCH_FAILED` until the repo is pushed.

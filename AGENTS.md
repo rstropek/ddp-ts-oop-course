@@ -78,12 +78,27 @@ The contract:
 
 Aim for one research box in most chapters, never more than two.
 
+## Experiments before theory
+
+Every chapter opens with something to type and watch, and names the concept
+afterwards. Setup, tooling, git, research, and the coding buddy are short
+chapters placed exactly where an experiment first needs them, never a block of
+theory at the front of a part.
+
 ## Exercises and linear reading
 
 Students meet an exercise's starter code only when an exercise step tells them
-to create or open it. A chapter teaches the concept first, as its own idea, and
-the exercise steps then point back to it. Never ask the reader to look at,
+to create or open it. A chapter runs the experiment first, names the concept,
+and the exercise steps then point back to it. Never ask the reader to look at,
 change, or judge code that is not in front of them at that point.
+
+Every exercise starts from a fresh copy of the general starter. Exercises that
+need more (HTML, CSS, base classes, half-written tests) keep those files in
+`exercises/<name>/` in this repo, and the chapter tells the student which files
+to copy where. Each exercise must be fully specified from the chapter and those
+files alone: the book is tested by letting a smaller LLM work through it, so an
+exercise that needs unstated knowledge, a file that is not there, or a teacher
+in the room is a bug.
 
 ## No glossary
 

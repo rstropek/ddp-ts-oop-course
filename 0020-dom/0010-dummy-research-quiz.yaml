@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
-# RESEARCH quiz for the placeholder chapter (0010-dom-basics/0010-dummy.qmd).
+# RESEARCH quiz for the placeholder chapter (0020-dom/0010-dummy.qmd).
 # Unlike a "check your understanding" quiz, a research quiz comes BEFORE the
 # exercise: its questions are the things the book deliberately does not
 # explain. Students open it, answer what they know, research what they don't
