@@ -136,8 +136,9 @@ questions:
       Expected: three rows; the last row holds one box (3 + 3 + 1 = 7). The
       browser fills a row and starts a new one when the columns are full.
       Required: both numbers, 3 rows and 1 box in the last row.
-      Partial: one of the two numbers right, the other wrong or missing.
-      Incorrect: one row of seven, seven rows, or three boxes in the last row.
+      Partial: one of the two numbers right, the other wrong or missing, for
+      example "3 rows, 3 boxes in the last row".
+      Incorrect: both numbers wrong, for example one row of seven.
 
   - id: box-width
     title: "How wide is the box?"

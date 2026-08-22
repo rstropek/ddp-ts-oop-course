@@ -95,8 +95,9 @@ questions:
       and which values count as valid. Yes, the field can still hold a value
       outside the range, because the user can type one in; the attributes do
       not cut the typed value down to the range.
-      Required: 1) what `min` and `max` say; 2) what `step` does; 3) that a
-      typed value can still be outside the range.
+      Required: 1) what `min` and `max` say; 2) what `step` does ("how far
+      the arrows jump" is a full answer); 3) that a typed value can still be
+      outside the range.
       Partial: all three attributes described correctly, but the second
       question missing or answered with "no".
       Incorrect: the attributes described wrongly, for example `step` as the
@@ -135,6 +136,7 @@ questions:
       Partial: only one of the two, for example naming `preventDefault`
       without saying what happens now.
       Incorrect: says nothing happens, or that Enter does not submit a form.
+      That claim is wrong about the browser, so it is never partial.
 
   - id: label-for
     title: "Why the label"

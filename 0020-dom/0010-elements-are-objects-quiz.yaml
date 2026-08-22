@@ -96,8 +96,9 @@ questions:
       the change; the paragraph then shows `Final`.
       Required: both literal values, each on the right side (console Draft,
       page Final).
-      Partial: exactly one of the two values right.
-      Incorrect: says the console prints Final.
+      Partial: exactly one of the two values right, for example "console
+      Final, page Final" (page right, console wrong).
+      Incorrect: both values wrong.
 
   - id: tree-nesting
     title: "Who sits inside whom"
