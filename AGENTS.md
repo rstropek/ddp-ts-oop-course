@@ -94,8 +94,10 @@ change, or judge code that is not in front of them at that point.
 
 Every exercise starts from a fresh copy of the general starter. Exercises that
 need more (HTML, CSS, base classes, half-written tests) keep those files in
-`exercises/<name>/` in this repo, and the chapter tells the student which files
-to copy where. Each exercise must be fully specified from the chapter and those
+`exercises/<name>/` in this repo, and the chapter places `{{< exercise <name> >}}`
+(`tests=true` for the tests starter) where the student should create the app;
+the shortcode lists the files and their target paths itself, so never write
+that instruction by hand. Each exercise must be fully specified from the chapter and those
 files alone: the book is tested by letting a smaller LLM work through it, so an
 exercise that needs unstated knowledge, a file that is not there, or a teacher
 in the room is a bug.
@@ -109,8 +111,9 @@ matters, in the sentence where it appears.
 ## Links
 
 Link text is descriptive and makes sense on its own, never "click here" or a
-bare URL. Quizzes and tutors are linked through the book's shortcodes
-(`{{< quiz >}}`, `{{< tutor >}}`), never by pasted URL.
+bare URL. Quizzes, tutors, and exercise files are linked through the book's
+shortcodes (`{{< quiz >}}`, `{{< tutor >}}`, `{{< exercise >}}`), never by
+pasted URL.
 
 ## The coding buddy
 

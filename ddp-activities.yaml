@@ -28,9 +28,9 @@ activities:
 
   tutors: {}
 
-  # Research quizzes drive a `::: {.research quiz="<key>"}` box: their
-  # questions are what the book deliberately leaves to the student to find out.
+  # One quiz per chapter, keyed by chapter slug. Each quiz also asks the
+  # chapter's research-box questions (ids `research-*`).
   quizzes:
-    research-nodelist:
-      file: 0020-dom/0010-dummy-research-quiz.yaml
-      note: "Creative Coding 2 book: research quiz, placeholder chapter (0010) — GitHub-hosted"
+    dummy:
+      file: 0020-dom/0010-dummy-quiz.yaml
+      note: "Creative Coding 2 book: Placeholder chapter (0010) — GitHub-hosted"

@@ -143,11 +143,13 @@ boundary, the literal value) and nothing more. A rubric grows only on
 evidence from its eval. Stay under ~8 lines unless evals forced more. The
 rubric is server-only and may state answers freely.
 
-Research quizzes (the ones a `::: {.research quiz=...}` box links to) add
-`{{fragment "shared.research_context"}}` to `instructions:` and pass
+One quiz per chapter, at the end. It MUST ask every question of the
+chapter's `::: {.research}` boxes, as questions with ids prefixed
+`research-`. A quiz with such questions adds
+`{{fragment "shared.research_context"}}` to `instructions:` and passes
 `reveal=false` to `discussion_frame`, so feedback and chat send the student
-to the source instead of revealing the answer. Their rubrics are the same
-shape; the only research-specific content is the question itself.
+to the source instead of revealing the answer. Research rubrics are the same
+shape as any other.
 
 
 ## Images in questions

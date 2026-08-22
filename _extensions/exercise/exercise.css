@@ -1,0 +1,4 @@
+/* Styling for {{< exercise >}} callouts — HTML output only. */
+.callout ul code {
+  font-size: 0.9em;
+}

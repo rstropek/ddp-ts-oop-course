@@ -1,16 +1,16 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
-# Golden-answer regression cases for the placeholder research quiz
+# Golden-answer regression cases for the placeholder chapter quiz
 # (0020-dom/0010-dummy.qmd). One correct, one partial, one incorrect per
 # question, plus one German correct answer per quiz. Teacher-only test data;
 # never publish as an activity. Grading runs on the quiz's own small model
 # (Qwen on SCCH, free); the feedback audit uses a frontier judge via
 # --judge-llm-* and costs money, so run after rubric changes, not routinely.
 
-id: dummy-research-quiz-eval
-target: ./0010-dummy-research-quiz.yaml
+id: dummy-quiz-eval
+target: ./0010-dummy-quiz.yaml
 
 questions:
-  - question: return-type
+  - question: research-return-type
     answers:
       - expect: correct
         answer: |
@@ -23,7 +23,7 @@ questions:
         answer: |
           an array of HTMLLIElement
 
-  - question: loop
+  - question: research-loop
     answers:
       - expect: correct
         answer: |
@@ -40,7 +40,7 @@ questions:
         answer: |
           items.map(item => ...) and items.filter(item => ...)
 
-  - question: live-or-static
+  - question: research-live-or-static
     answers:
       - expect: correct
         answer: |
@@ -53,3 +53,15 @@ questions:
       - expect: incorrect
         answer: |
           yes, the list is live and always shows the current li elements
+
+  - question: identity
+    answers:
+      - expect: correct
+        answer: |
+          "x", a and b are the same element
+      - expect: partial
+        answer: |
+          x
+      - expect: incorrect
+        answer: |
+          still empty, b was queried separately so it's a different object

@@ -29,11 +29,11 @@ book:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"
 
-# Base URL of the TypeScript playground server. The `example` shortcode turns
-# each exercise into an "Open in the playground" link built from this base
-# (and the same base powers the standalone `{{< playground <url> >}}` shortcode).
-# The server's FQDN may change — when it does, edit ONLY this line.
-playground-base-url: "https://ts-web-playground-server-bfdfbjcthubcardq.westeurope-01.azurewebsites.net"
+# Where the exercise files live. The `exercise` shortcode lists the files of
+# exercises/<folder>/ and links each to its raw GitHub URL; the folder itself
+# links to the tree view (and becomes the QR code in the PDF).
+exercises-base-url: "https://github.com/rstropek/ddp-ts-oop-course/tree/main/exercises"
+exercises-raw-base-url: "https://raw.githubusercontent.com/rstropek/ddp-ts-oop-course/main/exercises"
 
 # Base URL of the novedu chat app. The `quiz` and `tutor` shortcodes turn an
 # activity code into a link built from this base (<base>/<code>). If the app

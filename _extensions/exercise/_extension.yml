@@ -1,0 +1,13 @@
+title: Exercise
+author: Creative Coding 2
+version: 1.0.0
+quarto-required: ">=1.4.0"
+# Provides the `{{< exercise <folder> >}}` shortcode: a callout that tells the
+# student to create a fresh app from the starter and copy the files of
+# exercises/<folder>/ into it, listing every file with its target path.
+contributes:
+  shortcodes:
+    - exercise.lua
+
+# PDF output needs the LaTeX packages `qrcode`, `inconsolata`, and `needspace`
+# (shared print-link block). TinyTeX installs them on the first render.

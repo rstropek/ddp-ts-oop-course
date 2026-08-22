@@ -7,5 +7,6 @@ only the files the student copies into a fresh app created from
 `src/styles.css`, a base class, a half-written test file. Never a complete
 project, never `package.json` or `node_modules`.
 
-The chapter names the folder and says which file goes where. Sample solutions
-do not live here; they stay with the teacher.
+The chapter places `{{< exercise <name> >}}`, which lists every file in the
+folder with its target path and links it on GitHub. Sample solutions do not
+live here; they stay with the teacher.

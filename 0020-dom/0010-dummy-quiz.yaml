@@ -1,23 +1,23 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
-# RESEARCH quiz for the placeholder chapter (0020-dom/0010-dummy.qmd).
-# A research quiz comes BEFORE the exercise: its questions are the things the
-# book deliberately does not explain. Students open it, answer what they know,
-# research what they don't (MDN, search engine, AI), and come back until every
-# question is answered. Rubrics list only the expected answer and the aspects
-# the student must state; the shared fragments carry every generic rule.
+# Quiz for the placeholder chapter (0020-dom/0010-dummy.qmd).
+# One quiz per chapter, at the end. It MUST ask every question of the
+# chapter's research boxes (ids prefixed `research-`), so the student finds
+# out during the chapter and gets checked here; those questions get the
+# research feedback rule (point to the source, never the answer). Rubrics
+# list only the expected answer and the aspects the student must state; the
+# shared fragments carry every generic rule.
 # Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
 # students 16-17).
 
-id: dummy-research-quiz
-name: "Research quiz: what querySelectorAll gives back"
+id: dummy-quiz
+name: "Quiz: Placeholder chapter"
 
-title: "Research: what does querySelectorAll give back?"
+title: "Check your understanding: placeholder chapter"
 description: |
-  Three questions the book does not answer. Read a question; if you can
-  answer it, do. If not, look it up on MDN, with a search engine, or ask
-  your AI, then come back and answer in your own words. This quiz is
-  anonymous and is here to steer your research, not to grade you.
-  Answering in German is fine too.
+  Four short questions about this chapter, three of them the research
+  task. Answer in your own words; if you cannot answer a research
+  question yet, look it up and come back. This quiz is anonymous and is
+  here for you. Answering in German is fine too.
 
 llm:
   model: Qwen/Qwen3.8-27B-FP8
@@ -35,7 +35,7 @@ discussion:
   instructions: |
     {{fragment "shared.discussion_frame"
       example="const items = document.querySelectorAll('li');"
-      scope="during a research task in the DOM part, before the selectors exercise"
+      scope="after the placeholder chapter of the DOM part"
       reveal=false
       knows=(array
         "variables, conditions, loops, arrays, and functions in TypeScript from year one"
@@ -47,7 +47,7 @@ discussion:
         "what a NodeList is (that is what they are researching right now)")}}
 
 questions:
-  - id: return-type
+  - id: research-return-type
     title: "What comes back"
     question: |
       `document.querySelectorAll("li")` does not return an array. What
@@ -57,7 +57,7 @@ questions:
       Required: names NodeList (any spelling or casing).
       Incorrect: an array, or a single element.
 
-  - id: loop
+  - id: research-loop
     title: "Looping over it"
     question: |
       You have `const items = document.querySelectorAll("li");`. Name two
@@ -70,7 +70,7 @@ questions:
       Partial: only one working way. `items.map(...)` does not work and does
       not count.
 
-  - id: live-or-static
+  - id: research-live-or-static
     title: "Does it update itself?"
     question: |
       After `const items = document.querySelectorAll("li");` your program
@@ -83,3 +83,14 @@ questions:
       Required: (1) says no; (2) uses or explains "static" (snapshot,
       "Momentaufnahme" count).
       Incorrect: says yes.
+
+  - id: identity
+    title: "One element, two names"
+    question: |
+      `const a = document.querySelector("#todos");` and
+      `const b = document.querySelector("#todos");` run one after the
+      other. You set `a.textContent = "x"`. What does `b.textContent` hold?
+    evaluation: |
+      Expected: "x". Both variables refer to the same element object; there
+      is only one `#todos` in the tree.
+      Required: (1) "x"; (2) because both point to the same object.

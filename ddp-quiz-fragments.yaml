@@ -3,8 +3,8 @@
 #
 # A quiz has TWO template hosts, and this library feeds both:
 #   instructions:            -> {{fragment "shared.quiz_context"}}
-#                               (+ {{fragment "shared.research_context"}} for
-#                                a research quiz)
+#                               (+ {{fragment "shared.research_context"}} when
+#                                the quiz has `research-*` questions)
 #   discussion.instructions: -> {{fragment "shared.discussion_frame" ...}}
 #
 # Grading runs on a small model (Qwen 3.8 27B on SCCH). Everything generic
@@ -59,23 +59,25 @@ fragments:
         asks for code, code that is right except for missing semicolons is
         `partial`; when it does not ask for code, semicolons never matter.
 
-  # Added to RESEARCH quizzes: the quiz drives the student's research, so the
-  # feedback must send them to the source, never hand over the answer.
+  # Added to every chapter quiz that contains research questions: for those,
+  # the feedback must send the student to the source, never hand over the
+  # answer.
   - id: research_context
     content: |
-      This is a research quiz: its questions are things the course book
-      deliberately does not explain, and the student is expected to look them
-      up (MDN, a search engine, an AI) and come back. Therefore, when the
-      verdict is not `correct`, do NOT state the correct answer in the
-      feedback. Name where it can be found instead, as precisely as you can
-      (the MDN page and section, the name of the concept to search for), and
-      say which required aspect is still missing, without giving it away.
+      Questions whose id starts with `research-` are research tasks: things
+      the course book deliberately does not explain, which the student is
+      expected to look up (MDN, a search engine, an AI) and come back to.
+      For THESE questions, when the verdict is not `correct`, do NOT state
+      the correct answer in the feedback. Name where it can be found instead,
+      as precisely as you can (the MDN page and section, the concept to
+      search for), and say which required aspect is still missing, without
+      giving it away. All other questions get the normal feedback.
 
   # The discussion chat's guidance, appended AFTER the app's built-in
   # discussion prompt. Each quiz supplies only what is chapter-specific: the
-  # code example, the scope phrase, and the two concept lists. A research
-  # quiz passes reveal=false so the chat guides to the source instead of
-  # explaining the answer.
+  # code example, the scope phrase, and the two concept lists. A quiz with
+  # research questions passes reveal=false so the chat guides to the source
+  # instead of explaining the answer.
   - id: discussion_frame
     input_schema:
       type: object

@@ -30,9 +30,27 @@ Every element in the tree is an **object**. That word follows you through the
 whole book.
 :::
 
-::: {.research quiz="research-nodelist" title="What does `querySelectorAll` give back?"}
+::: {.research title="What does `querySelectorAll` give back?"}
 The next exercise selects every `li` on the page and changes them all. The
-book shows you the call and nothing more. What comes back, how you loop over
-it, and whether it notices new elements is yours to find out. For the exam you
-need to be able to loop over the result without looking it up.
+book shows you the call and nothing more. Find out:
+
+1. `document.querySelectorAll("li")` does not return an array. What does it
+   return?
+2. Name two different ways to visit every element of the result.
+3. Your program adds a new `li` afterwards. Does the result contain it? What
+   word does MDN use for this behaviour?
+
+For the exam you need to be able to loop over the result without looking it
+up.
 :::
+
+## Exercise: a to-do list {#sec-dummy-exercise}
+
+{{< exercise dummy-todo >}}
+
+Add the items the user types to the list, and mark an item as done when it is
+clicked. The `done` class in `src/styles.css` is waiting for you.
+
+## Check your understanding {#sec-dummy-quiz}
+
+{{< quiz dummy title="Placeholder chapter" >}}

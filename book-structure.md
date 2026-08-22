@@ -27,11 +27,11 @@ what worked last year:
   standards, and then sends students to MDN, a search engine, or their AI
   tools. When a chapter outline below lists APIs, that is what the chapter
   *names and uses*, not what it documents. Most chapters carry one
-  **research task** (a `::: {.research quiz=...}` box) driven by a novedu
-  research quiz: the student reads a question, answers it if they can,
-  researches if they can't, and repeats until every question is answered. The
-  exercise after the box needs those answers, and the book never supplies
-  them. Research tasks marked 🔎 below are examples, not the final set.
+  **research task** (a `::: {.research}` box listing two to four questions):
+  the student finds the answers before going on, the exercise after the box
+  needs them, and the book never supplies them. The one quiz at the end of
+  each chapter asks every research question again. Research tasks marked 🔎
+  below are examples, not the final set.
 * **Testing arrives in two steps.** Unit tests (Vitest) as soon as there is logic
   worth testing outside the DOM (Part 5, classes), e2e tests (Playwright) once
   students build apps with real UI flows (Part 8).
@@ -126,8 +126,8 @@ and names the concept afterwards.
   platform, how a reference page is organized), a search engine (error
   messages, "how do I" questions, the age of a result), an AI (explanations at
   your level, but verify against MDN; how to ask a precise question).
-* How a research task in this book works: the quiz drives you. Open it, read
-  a question, answer or go find out, come back, repeat until done.
+* How a research task in this book works: the box lists the questions, you
+  find out now, and the chapter quiz asks the same questions at the end.
 * 🔎 First research task: what `textContent` and `innerHTML` do differently;
   ask an AI the same question and note one thing one source said that the
   other didn't.
@@ -505,8 +505,12 @@ this part tests them through the browser and ends with a project.
 7. **Exercise files live in `exercises/<name>/` in this repo.** Students create
    a fresh app from the general starter and copy the files in.
 
+8. **One quiz per chapter**, at the end, where a quiz makes sense; it must
+   cover the chapter's research questions.
+9. **Exercise files via `{{< exercise <folder> >}}`**, a shortcode that lists
+   `exercises/<folder>/` with target paths and GitHub links; the playground
+   `example` shortcode is removed.
+
 ## Still open
 
-* Exact set of research quizzes per chapter (the 🔎 lines are first drafts).
-* Whether the `example` shortcode is kept (pointing at `exercises/<name>/`) or
-  replaced by a plain "Files for this exercise" callout.
+* Exact set of research questions per chapter (the 🔎 lines are first drafts).

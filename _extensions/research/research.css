@@ -18,24 +18,3 @@
   font-size: 1rem;
   line-height: 1;
 }
-
-/* The call-to-action button, purple like the box's accent. */
-.research-cta p {
-  margin: 0;
-}
-
-.research-cta a {
-  display: inline-block;
-  padding: 0.4rem 0.9rem;
-  border-radius: 0.4rem;
-  background: #6f42c1;
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.research-cta a:hover,
-.research-cta a:focus {
-  filter: brightness(1.08);
-  text-decoration: none;
-}
