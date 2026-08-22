@@ -1,0 +1,179 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Animation with requestAnimationFrame"
+# (0030-svg/0040-animation.qmd).
+# The first four questions are the chapter's research box (ids `research-*`):
+# they get the research feedback rule, so the grader names the source instead
+# of the answer. The last two check the chapter's own concepts, the chain of
+# single frame requests and why a frame's length has to be measured.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: animation-quiz
+name: "Quiz: Animation with requestAnimationFrame"
+
+title: "Check your understanding: animation with requestAnimationFrame"
+description: |
+  Six short questions about the chapter *Animation with
+  requestAnimationFrame*, four of them the research task. Answer in your
+  own words; if you cannot answer a research question yet, look it up and
+  come back. One or two sentences are enough. This quiz is anonymous and
+  is here for you, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="requestAnimationFrame(tick);"
+      scope="after the animation chapter of the SVG part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the bouncing ball from year one: a position variable, a direction variable, and flipping the sign at the wall"
+        "HTML elements, the DOM tree, events with `addEventListener`, and `classList`"
+        "`querySelector<T>` with a null check, `querySelectorAll`, and `for...of`"
+        "SVG written by hand and built from TypeScript with `createElementNS` and `setAttribute`"
+        "CSS selectors, Flexbox, Grid, and `transition`"
+        "the animation loop: `requestAnimationFrame(tick)` inside `tick` books the next frame"
+        "state in `let` variables outside the loop function"
+        "delta time: move by speed times the length of the last frame"
+        "the SVG `transform` attribute with `translate`, and that `rotate` exists"
+        "`@keyframes` with the `animation` property as the CSS alternative")
+      not_yet=(array
+        "classes, `this`, inheritance, or generics other than `querySelector<T>`"
+        "`setInterval` and `setTimeout`"
+        "`async`, `fetch`, `Map`, or `Set`"
+        "the Web Animations API and SVG SMIL animation")}}
+
+questions:
+  - id: research-timestamp
+    title: "The number the browser passes in"
+    question: |
+      `requestAnimationFrame` calls your function with one number. What does
+      that number measure, and does it keep counting while your animation is
+      stopped and asks for no frames?
+    evaluation: |
+      Expected: the number is a clock reading, the time that has passed since
+      the page started loading. It comes from a clock that keeps running
+      whatever your code does, so yes, it keeps counting while the animation
+      is stopped.
+      Required: (1) it is a time measured from the start of the page, not the
+      length of one frame; (2) it keeps counting while nothing is animated.
+      Partial: names it as a time or timestamp but gets the starting point
+      wrong or misses the second part.
+      Incorrect: says it is the duration of the last frame, a frame counter,
+      or the number of the animation.
+
+  - id: research-cancel
+    title: "Calling a frame off"
+    question: |
+      `cancelAnimationFrame` takes one argument. What is that argument, and
+      where in your own code do you get hold of the value you pass in?
+    evaluation: |
+      Expected: it takes the id of a frame request, a number. You get it as
+      the return value of the `requestAnimationFrame` call that booked that
+      frame, so you store that return value in a variable.
+      Required: (1) it is the id (a number) of a booked frame request; (2) it
+      comes back from `requestAnimationFrame` and has to be kept in a
+      variable.
+      Partial: says an id or a number without saying where it comes from, or
+      says "the return value" without saying it identifies the request.
+      Incorrect: says you pass the callback function, the element, or nothing
+      at all.
+
+  - id: research-rotate-center
+    title: "The point a rotation turns around"
+    question: |
+      The SVG attribute `transform="rotate(...)"` accepts either one number or
+      three. What do the second and third numbers stand for, and which point
+      does the browser turn the shape around when you write only the first
+      number?
+    evaluation: |
+      Expected: the second and third numbers are the x and y coordinate of the
+      point the shape turns around. With only the angle given, the shape turns
+      around the origin of its coordinate system, the point 0, 0 in the top
+      left corner.
+      Required: (1) the two extra numbers are the x and y of the center of
+      rotation; (2) without them the rotation happens around 0, 0.
+      Partial: names the center of rotation correctly but gets the default
+      wrong or leaves it out.
+      Incorrect: says the two numbers are a size, a shift, or a second angle,
+      or claims the shape turns around its own middle by default.
+
+  - id: research-keyframes-steps
+    title: "The smallest @keyframes rule"
+    question: |
+      A `@keyframes` rule lists the steps of a CSS animation. What is the
+      smallest number of steps a useful rule needs, and which two keywords can
+      be written instead of `0%` and `100%`?
+    evaluation: |
+      Expected: two steps, a start and an end. `from` stands for `0%` and `to`
+      stands for `100%`.
+      Required: (1) two steps are enough; (2) the keywords `from` and `to`,
+      matched to `0%` and `100%`.
+      Partial: names `from` and `to` but gives the wrong number of steps, or
+      says two steps without the keywords.
+      Incorrect: names other keywords such as `start` and `end`, or claims a
+      rule needs percentages for every step.
+
+  - id: one-frame-only
+    title: "The animation that runs once"
+    question: |
+      `ball` is an SVG circle that starts at `cx="20"`. A student writes this
+      and expects the ball to slide across the page:
+
+      ```ts
+      let x = 20;
+
+      const tick = () => {
+        x += 2;
+        ball.setAttribute('cx', String(x));
+      };
+
+      requestAnimationFrame(tick);
+      ```
+
+      What does the page actually show, and why?
+    evaluation: |
+      Expected: the ball jumps 2 pixels to the right once and then stands
+      still. `requestAnimationFrame` books exactly one frame, and `tick` never
+      asks for another one, so the chain ends after the first call.
+      Required: (1) the ball moves once (about 2 pixels) and then stops; (2)
+      the missing `requestAnimationFrame(tick)` inside `tick` is the reason,
+      because each frame has to book the next one.
+      Partial: says the ball does not move properly or names the missing call
+      without describing what is seen, or the other way round.
+      Incorrect: says the ball slides normally, that nothing happens at all,
+      or that the page throws an error.
+
+  - id: why-delta-time
+    title: "Pixels per frame or pixels per second"
+    question: |
+      Two students animate the same ball. One moves it with `x += 3;` in every
+      frame. The other measures how long the frame took and moves it with
+      `x += SPEED * deltaSeconds;`. On the teacher's laptop both look the
+      same. Give one situation in which the two versions no longer look the
+      same, and say which one behaves the way the programmer wanted.
+    evaluation: |
+      Expected: on a screen with a different refresh rate (a 144 Hz monitor
+      instead of 60 Hz) or on a busy machine that drops frames, the frame rate
+      changes. `x += 3` then runs faster or slower, while the delta time
+      version keeps the same speed in pixels per second, which is what the
+      programmer wanted.
+      Required: (1) a situation where the frame rate differs, such as another
+      monitor or a slow or busy computer; (2) the delta time version keeps its
+      real speed, the per-frame version does not.
+      Partial: names the right situation but does not say which version is
+      right, or says delta time is better without a situation.
+      Incorrect: claims both are always the same, or that `x += 3` is the
+      reliable one.

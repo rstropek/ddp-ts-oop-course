@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden answers for 0030-charts-quiz.yaml ("Charts: scaling data to pixels").
+# Teacher-only test data. Never publish as an activity, never mint a code.
+
+id: charts-quiz-eval
+target: ./0030-charts-quiz.yaml
+
+questions:
+  - question: research-text-placement
+    answers:
+      - expect: correct
+        answer: |
+          text-anchor="end" so the text stops at the x, and
+          dominant-baseline="middle" for the up and down part
+      # Only the horizontal half.
+      - expect: partial
+        answer: |
+          text-anchor end
+      - expect: incorrect
+        answer: |
+          text-anchor="middle" and then text-align: center in the css
+
+  - question: research-shape-title
+    answers:
+      - expect: correct
+        answer: |
+          it becomes the tooltip of that shape, so when you keep the mouse on
+          the rect for a moment a little box with the text pops up
+      # German correct answer for this quiz.
+      - expect: correct
+        answer: |
+          das ist der tooltip von der form. wenn man mit der maus kurz drauf
+          bleibt kommt ein kleines kastl mit dem text.
+      # Accessibility only, tooltip missing.
+      - expect: partial
+        answer: |
+          a screen reader reads it out as the name of the shape
+      - expect: incorrect
+        answer: |
+          the text is drawn inside the rectangle so you can see it in the chart
+
+  - question: research-dashed-line
+    answers:
+      - expect: correct
+        answer: |
+          stroke-dasharray. the numbers are how long a dash is and how long the
+          gap is, and that repeats along the line.
+      # Right attribute, numbers explained wrongly.
+      - expect: partial
+        answer: |
+          stroke-dasharray, the number says how many dashes the line gets
+      - expect: incorrect
+        answer: |
+          you set stroke="dashed" or use border-style dashed
+
+  - question: scale-a-value
+    answers:
+      - expect: correct
+        answer: |
+          20 of 80 is a quarter, a quarter of 300 is 75, 330 - 75 = 255
+      # Stops at the bar height instead of the y coordinate.
+      - expect: partial
+        answer: |
+          75
+      - expect: incorrect
+        answer: |
+          405, because you add the 75 pixels to the baseline
+
+  - question: redraw-from-the-array
+    answers:
+      - expect: correct
+        answer: |
+          the array is where the data really is and the svg is only a picture of
+          it. if i want to delete a bubble or change the colors i change the
+          array and draw again, i never have to search for the right circle in
+          the dom.
+      # Vague "simpler" answer with no mechanism.
+      - expect: partial
+        answer: |
+          because it is easier and the code stays shorter
+      - expect: incorrect
+        answer: |
+          drawing everything again is faster for the browser than adding one
+          circle
+
+  - question: flipped-y
+    answers:
+      - expect: correct
+        answer: |
+          in svg y goes down from the top and the y of a rect is its top corner,
+          so if the bar should end on the baseline its top has to be its own
+          height higher up
+      # Half the reason.
+      - expect: partial
+        answer: |
+          because in svg the y axis points downwards
+      - expect: incorrect
+        answer: |
+          because svg starts counting at the bottom left corner like in maths

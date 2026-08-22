@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the scripts and assets chapter quiz
+# (0030-svg/0060-toolchain-assets.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: toolchain-assets-quiz-eval
+target: ./0060-toolchain-assets-quiz.yaml
+
+questions:
+  - question: research-preview-vs-file
+    answers:
+      - expect: correct
+        answer: |
+          the browser uses file:// and it blocks the module script, so the js
+          never runs. preview serves it over http so it works.
+      # Scheme named, consequence missing.
+      - expect: partial
+        answer: |
+          because then it's a file:// url and not a real website
+      - expect: incorrect
+        answer: |
+          because the typescript is missing, you have to build again first
+
+  - question: research-hashed-name
+    answers:
+      - expect: correct
+        answer: |
+          it's a hash of the content so the browser is forced to download the
+          new file. without it the name would stay the same and people would
+          keep the old version from their cache.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          das ist ein hash vom inhalt, damit der browser die neue datei
+          wirklich ladet. ohne hash nimmt er die alte aus dem cache.
+      # Hash named, caching not mentioned.
+      - expect: partial
+        answer: |
+          it's a hash that vite computes from the file content
+      - expect: incorrect
+        answer: |
+          it makes the file name secret so nobody can steal the code
+
+  - question: research-and-operator
+    answers:
+      - expect: correct
+        answer: |
+          with && biome only runs if tsc worked, so after an error it stops.
+          with ; biome would run anyway.
+      # Only the && half.
+      - expect: partial
+        answer: |
+          && stops after the error and biome is not started
+      - expect: incorrect
+        answer: |
+          && starts both programs at the same time, ; is exactly the same
+
+  - question: verify-after-type-error
+    answers:
+      - expect: correct
+        answer: |
+          no, biome never even started because tsc failed first. i delete the
+          unused variable and run npm run verify again.
+      # Fixes the error but misses that Biome was skipped.
+      - expect: partial
+        answer: |
+          i remove unusedThing from index.ts and then it should be green
+      - expect: incorrect
+        answer: |
+          yes, biome said nothing so the style is fine, only the type error
+          is left
+
+  - question: dist-not-in-git
+    answers:
+      - expect: correct
+        answer: |
+          dist is generated from src, so it doesn't belong in the repo. my
+          classmate just runs npm install and npm run build and gets it.
+      # Reason right, no rebuild path.
+      - expect: partial
+        answer: |
+          because it is built automatically and would be doubled in the repo
+      - expect: incorrect
+        answer: |
+          dist is way too big for github and once it's gone you can't get the
+          page back

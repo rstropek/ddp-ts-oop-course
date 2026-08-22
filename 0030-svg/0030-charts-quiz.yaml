@@ -1,0 +1,167 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Charts: scaling data to pixels" (0030-svg/0030-charts.qmd).
+# The first three questions are the chapter's research-box questions.
+
+id: charts-quiz
+name: "Quiz: Charts"
+title: "Check your understanding: charts"
+description: |
+  Six short questions about the chapter *Charts: scaling data to pixels*.
+  Answer in your own words. There are no answer options to pick from, and
+  this quiz is anonymous: it's here for you, so you can see what you already
+  understand and what you should read again. One or two sentences are enough
+  for most answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml" # repo root, resolves on GitHub and locally
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="bar.setAttribute('y', String(scaleY(value)));"
+      scope="after the chapter on charts in the SVG part"
+      reveal=false
+      knows=(array
+        "HTML, CSS, and the DOM as a tree of objects"
+        "`document.querySelector<SVGSVGElement>('#chart')` with an `if (!element) { throw ... }` null check"
+        "`textContent`, `classList`, `createElement`, `append`, and `remove`"
+        "`addEventListener` with `click`, `input`, and `submit`, plus `event.preventDefault()`"
+        "form inputs of type `number`, `color`, and `range`, read with `value` and `valueAsNumber`"
+        "SVG written by hand: `viewBox`, `rect`, `circle`, `line`, `text`, `g`, `fill`, `stroke`"
+        "SVG built from TypeScript with `document.createElementNS(SVG_NS, 'rect')` and `setAttribute('x', String(x))`"
+        "`replaceChildren()` to empty an element before drawing it again"
+        "named constants for a chart's layout and one scale function from values to pixels"
+        "arrays, loops, `if`, functions, and object literals with a compound `type` from year one")
+      not_yet=(array
+        "classes, `this`, and inheritance"
+        "`requestAnimationFrame` and animation"
+        "automated tests with Vitest or Playwright"
+        "generics other than `querySelector<T>`"
+        "`fetch`, `async`, and `localStorage`"
+        "`map`, `filter`, and `reduce` with a callback")}}
+
+questions:
+  - id: research-text-placement
+    title: "Placing a tick label"
+    question: |
+      A tick label should stop just left of its tick and sit level with it.
+      Which value of `text-anchor` makes a text **end** at its `x` instead of
+      starting there? And which second attribute places a text up and down on
+      its `y`, with which value for centering it on the point?
+    evaluation: |
+      Expected: `text-anchor="end"` makes the text end at its `x`. The second
+      attribute is `dominant-baseline`, and `dominant-baseline="middle"`
+      (`central` is equally right) centers the text on its `y`.
+      Required: 1) the value `end` for `text-anchor`; 2) `dominant-baseline`
+      with the value `middle` or `central`.
+      Partial: one of the two halves right, for example `end` alone, or
+      `dominant-baseline` named without a usable value.
+      Incorrect: `middle` or `start` given for the first half, or CSS
+      `text-align` and `vertical-align` offered instead of the SVG attributes.
+
+  - id: research-shape-title
+    title: "A title inside a shape"
+    question: |
+      SVG has a `<title>` element, and one place to put it is inside a single
+      shape, as a child of a `rect` or a `circle`. What does the browser then
+      do with that text, and when does the user get to see it?
+    evaluation: |
+      Expected: the text becomes the tooltip of that shape, so it appears in a
+      small box when the mouse rests on the shape for a moment. It is also the
+      accessible name a screen reader reads for the shape.
+      Required: 1) the text is a tooltip or a hover text for that one shape;
+      2) it shows when the pointer stays over the shape.
+      Partial: says it is read by a screen reader or is alt text, with no
+      mention of the tooltip.
+      Incorrect: says the text is drawn on the page, or that it names the whole
+      picture, or that the browser ignores it.
+
+  - id: research-dashed-line
+    title: "A dashed line"
+    question: |
+      Which attribute turns a solid SVG line into a dashed one, and what do the
+      numbers you hand it mean?
+    evaluation: |
+      Expected: `stroke-dasharray`. Its numbers are lengths that alternate
+      between a dash and a gap, so `stroke-dasharray="8 6"` draws 8 units of
+      line, then 6 units of nothing, repeated. A single number uses the same
+      length for both.
+      Required: 1) the name `stroke-dasharray`; 2) the numbers are dash and gap
+      lengths that repeat.
+      Partial: the attribute named correctly with a wrong or missing account of
+      the numbers.
+      Incorrect: names `stroke-width`, `stroke-linecap`, `border-style`, or
+      `dashed` as a value of `stroke`.
+
+  - id: scale-a-value
+    title: "Where does 20 land?"
+    question: |
+      A chart uses these constants and this scale function:
+
+      ```typescript
+      const BASELINE = 330;
+      const CHART_HEIGHT = 300;
+      const MIN_VALUE = 0;
+      const MAX_VALUE = 80;
+
+      const scaleY = (value: number) => BASELINE - ((value - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)) * CHART_HEIGHT;
+      ```
+
+      What number does `scaleY(20)` return? Show how you got there.
+    evaluation: |
+      Expected: 255. The value 20 is a quarter of the way from 0 to 80, a
+      quarter of 300 pixels is 75, and 330 - 75 = 255.
+      Required: 1) the result 255; 2) a calculation that shows the share of the
+      range turned into pixels and subtracted from `BASELINE`.
+      Partial: the right way of calculating with an arithmetic slip, or the
+      answer 255 with no working shown.
+      Incorrect: 75 (the height instead of the y), 405 (added instead of
+      subtracted), or any answer with no usable calculation.
+
+  - id: redraw-from-the-array
+    title: "Why draw everything again"
+    question: |
+      A bubble chart keeps every bubble in an array. After each new bubble it
+      clears the `<g>` that holds the circles and draws every bubble in the
+      array again. Why is that better than appending the one new circle and
+      later editing the circles that are already on the page?
+    evaluation: |
+      Expected: the array is the one place the data lives, and the picture is
+      only a copy of it. Every change (add, remove, a different color, a new
+      scale) is a change to the array plus one call to the draw function, so
+      the code never has to find the right circle in the SVG or keep the page
+      and the data in step by hand.
+      Required: 1) the array is the single place the data lives; 2) a later
+      change needs no hunting for or editing of single elements.
+      Partial: only says it is simpler or shorter, without naming the array as
+      the source of the picture or what the alternative would cost.
+      Incorrect: says it is faster for the browser, or that appending a circle
+      does not work at all.
+
+  - id: flipped-y
+    title: "The subtraction in every chart"
+    question: |
+      The first bars in the chapter were drawn with `y` set to `0` and
+      `height` set to the value, and they hung down from the top edge. Setting
+      `y` to `BASELINE - height` instead makes them stand on the floor.
+      Explain why that subtraction is needed.
+    evaluation: |
+      Expected: in SVG, y counts downward from the top of the picture, and a
+      rectangle's `y` is its top edge. A bar that has to end on the floor must
+      therefore start its own height above the floor, which is
+      `BASELINE - height`.
+      Required: 1) y grows downward from the top; 2) a rectangle's `y` is its
+      top edge, so the top edge has to be moved up by the bar's height.
+      Partial: says y grows downward without connecting it to the rectangle's
+      top edge, or the other way round.
+      Incorrect: says SVG has its origin at the bottom left, or that the
+      subtraction changes the height of the bar.

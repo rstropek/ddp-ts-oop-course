@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden answers for 0010-svg-by-hand-quiz.yaml ("A picture made of text").
+# Teacher-only test data. Never publish as an activity, never mint a code.
+
+id: svg-by-hand-quiz-eval
+target: ./0010-svg-by-hand-quiz.yaml
+
+questions:
+  - question: research-arc-command
+    answers:
+      - expect: correct
+        answer: |
+          first the two radii of the ellipse, then how much it is turned, then
+          the large arc flag which picks the short or the long way round, then
+          the sweep flag which says in which direction it curves, and the last
+          two are the x and y where the arc stops
+      # Flags right, end point missing.
+      - expect: partial
+        answer: |
+          55 and 45 are the radii, then the rotation, then the flag for short
+          or long arc and the flag for the direction
+      - expect: incorrect
+        answer: |
+          the first two numbers are where the arc starts and the rest are the
+          angles in degrees
+
+  - question: research-stroke-linecap
+    answers:
+      - expect: correct
+        answer: |
+          the ends get rounded off like a half circle, normally they are just
+          cut off straight at the end point
+      # German correct answer for this quiz.
+      - expect: correct
+        answer: |
+          die enden der linie werden rund, ohne das attribut sind sie gerade
+          abgeschnitten
+      # Only the round ends.
+      - expect: partial
+        answer: |
+          it makes the ends of the line round
+      - expect: incorrect
+        answer: |
+          it rounds the corners of the rectangle like rx does
+
+  - question: research-text-anchor
+    answers:
+      - expect: correct
+        answer: |
+          the text is centered on x, so 60 is the middle of the text and it
+          goes the same amount to the left and to the right. without it the
+          text starts at x.
+      # Centers, but on the wrong thing.
+      - expect: partial
+        answer: |
+          it puts the text in the middle of the whole svg
+      - expect: incorrect
+        answer: |
+          it centers the text up and down so y is in the middle of the letters
+
+  - question: rect-position
+    answers:
+      - expect: correct
+        answer: |
+          top right, because x and y are the top left corner of the rect and y
+          goes down. it is 30 wide of 100 so about a third, and 20 of 100 high.
+      # Corner right, nothing about the size.
+      - expect: partial
+        answer: |
+          in the top right corner of the drawing
+      - expect: incorrect
+        answer: |
+          bottom right, because y 10 is measured from the bottom of the
+          viewBox
+
+  - question: line-needs-stroke
+    answers:
+      - expect: correct
+        answer: |
+          a line has no inside so fill has nothing to paint. you need
+          stroke="black" and a stroke-width, then you see it.
+      # The fix without the reason.
+      - expect: partial
+        answer: |
+          you have to write stroke instead
+      - expect: incorrect
+        answer: |
+          x1 and y1 are the same as y2 so the line has no length, you need
+          different numbers
+
+  - question: imperative-vs-declarative
+    answers:
+      - expect: correct
+        answer: |
+          imperative means i write the commands in the order they run, like set
+          stroke then draw a circle in p5. declarative means i just describe
+          the five circles with their attributes and the browser figures out
+          how to draw them.
+      # Both named the right way round, no explanation of what they mean.
+      - expect: partial
+        answer: |
+          p5 is imperative and svg is declarative
+      - expect: incorrect
+        answer: |
+          imperative is when you describe the picture and declarative is when
+          you write the drawing commands step by step

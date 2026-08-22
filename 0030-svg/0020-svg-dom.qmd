@@ -47,8 +47,8 @@ once and you will recognize it forever.
 
 4. Run `npm start`.
 
-The page shows the heading and nothing else. No red circle, no error message,
-no warning. Press F12 and look in the **Elements** tab: the line
+The page shows the heading and nothing else. No red circle, and no complaint
+in the console either. Press F12 and look in the **Elements** tab: the line
 `<circle cx="100" cy="80" r="40" fill="crimson"></circle>` sits inside the
 `<svg>`, spelled exactly as you meant it. In the **Console** tab your log line
 reads `HTMLUnknownElement`.
@@ -110,17 +110,16 @@ Forget the `String()` and TypeScript stops you with
 
 Do not go looking for a shortcut through properties. `circle.cx = 100` does not
 compile, because `cx` is a read-only property holding an object that describes
-the length together with its animated value. Attributes are the simple road,
-and this book stays on it.
+the length together with its animated value. Every geometry value in this book
+goes in through `setAttribute`.
 
 ## The type family grows {#sec-svg-dom-types}
 
-You already meet a new element type in every chapter: `HTMLButtonElement` for a
-button, `HTMLInputElement` for an input, `HTMLParagraphElement` for a paragraph.
-SVG continues the family with `SVGCircleElement`, `SVGRectElement`,
-`SVGLineElement`, and one type for all of them together, `SVGElement`. The
-`<svg>` tag itself is an `SVGSVGElement`, and the doubled SVG is not a typo:
-it is the SVG element of the SVG family.
+You meet a new element type in almost every chapter, `HTMLButtonElement` for a
+button and `HTMLInputElement` for an input. SVG continues the family the same
+way, one type per tag: `SVGCircleElement`, `SVGRectElement`, and `SVGElement`
+for all of them together. The `<svg>` tag itself is an `SVGSVGElement`, where
+the doubled SVG is not a typo but the SVG element of the SVG family.
 
 TypeScript knows the tag names, so `createElementNS(SVG_NS, 'rect')` hands back
 an `SVGRectElement` without any help from you. Hover the variable in VS Code
@@ -133,9 +132,9 @@ const canvas = document.querySelector<SVGSVGElement>('#canvas');
 
 ## CSS reaches shapes too {#sec-svg-dom-css}
 
-A shape carries classes like any other element, and `classList.add`,
-`classList.remove`, and `classList.toggle` work on it unchanged. What changes
-are the properties worth setting. `color` and `background-color` do nothing to
+A shape carries classes like any other element, and `classList.add` and
+`classList.toggle` work on it unchanged. What changes are the properties worth
+setting. `color` and `background-color` do nothing to
 a circle, because SVG paints the inside with `fill` and the outline with
 `stroke`:
 

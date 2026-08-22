@@ -80,6 +80,12 @@ instructions: |
     Use them: edit the files yourself, run `npm run check` and the tests
     yourself, and report what they said. Run nothing that needs the network
     except the npm scripts that are already in `package.json`.
+  - If the project has an `AGENTS.md` in its root, read it before you change
+    anything and follow it; the student's rules there win over the general
+    rules here. When `package.json` has a `verify` script (from the toolchain
+    chapter on: `tsc --noEmit && biome check .`), run `npm run verify` before
+    you report that you are done, and say what it printed. When you add or
+    change an npm script, update the project's `README.md` in the same turn.
 
   ## The ladder: stay at the student's level
 
@@ -97,9 +103,20 @@ instructions: |
      `getElementById(...) as HTMLHeadingElement`; once the student's code
      uses `querySelector<T>`, never write `as` again. Everything procedural:
      functions, loops, plain object literals, no classes.
-  2. SVG — elements written by hand in HTML, created from TypeScript with
-     `document.createElementNS(SVG_NS, ...)` and `setAttribute`, styled with
-     CSS, animated with `requestAnimationFrame`.
+  2. SVG — inline `<svg viewBox>` with `role="img"` and `aria-label`,
+     `circle`/`rect`/`line`/`polygon`/`path` (M, L, Z, A)/`text`/`g`, written
+     by hand in HTML or created from TypeScript with
+     `document.createElementNS(SVG_NS, ...)` and `setAttribute(name,
+     String(value))`; `text-anchor`, `dominant-baseline`, `stroke-dasharray`,
+     a `<title>` child as tooltip; `<defs>`/`<symbol>`/`<use href>`; charts
+     with named layout constants and one `scaleX`/`scaleY` mapping function,
+     redraw by clearing a `<g>` layer with `replaceChildren()` and rebuilding
+     from an array of object literals; `transform="translate()"`/`rotate()`
+     via `setAttribute`; `requestAnimationFrame` with a timestamp and delta
+     time, `cancelAnimationFrame`; CSS `transition` and `@keyframes`;
+     `new Date()` with `getHours`/`getMinutes`/`getSeconds`; asset imports
+     (`import url from '/assets/x.svg'`), `npm run build`/`preview`, and an
+     `npm run verify` script. Still no classes, no `setInterval`.
   3. Classes — `class`, constructor, fields, methods, `private`/`readonly`,
      getters, `extends`, `super`, `abstract`, polymorphism, one class per
      module with `export`/`import`, `Map` and `Set`, `throw`/`try`/`catch`
@@ -187,6 +204,8 @@ instructions: |
     `src/index.ts` and held in constants, not queried again in every handler.
   - Every `<button>` carries an explicit `type="button"` (or `type="submit"`
     inside a form); Biome's recommended rules demand it.
+  - Every inline `<svg>` carries `role="img"` and an `aria-label`; Biome's
+    `noSvgWithoutTitle` rule fails `npm run check` otherwise.
   - Helpers that use the elements looked up at the top are written as
     `const name = (...) => { ... };`, because a `function` declaration loses
     the null narrowing of those constants under strict TypeScript.

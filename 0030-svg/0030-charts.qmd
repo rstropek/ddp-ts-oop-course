@@ -1,0 +1,398 @@
+---
+title: "Charts: scaling data to pixels"
+---
+
+A chart is a pile of rectangles that happens to mean something. You can already
+put a rectangle into an SVG from TypeScript, so what is missing is the
+arithmetic between the numbers you have and the pixels the picture has. That
+arithmetic is the whole job. Start by getting it wrong on purpose.
+
+## Four bars hanging from the ceiling {#sec-charts-hanging}
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template inside `coursework/` of your course repository, call the folder
+   `chart-experiment`, and run `npm install` and `npm start`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Four bars</h1>
+   <svg id="chart" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Four bars"></svg>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Replace the two lines in `src/index.ts` with this:
+
+   ```ts
+   const SVG_NS = 'http://www.w3.org/2000/svg';
+
+   const chart = document.querySelector<SVGSVGElement>('#chart');
+
+   if (!chart) {
+     throw new Error('The chart is missing');
+   }
+
+   const values = [12, 40, 25, 60];
+
+   for (let i = 0; i < values.length; i++) {
+     const value = values[i];
+     if (value === undefined) {
+       continue;
+     }
+
+     const bar = document.createElementNS(SVG_NS, 'rect');
+     bar.setAttribute('x', String(20 + i * 60));
+     bar.setAttribute('y', '0');
+     bar.setAttribute('width', '40');
+     bar.setAttribute('height', String(value));
+     bar.setAttribute('fill', 'seagreen');
+     chart.append(bar);
+   }
+   ```
+
+Four green bars, and every one of them hangs down from the top edge. The
+biggest value gives the longest bar, so the data is in there, just upside down.
+A rectangle's `y` is its **top** edge, and y counts downward from the top of
+the picture.
+
+## Stand them on the floor {#sec-charts-flip}
+
+The floor of this picture is at y 300, the bottom of the `viewBox`, and a bar
+that is `value` pixels tall has to start `value` pixels above it. Change the
+`y` line:
+
+```ts
+bar.setAttribute('y', String(300 - value));
+```
+
+Now the bars grow upward from the bottom. Every chart you write does that
+subtraction somewhere, and forgetting it is the usual reason a chart comes out
+hanging from the ceiling.
+
+## The bar that runs off the picture {#sec-charts-overflow}
+
+Change the last value in the array from `60` to `420` and look again. Its `y`
+came out as -120, so the bar is cut off at the top edge and dwarfs the others.
+
+Nothing is broken. The data goes up to 420 while the picture is 300 pixels
+tall, and the code treated one value as one pixel. Values and pixels are two
+different scales, and the code has to convert between them the way you convert
+euros to dollars.
+
+## One function turns values into pixels {#sec-charts-scale}
+
+Give the drawing a frame first. The plot keeps a margin around itself so there
+is room for the axis and its labels, and each distance gets a name instead of
+being sprinkled through the code. Put this above the loop:
+
+```ts
+const MARGIN = 40;
+const CHART_WIDTH = 320;
+const CHART_HEIGHT = 220;
+const BASELINE = MARGIN + CHART_HEIGHT;
+const MIN_VALUE = 0;
+const MAX_VALUE = 500;
+```
+
+`BASELINE` is the y of the floor, 260. Above it sit 220 pixels of plot, and the
+values in there run from 0 to 500. One arrow function maps the one range onto
+the other:
+
+```ts
+const scaleY = (value: number) => BASELINE - ((value - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)) * CHART_HEIGHT;
+```
+
+Read it in three moves. `(value - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)` asks how
+far up the range the value sits and answers with a share between 0 and 1.
+Multiplying by `CHART_HEIGHT` turns that share into pixels. Subtracting from
+`BASELINE` does the flip you just did by hand. Try 250: half the range, so 110
+pixels, so 260 - 110 = 150, halfway up the plot.
+
+Now let the loop use it. Change the array to
+`const values = [120, 400, 250, 480];` and replace the body of the loop:
+
+```ts
+const BAR_WIDTH = 40;
+const slotWidth = CHART_WIDTH / values.length;
+
+for (let i = 0; i < values.length; i++) {
+  const value = values[i];
+  if (value === undefined) {
+    continue;
+  }
+
+  const top = scaleY(value);
+  const centerX = MARGIN + i * slotWidth + slotWidth / 2;
+
+  const bar = document.createElementNS(SVG_NS, 'rect');
+  bar.setAttribute('x', String(centerX - BAR_WIDTH / 2));
+  bar.setAttribute('y', String(top));
+  bar.setAttribute('width', String(BAR_WIDTH));
+  bar.setAttribute('height', String(BASELINE - top));
+  bar.setAttribute('fill', 'seagreen');
+  chart.append(bar);
+}
+```
+
+Every bar fits now, and each one gets a slot of equal width and sits in the
+middle of it, so changing `BAR_WIDTH` changes the gaps and nothing else. Raise
+`MAX_VALUE` to 1000 and the whole chart shrinks to half height without one
+other edit. That is what naming the numbers buys you.
+
+## Axes, ticks, and labels {#sec-charts-axes}
+
+An axis is a `line`, and so is a tick. A tick label is a `text`. Those parts
+belong together, so put them in one `g` element and give the group the
+attributes they share:
+
+```ts
+const axes = document.createElementNS(SVG_NS, 'g');
+axes.setAttribute('stroke', '#333');
+
+const yAxis = document.createElementNS(SVG_NS, 'line');
+yAxis.setAttribute('x1', String(MARGIN));
+yAxis.setAttribute('y1', String(MARGIN));
+yAxis.setAttribute('x2', String(MARGIN));
+yAxis.setAttribute('y2', String(BASELINE));
+axes.append(yAxis);
+
+const xAxis = document.createElementNS(SVG_NS, 'line');
+xAxis.setAttribute('x1', String(MARGIN));
+xAxis.setAttribute('y1', String(BASELINE));
+xAxis.setAttribute('x2', String(MARGIN + CHART_WIDTH));
+xAxis.setAttribute('y2', String(BASELINE));
+axes.append(xAxis);
+```
+
+Put that block above the loop that draws the bars, because SVG paints in
+document order and whatever is appended last lies on top. A `g` hands its
+attributes down to everything inside it, so one `stroke` colors both lines.
+
+The ticks come out of a loop over values, not over pixels, because `scaleY`
+already knows where a value lives:
+
+```ts
+for (let value = MIN_VALUE; value <= MAX_VALUE; value += 100) {
+  const y = scaleY(value);
+
+  const tick = document.createElementNS(SVG_NS, 'line');
+  tick.setAttribute('x1', String(MARGIN - 6));
+  tick.setAttribute('y1', String(y));
+  tick.setAttribute('x2', String(MARGIN));
+  tick.setAttribute('y2', String(y));
+  axes.append(tick);
+
+  const label = document.createElementNS(SVG_NS, 'text');
+  label.setAttribute('x', String(MARGIN - 12));
+  label.setAttribute('y', String(y));
+  label.setAttribute('font-size', '12');
+  label.setAttribute('fill', '#333');
+  label.setAttribute('stroke', 'none');
+  label.textContent = String(value);
+  axes.append(label);
+}
+
+chart.append(axes);
+```
+
+The `stroke="none"` is there because the group's stroke would otherwise outline
+every letter. And the numbers land wrong twice over: each one starts at its own
+x and runs right across the axis, and it rests its bottom edge on the tick
+instead of straddling it. `text-anchor`, which you already used when writing
+SVG by hand, takes care of the horizontal half, a second attribute takes the
+vertical one, and the research box below sends you after the exact values.
+
+## Redraw means clear and rebuild {#sec-charts-redraw}
+
+A chart that reacts to a form has to change. Do not go hunting for the one
+`rect` whose height is now wrong. Throw the drawing away and build it again
+from the data. Wrap what you wrote above into two helpers, `drawAxes` and
+`drawBars`, and the update is three lines:
+
+```ts
+const drawChart = () => {
+  plot.replaceChildren();
+  drawAxes();
+  drawBars();
+};
+```
+
+`replaceChildren()` with no arguments empties an element. Call it on the `<svg>`
+itself and it takes everything, including whatever you drew by hand in the
+HTML, so give the moving parts their own layer: a `<g id="plot"></g>` that your
+code clears, with anything permanent sitting outside it.
+
+The `role="img"` and `aria-label` on the `<svg>` tell a screen reader what the
+picture shows, and Biome's accessibility rules insist on them. Being attributes
+on the element itself, they survive every redraw.
+
+::: {.research title="Where does a text sit, and what makes a line dashed?"}
+The first chart you build below writes a number next to every tick, a month
+under every bar, a value that pops up when the mouse rests on a bar, and a
+dashed line across the plot. The code above does none of those four things.
+
+1. A tick label should stop just left of its tick and sit level with it. Which
+   value of `text-anchor` makes a text **end** at its `x` instead of starting
+   there? And which second attribute places a text up and down on its `y`, with
+   which value for centering it on the point?
+2. SVG has a `<title>` element, and one place to put it is inside a single
+   shape, as a child of a `rect` or a `circle`. What does the browser then do
+   with that text, and when does the user get to see it?
+3. Which attribute turns a solid SVG line into a dashed one, and what do the
+   numbers you hand it mean?
+
+Question 1 is exam material. A chart whose labels are half a centimeter off is
+a chart you have to repair without internet and without AI.
+:::
+
+## Exercise A: a year of energy {#sec-charts-bar-exercise}
+
+Twelve monthly readings, twelve bars, and a dashed line where the budget ends.
+Every bar above that line turns red.
+
+{{< exercise bar-chart >}}
+
+1. Create the app inside `coursework/` of your course repository as the box
+   above says, then run `npm start`. You get a heading and an empty frame:
+   `index.html` holds an `<svg id="chart">` of 640 by 400 and an empty
+   `<p id="legend">` under it.
+2. In `src/index.ts`, write `import './styles.css';` and
+   `const SVG_NS = 'http://www.w3.org/2000/svg';`, then look up `#chart` as
+   `SVGSVGElement` and `#legend` as `HTMLParagraphElement` and throw if either
+   is missing.
+3. Take over the data and the layout:
+
+   ```ts
+   const MARGIN_LEFT = 60;
+   const MARGIN_TOP = 30;
+   const CHART_WIDTH = 540;
+   const CHART_HEIGHT = 300;
+   const BASELINE = MARGIN_TOP + CHART_HEIGHT;
+   const BAR_WIDTH = 30;
+   const MIN_VALUE = 0;
+   const MAX_VALUE = 80;
+   const TICK_STEP = 20;
+   const THRESHOLD = 50;
+
+   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+   const values = [62, 58, 47, 39, 28, 21, 18, 20, 27, 41, 55, 68];
+   ```
+
+   The numbers are kilowatt hours, one per month.
+4. Write `scaleY` for these constants, the same shape as the one in this
+   chapter. Check it on paper first: `scaleY(0)` must be 330 and `scaleY(80)`
+   must be 30.
+5. Draw the axes into a `g` element with the CSS class `axis`, which the
+   stylesheet already colors. The y axis runs from `MARGIN_TOP` down to
+   `BASELINE` at x `MARGIN_LEFT`, the x axis from `MARGIN_LEFT` to
+   `MARGIN_LEFT + CHART_WIDTH` at y `BASELINE`. Expected result: a large L in
+   the frame.
+6. Loop from `MIN_VALUE` to `MAX_VALUE` in steps of `TICK_STEP`. Give every
+   value a short tick left of the y axis and a `text` with the number and the
+   class `label`, ending just before the tick and centered on it. The research
+   box names the two attributes. Expected result: 0, 20, 40, 60, and 80 stand
+   in a tidy column.
+7. Draw the twelve bars. Each bar gets the class `bar`, its slot is
+   `CHART_WIDTH / values.length` wide, and the bar sits centered in its slot
+   with the width `BAR_WIDTH`. A bar whose value is greater than `THRESHOLD`
+   gets the extra class `over`. Expected result: eight green bars and four red
+   ones for January, February, November, and December.
+8. Draw the threshold line: one dashed `line` with the class `threshold`,
+   running the full width of the plot at `scaleY(THRESHOLD)`. The research box
+   names the attribute for the dashes.
+9. Write the month name under each bar as a `text` with the class `label`,
+   centered on the same slot middle as the bar, about 18 pixels below
+   `BASELINE`.
+10. Let every bar say its own number. Append a `title` element to the `rect`
+    itself, with text such as `Nov: 55 kWh`. Expected result: rest the mouse on
+    a bar for a second and a small box shows that text.
+11. Fill the legend. Count the months above `THRESHOLD` with a loop and write
+    a sentence such as `4 of 12 months are above 50 kWh.` into `#legend`.
+12. Run `npm run check` and fix what Biome reports.
+
+Change one number in `values` to 200 and reload: the bar shoots out of the top.
+Raise `MAX_VALUE` to 200 and the chart is right again, tick labels and all,
+because every pixel in it came out of `scaleY`.
+
+## Exercise B: the bubble chart {#sec-charts-bubble-exercise}
+
+Now the data comes from the user. A form with a color picker, two number
+fields, and a slider adds one bubble at a time to a coordinate system that runs
+from 0 to 100 in both directions. This is a rebuilt version of a real exam, and
+steps 3 to 9 are the must-have set: read the form, refuse values outside the
+range with a visible message, put the circle in the right place, and clear the
+chart on demand. Step 10 is the finishing touch.
+
+{{< exercise bubble-chart >}}
+
+1. Create the app inside `coursework/` of your course repository as the box
+   above says, then run `npm start` and read `index.html`. The chart area is
+   drawn by hand inside a `<g class="axis">`: a square from (50, 50) to
+   (450, 450) in SVG pixels, with nine ticks per axis. Below it sits an empty
+   `<g id="bubbles">`, the layer your code owns.
+2. In `src/index.ts`, import the stylesheet, add `SVG_NS`, and look up
+   `#bubbleForm`, `#bubbleColor`, `#bubbleX`, `#bubbleY`, `#bubbleSize`,
+   `#sizeValue`, `#bubbleError`, `#clearBubbles`, and `#bubbles` as an
+   `SVGGElement`. One `if` that throws covers all nine.
+3. Add the layout constants `MARGIN` 50, `AXIS_LENGTH` 400, `BASELINE`
+   `MARGIN + AXIS_LENGTH`, `MIN_VALUE` 0, and `MAX_VALUE` 100. Write `scaleX`,
+   which maps a value to a pixel from left to right, and `scaleY`, which maps
+   it from bottom to top. On paper: `scaleX(0)` is 50, `scaleX(100)` is 450,
+   `scaleY(0)` is 450, and `scaleY(100)` is 50.
+4. Describe one bubble with a compound type and keep a list of them:
+
+   ```ts
+   type Bubble = {
+     x: number;
+     y: number;
+     size: number;
+     color: string;
+   };
+
+   let bubbles: Bubble[] = [];
+   ```
+
+5. Write `const drawBubbles = () => { ... };`. It clears the bubble layer with
+   `replaceChildren()` and loops over `bubbles` with `for...of`, creating one
+   `circle` per entry: `cx` from `scaleX`, `cy` from `scaleY`, `r` from the
+   size, and `fill` from the color.
+6. Listen for `submit` on the form with `event.preventDefault()` as the first
+   line. Read x, y, and the size with `valueAsNumber`, the color with `value`.
+7. Refuse bad coordinates. When x or y is `NaN`, below `MIN_VALUE`, or above
+   `MAX_VALUE`, write a message such as `Please enter an x and a y between 0 and
+   100.` into `#bubbleError`, put the cursor back with `focus()`, and `return`.
+   Expected result: typing 150 into the x field and pressing Enter shows the
+   message and draws nothing.
+8. In the good case, clear the error text, `push` a new object
+   `{ x, y, size, color }` onto `bubbles`, and call `drawBubbles()`. Expected
+   result: x 0 and y 0 puts a circle in the lower left corner, x 100 and y 100
+   in the upper right, and x 50 with y 50 in the middle.
+9. Make the **Clear** button empty the array, clear the error text, and redraw.
+   Assigning a fresh `[]` to `bubbles` is the shortest way to empty it.
+   Expected result: the circles are gone and the hand-drawn axes are still
+   there, because your code only ever clears the `#bubbles` layer.
+10. Show the slider's number: listen for `input` on the range field and write
+    its `value` into the `#sizeValue` span, so the label counts along as you
+    drag.
+11. Run `npm run check` and fix what Biome reports.
+
+Add half a dozen bubbles and look at what your code did. No circle was ever
+edited after it was created. The array holds the truth and the picture is a
+copy of it, so every change goes to the array first and the drawing follows. A
+chart that later has to remove a bubble costs you two more lines that way.
+
+::: {.callout-tip}
+## Bonus: keep the bubble inside the box
+
+A bubble at x 100 with size 50 sticks half out of the chart area. Refuse it:
+the circle fits when `scaleX(x) - size` is at least `MARGIN` and
+`scaleX(x) + size` is at most `MARGIN + AXIS_LENGTH`, and the same check with
+`scaleY(y)` for the vertical direction.
+:::
+
+## Check your understanding {#sec-charts-quiz}
+
+Six short questions, and the first three are the research questions from above.
+
+{{< quiz charts title="Charts" >}}

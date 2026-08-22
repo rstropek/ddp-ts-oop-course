@@ -1,0 +1,253 @@
+---
+title: "Toolchain step: scripts and assets"
+---
+
+The chapter on the starter project left one folder empty on purpose, and this
+part filled it with your first stand-alone `.svg`. Now your program learns to
+point at that file, and you find out what `npm run build` really produces.
+
+## A picture your program picks {#sec-toolchain-assets-experiment}
+
+Create a new app from the vite-ts-starter template inside `coursework/` of
+your course repository, name it `assets-tour`, and run `npm install`. Save this drawing as `assets/badge.svg`:
+
+```html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="A gold badge">
+  <circle cx="50" cy="50" r="45" fill="gold" stroke="darkorange" stroke-width="6" />
+  <text x="50" y="62" font-size="34" text-anchor="middle" fill="darkorange">3.6</text>
+</svg>
+```
+
+Put an empty image below the heading in `index.html`:
+
+```html
+<img id="badgeImage" alt="A gold badge" width="100" height="100">
+```
+
+Then replace `src/index.ts` with this:
+
+```ts
+import badgeUrl from '/assets/badge.svg';
+
+const badgeImage = document.querySelector<HTMLImageElement>('#badgeImage');
+if (!badgeImage) {
+  throw new Error('Image #badgeImage not found');
+}
+
+badgeImage.src = badgeUrl;
+console.log(badgeUrl);
+```
+
+Run `npm start`. The badge appears next to the heading. Open the browser
+console with F12 and read what `badgeUrl` holds. It is not the text
+`/assets/badge.svg` but a long string starting with
+`data:image/svg+xml;base64,`.
+
+## What an asset import gives you {#sec-toolchain-assets-import}
+
+Importing a file that is not code hands your program one thing: a string the
+browser can put into a `src` attribute. Vite picks that string. A small file
+gets packed into the string itself, which is the `data:` address you just read.
+A file over roughly four kilobytes gets copied next to your built code, and the
+string becomes a path such as `/assets/rings-slS3_jD9.svg`. Your code never has
+to care which one it got.
+
+The leading slash in `'/assets/badge.svg'` means the project root, the folder
+that holds `index.html` and the starter's `assets/`. A picture you keep next to
+your code inside `src/` is imported with a relative path instead:
+
+```ts
+import logoUrl from './logo.svg';
+```
+
+One line in the starter lets TypeScript accept either of them. Open
+`src/vite-env.d.ts`:
+
+```ts
+/// <reference types="vite/client" />
+```
+
+It pulls in Vite's type information, and part of that says an `.svg` import
+gives you a string. Delete the line and the compiler answers with
+`error TS2307: Cannot find module '/assets/badge.svg' or its corresponding type
+declarations.` Put it back.
+
+Only files something imports reach the finished build. A picture that lands in
+`assets/` and is never mentioned stays behind.
+
+## What npm run build produces {#sec-toolchain-assets-build}
+
+Stop the dev server and run:
+
+```bash
+npm run build
+```
+
+```
+> tsc && vite build
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 5 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                0.40 kB │ gzip: 0.28 kB
+dist/assets/index-B3kKJMcG.js  1.22 kB │ gzip: 0.79 kB
+
+✓ built in 37ms
+```
+
+A folder `dist` now sits in your project:
+
+```
+dist/
+├── assets/
+│   └── index-B3kKJMcG.js
+└── index.html
+```
+
+No TypeScript is in there. Browsers cannot run it, so Vite translated your
+program into one JavaScript file. And `dist/index.html` no longer names
+`./src/index.ts`, because Vite rewrote that line to point at the built file:
+
+```html
+<script type="module" crossorigin src="/assets/index-B3kKJMcG.js"></script>
+```
+
+The letters after `index-` change whenever your code changes, and the research
+box below asks what they are for. A project with a `src/styles.css` gets a
+second hashed file next to it, `index-n9PMcGTe.css`.
+
+The `build` script runs two programs, `tsc && vite build`. The type check comes
+first so a program with a type error is never packaged. Vite on its own strips
+the types without reading them and would build broken code without a word.
+
+To see the result, run `npm run preview` and open `http://localhost:4173/`.
+That is the finished `dist` folder, served with no dev server behind it and no
+auto-reload.
+
+Your `.gitignore` lists `dist/`, so none of this reaches git. Anybody with your
+source rebuilds it in under a second.
+
+::: {.research title="Serving a built page, and chaining two commands"}
+The exercise below builds a project and opens the result, and it adds a script
+that runs two programs in one line.
+
+1. `npm run preview` starts a small web server for the `dist` folder. Why does
+   double-clicking `dist/index.html` not show you the same page? Name the
+   address scheme the browser uses then, and what it refuses to do with a
+   `<script type="module">`.
+2. The built file is named something like `index-B3kKJMcG.js`, and the letters
+   change whenever your code changes. What are they for, and what would go
+   wrong for a visitor who came back to the page without them?
+3. A script runs `tsc --noEmit && biome check .`. What does `&&` do when `tsc`
+   reports an error, and how would the script behave if it used `;` instead?
+
+For the exam, keep the meaning of `&&` in your head. You will read npm scripts
+without a search engine.
+:::
+
+## A command of your own {#sec-toolchain-assets-verify}
+
+The `scripts` list in `package.json` takes entries of your own. Add this one,
+right after `check:fix`:
+
+```json
+"verify": "tsc --noEmit && biome check ."
+```
+
+Run it:
+
+```bash
+npm run verify
+```
+
+```
+> tsc --noEmit && biome check .
+
+Checked 10 files in 3ms. No fixes applied.
+```
+
+The type check found nothing, so `&&` let Biome run, and Biome found nothing
+either. From here on, `npm run verify` is what you run before every commit. The
+part on testing adds the test run to that same line.
+
+Biome reads your `.svg` files too, and it insists that a drawing says what it
+shows. The `role="img"` and `aria-label` on the badge are why the run above
+stayed quiet. Leave them off and you get
+`lint/a11y/noSvgWithoutTitle: Alternative text title element cannot be empty`.
+
+## House rules the agent reads {#sec-toolchain-assets-agents}
+
+Your coding buddy carries the rules of this course, and you can give it rules
+for one project on top of those. A file named `AGENTS.md` in the project root
+is what agents read before they start working. Plain Markdown, short, written
+for a colleague who joined today.
+
+The starter's `.agents/skills/` folder is the same idea for instructions you
+reuse across projects: each folder in there is one skill, loaded when a task
+needs it, and `skills-lock.json` records where each one came from. The starter
+ships `find-docs`, which sends the agent to current documentation instead of
+its memory, and a later part has you write a skill of your own.
+
+## Exercise: get a project ready to hand in {#sec-toolchain-assets-exercise}
+
+Open your bubble chart or your beehive game in `coursework/`, whichever you
+would rather keep. For a clean start instead, create a new app from the
+vite-ts-starter template inside `coursework/`, run `npm install`, and use the
+badge from this chapter.
+
+1. **Give the project a picture.** Move an `.svg` file into the project's
+   `assets/` folder, add an `<img>` with an id to `index.html`, and set its
+   `src` from `src/index.ts` with an import, the way the experiment above did.
+   Expected result: the picture shows up in the browser.
+
+2. **Add the verify script.** Put `"verify": "tsc --noEmit && biome check ."`
+   into the `scripts` list in `package.json` and run `npm run verify`. Fix
+   every finding and run it again until nothing is reported. An `.svg` without
+   `role="img"` and `aria-label` is one finding you may have to fix.
+
+3. **Build it and look at the result.** Run `npm run build`, then list `dist`
+   and write down every file name, hashes included. Run `npm run preview` and
+   use the page at `http://localhost:4173/`. Expected result: it behaves as it
+   does under `npm start`, and `git status` does not mention `dist`.
+
+4. **Let the buddy write the README.** Start `pi` in the project and ask it:
+   *Write a README.md for this project. Say what it does, how to run it, and
+   what each script in package.json is for.* Then read the file line by line
+   and correct it by hand. Expected result: every command in the README is one
+   you have run, and nothing is claimed that the project does not do.
+
+5. **Write the house rules.** Create `AGENTS.md` in the project root with three
+   rules in your own words:
+
+   * When a script in `package.json` changes, update `README.md` in the same
+     change.
+   * Run `npm run verify` before reporting that you are done, and say what it
+     printed.
+   * Course style: single quotes, semicolons, `querySelector<T>` with a null
+     check that throws, and no classes yet.
+
+6. **Test the rules.** Ask the buddy for one small change, for example a button
+   that clears the drawing or a script `"clean"` that deletes `dist`. Expected
+   result: it runs `npm run verify`, and it edits `README.md` if it touched a
+   script. If it skipped one, point it at `AGENTS.md` and name the rule it
+   missed.
+
+7. **Commit.** Run `npm run verify` one last time, then `git add .` and
+   `git commit` with a message in the convention you picked in the git chapter.
+   Expected result: `git status` prints "nothing to commit, working tree
+   clean".
+
+::: {.callout-tip}
+## You review the agent, not the other way around
+
+`AGENTS.md` makes the agent's work easier to check, and it never makes the
+check unnecessary. You read the README and decide whether it is true.
+:::
+
+## Check your understanding {#sec-toolchain-assets-quiz}
+
+Five short questions, three of them from the research task.
+
+{{< quiz toolchain-assets title="Scripts and assets" >}}

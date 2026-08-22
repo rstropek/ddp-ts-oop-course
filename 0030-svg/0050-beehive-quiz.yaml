@@ -1,0 +1,163 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Grids, hexagons, and a small game"
+# (0030-svg/0050-beehive.qmd). The first four questions are the chapter's
+# research-box questions.
+
+id: beehive-quiz
+name: "Quiz: Grids, hexagons, and a small game"
+title: "Check your understanding: grids, hexagons, and a small game"
+description: |
+  Six short questions about the chapter *Grids, hexagons, and a small game*.
+  Answer in your own words. There are no answer options to pick from, and this
+  quiz is anonymous: it's here for you, so you can see what you already
+  understand and what you should read again. One or two sentences are enough
+  for most answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml" # repo root, resolves on GitHub and locally
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="dot.setAttribute('cx', String(26 + col * STEP));"
+      scope="after the grid and game chapter of the SVG part"
+      reveal=false
+      knows=(array
+        "`document.querySelector<HTMLButtonElement>('#up')` with an `if (!element) { throw ... }` null check"
+        "`textContent`, `createElement`, `append`, `remove`, and `classList`"
+        "`addEventListener` with `click`, `keydown` and `event.key`, `input`, and `submit`"
+        "`event.preventDefault()` on a form's submit event"
+        "SVG written by hand: `viewBox`, `circle`, `rect`, `polygon`, `text`, `g`, `fill`, `stroke`"
+        "creating SVG elements from TypeScript with `document.createElementNS(SVG_NS, 'circle')` and `setAttribute`"
+        "drawing charts from data with loops and named layout constants"
+        "`requestAnimationFrame` for animation"
+        "CSS selectors and the basics of Flexbox and Grid"
+        "arrays, `for` loops, `switch`, `if`, functions, and object literals from year one"
+        "`Math.random`, `Math.floor`, `Math.cos`, and `Math.sin`")
+      not_yet=(array
+        "classes, `this`, and inheritance"
+        "automated tests with Vitest or Playwright"
+        "generics other than `querySelector<T>`"
+        "`Map`, `Set`, destructuring, spread, and the ternary operator"
+        "`fetch`, `async`, and `localStorage`")}}
+
+questions:
+  - id: research-hexagon-corners
+    title: "The six corners"
+    question: |
+      A regular hexagon has six corners, all at the same distance from its
+      center. Given the center point and that distance, how do you compute the
+      six corner points with `Math.cos` and `Math.sin`? And which unit do those
+      two functions want the angle in?
+    evaluation: |
+      Expected: corner number `i` sits at `centerX + radius * Math.cos(angle)`
+      and `centerY + radius * Math.sin(angle)`, where the angle grows by 60
+      degrees (one sixth of a full turn) from one corner to the next, so a loop
+      running six times produces all of them. `Math.cos` and `Math.sin` want
+      radians, so degrees have to be multiplied by `Math.PI / 180`.
+      Required: 1) center plus radius times cosine for x and sine for y; 2) the
+      60 degree step between corners; 3) radians, with the conversion named.
+      Partial: formula and 60 degree step right but radians missing or wrong,
+      or radians named without the formula.
+      Incorrect: degrees passed straight into `Math.cos`, or the corners
+      described as center plus radius added to x and y.
+
+  - id: research-defs-symbol-use
+    title: "defs, symbol, and use"
+    question: |
+      What are `<defs>`, `<symbol>`, and `<use>` for in an SVG, and which
+      attribute of `<use>` names the symbol it places?
+    evaluation: |
+      Expected: `<defs>` holds content that is defined but not drawn where it
+      stands, `<symbol>` is a reusable shape kept in there, and `<use>` draws a
+      copy of that shape at a place you choose (with its own `x` and `y`). The
+      attribute is `href`, written as `href="#hex"` (older files use
+      `xlink:href`).
+      Required: 1) `<defs>` and `<symbol>` define a shape that is not drawn on
+      the spot; 2) `<use>` places copies of it; 3) the attribute is `href`.
+      Partial: the roles described correctly with the attribute missing or
+      wrong, or `href` named without what the elements do.
+      Incorrect: says content in `<defs>` is drawn like any other element, or
+      names `src`, `use`, or `symbol` as the attribute.
+
+  - id: research-arrow-keys
+    title: "What the arrow keys say"
+    question: |
+      A `keydown` handler reads `event.key`. What are the four values you get
+      for the four arrow keys?
+    evaluation: |
+      Expected: `'ArrowLeft'`, `'ArrowRight'`, `'ArrowUp'`, and `'ArrowDown'`.
+      Required: all four strings, spelled the way the browser sends them.
+      Capitalization counts here, because the code compares strings.
+      Partial: the pattern right but only two or three of the four named, or
+      all four with wrong capitalization such as `'arrowleft'`.
+      Incorrect: `'Left'` and `'Up'`, the numbers 37 to 40, or names such as
+      `'arrow-left'`.
+
+  - id: research-prevent-default-keydown
+    title: "preventDefault on a key"
+    question: |
+      What does `event.preventDefault()` stop when you call it inside a
+      `keydown` handler?
+    evaluation: |
+      Expected: it cancels the browser's own reaction to that key press, not
+      the event itself. For the arrow keys that reaction is scrolling the page
+      (and moving the cursor when the focus is in a text field). The handler
+      still runs.
+      Required: 1) the browser's default action for that key is cancelled; 2)
+      for arrow keys that default action is scrolling.
+      Partial: the default action idea without naming scrolling, or scrolling
+      named without the idea of a default action.
+      Incorrect: says the event no longer fires, or that the handler stops
+      running.
+
+  - id: state-not-attributes
+    title: "Where the bee really is"
+    question: |
+      The beehive keeps the bee's cell in an object:
+
+      ```typescript
+      const beePosition = { col: 0, row: 0 };
+      ```
+
+      Every move changes that object and then redraws the bee. A classmate
+      deletes the object. Instead he reads the bee's `x` attribute out of the
+      SVG, adds one step, and writes it back. Name two things that get harder
+      for him.
+    evaluation: |
+      Expected: the attribute is a string of pixels, so every move needs a
+      conversion back to a number; the rules of the game are about columns and
+      rows, so "stay inside the hive" has to be computed back out of pixel
+      values, and the half-step offset of every second row makes that
+      arithmetic messy; dropping a honey pot needs the cell the bee stands on,
+      which he no longer has.
+      Required: two of those, in the student's own words.
+      Partial: exactly one of them.
+      Incorrect: says it makes no difference, or claims an attribute cannot be
+      read back.
+
+  - id: row-offset
+    title: "Half a step to the right"
+    question: |
+      In the hive, `STEP_X` is the horizontal distance between the centers of
+      two cells in the same row. The cell in column 0, row 0 has its left edge
+      at x = 0. Where is the left edge of the cell in column 0, row 1, and why?
+    evaluation: |
+      Expected: at `STEP_X / 2`, half a step to the right. Every row with an odd
+      number is pushed over by half a step, so its cells sit in the dents of the
+      row above and the hexagons meet without a gap.
+      Required: 1) the value `STEP_X / 2` (half of `STEP_X` in words counts);
+      2) the reason, that odd rows are offset by half a step so the rows
+      interlock.
+      Partial: the right value with no reason, or the offset idea with a wrong
+      value.
+      Incorrect: says 0 because the column is the same, or `STEP_X`.

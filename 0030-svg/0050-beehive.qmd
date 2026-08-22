@@ -1,0 +1,318 @@
+---
+title: "Grids, hexagons, and a small game"
+---
+
+Bees pack their comb with hexagons because hexagons cover a surface with no gap
+left over. Your loops can lay out the same pattern, and a bee can then walk from
+cell to cell. Start with circles though, since a circle needs one radius
+and a hexagon needs six corner points.
+
+## Five circles, then twenty-five {#sec-beehive-rows}
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template inside `coursework/` of your course repository, call the folder
+   `packing-experiment`, and run `npm install` and `npm start`.
+2. In `index.html`, replace the `<h1>` line with this:
+
+   ```html
+   <h1>Packing experiment</h1>
+   <svg id="board" viewBox="0 0 300 260" width="300" height="260" role="img" aria-label="Circles placed by a loop"></svg>
+   ```
+
+3. Replace both lines of `src/index.ts` with this:
+
+   ```ts
+   const SVG_NS = 'http://www.w3.org/2000/svg';
+
+   const board = document.querySelector<SVGSVGElement>('#board');
+   if (!board) {
+     throw new Error('The page has no board');
+   }
+
+   const STEP = 52;
+
+   for (let col = 0; col < 5; col++) {
+     const dot = document.createElementNS(SVG_NS, 'circle');
+     dot.setAttribute('cx', String(26 + col * STEP));
+     dot.setAttribute('cy', '26');
+     dot.setAttribute('r', '26');
+     dot.setAttribute('fill', '#f7d774');
+     dot.setAttribute('stroke', '#8a6d1a');
+     board.append(dot);
+   }
+   ```
+
+Five yellow circles in a row, each one touching the next. `STEP` is the
+distance between two centers, and `col * STEP` turns the loop counter into a
+position. Now wrap a loop over rows around the loop over columns, and let the
+row decide `cy`:
+
+```ts
+for (let row = 0; row < 5; row++) {
+  for (let col = 0; col < 5; col++) {
+    const dot = document.createElementNS(SVG_NS, 'circle');
+    dot.setAttribute('cx', String(26 + col * STEP));
+    dot.setAttribute('cy', String(26 + row * STEP));
+    dot.setAttribute('r', '26');
+    dot.setAttribute('fill', '#f7d774');
+    dot.setAttribute('stroke', '#8a6d1a');
+    board.append(dot);
+  }
+}
+```
+
+Twenty-five circles in a square grid, with a hole between every four of them.
+
+## The half step that closes the holes {#sec-beehive-offset}
+
+Push every second row half a step to the right, and pull the rows closer
+together. Add these above the loops:
+
+```ts
+const ROW_STEP = 45;
+
+const rowOffset = (row: number) => {
+  if (row % 2 === 1) {
+    return STEP / 2;
+  }
+
+  return 0;
+};
+```
+
+Then change the two position lines inside the inner loop:
+
+```ts
+dot.setAttribute('cx', String(26 + col * STEP + rowOffset(row)));
+dot.setAttribute('cy', String(26 + row * ROW_STEP));
+```
+
+Reload, and the holes are gone. `row % 2 === 1` picks rows 1 and 3, so the
+second and the fourth row move half a step sideways, and the smaller `ROW_STEP`
+lets each row drop into the dents of the row above it. The whole layout now sits
+in `STEP`, `ROW_STEP`, and the two loop bounds, so a bigger board is a change to
+four numbers and to nothing in the drawing code.
+
+## One shape, placed 25 times {#sec-beehive-use}
+
+Circles leave thin gaps along their sides. Hexagons do not, which is why a real
+comb is built from them, and a hexagon in SVG is a `<polygon>` with six points.
+Writing those points 25 times would mean 25 polygons carrying 300 numbers
+between them, all describing one shape in different places. SVG has a way out:
+keep one copy of the shape and stamp it onto the picture as often as you like,
+each stamp with its own `x` and `y`, which is exactly what your two loops
+compute. The element names are `<defs>`, `<symbol>`, and `<use>`; the research
+box below sends you to MDN for how they fit together.
+
+## State first, picture second {#sec-beehive-state}
+
+The bee in the exercise stands on one cell. Where does that fact live? You could
+read the bee's `x` attribute back out of the document, add a step, and write it
+back. Or you keep a variable of your own:
+
+```ts
+const beePosition = { col: 0, row: 0 };
+```
+
+Take the variable. An attribute hands you a string in pixels, while every rule
+of the game is about columns and rows. "Stay inside the hive" is
+`col >= 0 && col < 5` on two small integers. In pixels, with the offset of every
+second row mixed in, the same rule turns into arithmetic nobody wants to debug.
+
+So the object holds what is true, and the picture only shows it. A move changes
+the object and then redraws:
+
+```ts
+const moveBee = (deltaCol: number, deltaRow: number) => {
+  beePosition.col += deltaCol;
+  beePosition.row += deltaRow;
+  drawBee();
+};
+```
+
+`drawBee` computes the pixel center of `beePosition`'s cell and writes it into
+the bee element. The guard that keeps the bee inside the hive belongs at the top
+of `moveBee`, and the exercise asks you for it.
+
+## Two ways to ask for the same move {#sec-beehive-controls}
+
+Because `moveBee` exists, wiring a button to it takes one line:
+
+```ts
+rightButton.addEventListener('click', () => moveBee(1, 0));
+```
+
+The keyboard needs a single listener, and it goes on `document`. A `keydown`
+listener on a button only fires while that button has the focus, and nobody
+wants to click the page before they may play.
+
+`event.key` says which key went down. You read it for letters in Part 2; the
+arrow keys carry names of their own, and the research box asks you for all four.
+A `switch (event.key)` with one `case` per arrow reads better than four `if`s,
+and a `default` that returns leaves every other key alone. Arrow keys also do
+something of their own in a browser, and `event.preventDefault()` is the line
+that stops it. What exactly it stops is the last research question.
+
+Both paths end in the same `moveBee`, so a rule you add later lives in one
+place. And the buttons are what make the game playable on a phone.
+
+## The pad is a three by three grid {#sec-beehive-pad}
+
+Four arrows around a honey button, and CSS Grid places them without a single
+wrapper `div`:
+
+```css
+#pad {
+  display: grid;
+  grid-template-columns: repeat(3, 3rem);
+  grid-template-rows: repeat(3, 3rem);
+}
+
+#up {
+  grid-column: 2;
+  grid-row: 1;
+}
+```
+
+Each button names its own column and row, so the order in the HTML does not
+decide where it lands. The stylesheet for the exercise carries all five
+placements.
+
+::: {.research title="Six corners, one symbol, and the arrow keys"}
+The hive you are about to build is one hexagon defined once and placed 25 times,
+and the bee walks through it with the arrow keys. You have seen neither of those
+in this book.
+
+1. A regular hexagon has six corners, all at the same distance from its center.
+   Given the center point and that distance, how do you compute the six corner
+   points with `Math.cos` and `Math.sin`? And which unit do those two functions
+   want the angle in?
+2. What are `<defs>`, `<symbol>`, and `<use>` for in an SVG, and which attribute
+   of `<use>` names the symbol it places?
+3. A `keydown` handler reads `event.key`. What are the four values you get for
+   the four arrow keys?
+4. What does `event.preventDefault()` stop when you call it inside a `keydown`
+   handler?
+
+Questions 1 and 3 are exam material: you write this kind of code with no
+internet and no AI next to you.
+:::
+
+## Exercise: the beehive {#sec-beehive-exercise}
+
+A hive of 25 cells, and a bee that leaves a honey pot wherever you send it.
+
+{{< exercise beehive >}}
+
+1. Create a new app from the vite-ts-starter template inside `coursework/` (or
+   `homework/`) of your course repository, run `npm install`. Read
+   `index.html`: an `<svg id="hive">` with an empty `<symbol id="hex">` inside
+   `<defs>`, two empty groups `#cells` and `#pots`, a `<text id="bee">`, a
+   status paragraph, and five buttons inside `#pad`. Run `npm start`. Expected
+   result: pad and status line show up, the hive area is empty, and half a bee
+   sticks out of the top left corner.
+2. In `src/index.ts`, write `import './styles.css';`, the namespace constant
+   `const SVG_NS = 'http://www.w3.org/2000/svg';`, and the layout constants:
+
+   ```ts
+   const COLUMNS = 5;
+   const ROWS = 5;
+   const RADIUS = 30;
+   const STEP_X = Math.sqrt(3) * RADIUS;
+   const STEP_Y = 1.5 * RADIUS;
+   ```
+
+   `RADIUS` is the distance from a cell's center to one of its corners,
+   `STEP_X` the horizontal distance between two centers in one row, `STEP_Y` the
+   distance between two rows. The last two follow from the hexagon's shape; take
+   them as given.
+3. Look up the elements with `querySelector<...>` and cover them with one `if`
+   that throws: `#hex` (`SVGSymbolElement`), `#cells` and `#pots`
+   (`SVGGElement`), `#bee` (`SVGTextElement`), `#status`
+   (`HTMLParagraphElement`), and the buttons `#up`, `#down`, `#left`, `#right`,
+   `#drop` (`HTMLButtonElement`). Write every helper below as
+   `const drawBee = () => { ... };` so the null check keeps holding inside it.
+4. Add the position helpers. The box around the cell in column `col` and row
+   `row` has its top left corner here:
+
+   ```ts
+   const rowOffset = (row: number) => {
+     if (row % 2 === 1) {
+       return STEP_X / 2;
+     }
+
+     return 0;
+   };
+
+   const cellLeft = (col: number, row: number) => col * STEP_X + rowOffset(row);
+   const cellTop = (row: number) => row * STEP_Y;
+   ```
+
+   The center of that cell is `cellLeft(col, row) + STEP_X / 2` across and
+   `cellTop(row) + RADIUS` down. Cells are placed by the corner, the bee by the
+   center.
+5. Fill the symbol. Write a helper that creates one `<polygon>`, sets its
+   `points` attribute to the six corners of a hexagon, and appends it to `#hex`.
+   Put that hexagon's center at `STEP_X / 2` across and `RADIUS` down, never at
+   `(0, 0)`: a symbol draws nothing above or to the left of its own origin, so
+   negative corners vanish. Build the attribute in a loop that runs six times,
+   pushing strings such as `'25.98,0'` into an array and joining them with a
+   space. Expected result: the page still shows no hive, and your answer to
+   research question 2 says why.
+6. Place the cells. Write a helper that takes a group, a class name, a column,
+   and a row, creates a `<use>` element pointing at the hexagon symbol, sets its
+   `x` and `y` from `cellLeft` and `cellTop`, adds the class, and appends it to
+   the group. Call it from a nested loop over `ROWS` and `COLUMNS` with the
+   class `cell` and the group `#cells`. Expected result: 25 golden hexagons in
+   five offset rows with no gaps, and a cell that brightens under the mouse.
+7. Give the bee a home. Add `const beePosition = { col: 0, row: 0 };` and
+   `let potCount = 0;`. Write `drawBee`, which sets the `x` and `y` attributes
+   of the bee element to the center of `beePosition`'s cell, and `showStatus`,
+   which puts a line such as `Bee at column 0, row 0. 0 honey pots.` into the
+   status paragraph. Call both once after the cells are placed. Expected result:
+   the bee sits in the middle of the top left cell.
+8. Make it move. Write `moveBee(deltaCol, deltaRow)`: compute the new column and
+   row, `return` without changing anything when either one falls outside 0 to 4,
+   otherwise store them and call `drawBee` and `showStatus`. Wire the four arrow
+   buttons with one `click` listener each: up is `(0, -1)`, down `(0, 1)`, left
+   `(-1, 0)`, right `(1, 0)`. Expected result: the bee walks and stops at the
+   border. It zig-zags going up and down, which is right, because the cell above
+   cell `(2, 3)` does sit half a step to the left.
+9. Drop honey. Write `dropHoney`, which places a hexagon with the class `honey`
+   in the `#pots` group at the bee's cell, counts the pot, and refreshes the
+   status line. That is the helper from step 6 again with two other arguments.
+   Wire it to `#drop`. Expected result: the cell under the bee turns orange, the
+   counter grows, and the bee stays visible on top of the pot.
+10. Add the keyboard. Listen for `keydown` on `document`, `switch` on
+    `event.key`, call `moveBee` in one `case` per arrow key, and end the switch
+    with `default: return;`. Call `event.preventDefault()` after the switch.
+    Expected result: the arrow keys move the bee. Make the window short enough
+    to scroll, comment the `preventDefault` line out, and press an arrow key to
+    see what that line does for you.
+11. Bonus: refuse a second pot on a cell that already holds one. Keep the pots
+    in an array of `{ col: number; row: number }` objects and search it in
+    `dropHoney`. Second bonus: let the space bar drop honey too.
+12. Run `npm run check` and `npx tsc --noEmit`, and fix what they report.
+
+::: {.callout-note}
+## What has to work
+
+* The app starts with `npm start`, the console stays free of errors, and
+  `npm run check` and `npx tsc --noEmit` pass.
+* The hive shows 25 hexagons in five offset rows, with no gaps between them.
+* The five buttons sit in a pad, with the four arrows around the honey button.
+* The bee moves left and right with the buttons and never leaves the hive.
+* The honey button leaves a pot on the cell the bee stands on.
+
+Movement up and down, and the arrow keys, are what lift this above passing.
+:::
+
+Keep the project. The next chapter looks at the project itself: where images
+and `.svg` files live, and what `npm run build` writes into `dist/`.
+
+## Check your understanding {#sec-beehive-quiz}
+
+Six short questions, and the first four are the research questions from above.
+
+{{< quiz beehive title="Grids and hexagons" >}}

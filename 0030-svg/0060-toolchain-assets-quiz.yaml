@@ -1,0 +1,150 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Toolchain step: scripts and assets"
+# (0030-svg/0060-toolchain-assets.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point to the source, never the answer). The last two
+# cover the chapter's own points: what a failing type check means for the rest
+# of `npm run verify`, and why `dist/` stays out of git.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: toolchain-assets-quiz
+name: "Quiz: Scripts and assets"
+
+title: "Check your understanding: scripts and assets"
+description: |
+  Five short questions about the chapter *Toolchain step: scripts and
+  assets*, three of them the research task. Answer in your own words; if
+  you cannot answer a research question yet, look it up and come back. One
+  or two sentences are enough. This quiz is anonymous and is here for you.
+  Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="import badgeUrl from '/assets/badge.svg';"
+      scope="after the scripts and assets chapter of the SVG part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "`document.querySelector<HTMLImageElement>('#id')` with a null check that throws"
+        "SVG written by hand, and SVG created from TypeScript with `createElementNS` and `setAttribute`"
+        "the starter project's files: `index.html`, `src/index.ts`, `src/vite-env.d.ts`, `assets/`, `package.json`, `biome.json`, `tsconfig.json`, `.gitignore`"
+        "`npm start`, `npm run check`, `npx tsc --noEmit`, `npm run build`, and `npm run preview`"
+        "importing an `.svg` file to get a URL string for an `<img>` `src`"
+        "git with a course repository: `git add`, `git commit`, `git push`, and `.gitignore`"
+        "the `pi` coding buddy and an `AGENTS.md` with project rules")
+      not_yet=(array
+        "what `npm run preview` gives you that opening a file does not, what the hash in a built file name is for, and what `&&` does when the first command fails (those are the research tasks right now)"
+        "classes, inheritance, or generics beyond `querySelector<T>`"
+        "automated tests with Vitest or Playwright"
+        "`async`, `fetch`, or `localStorage`")}}
+
+questions:
+  - id: research-preview-vs-file
+    title: "Why a server for dist"
+    question: |
+      You built your project and want to look at the result. Double-clicking
+      `dist/index.html` does not give you the working page, but
+      `npm run preview` does. Which address scheme does the browser use when
+      you open the file directly, and what does it refuse to do there?
+    evaluation: |
+      Expected: `file://`; the browser refuses to load the ES module script
+      (module scripts are blocked by the same-origin policy over `file://`,
+      so the JavaScript never runs). `npm run preview` serves the folder over
+      `http://`, where module loading works.
+      Required: (1) names the `file://` scheme; (2) says the module script or
+      the JavaScript does not load or is blocked.
+      Partial: only one of the two, for example "it uses file://" with no
+      consequence, or "the script does not load" with no scheme.
+      Incorrect: claims the page fails because TypeScript is missing, or
+      because `dist` needs to be rebuilt.
+
+  - id: research-hashed-name
+    title: "The letters in the file name"
+    question: |
+      A built project contains `dist/assets/index-B3kKJMcG.js`, and the
+      letters after `index-` change whenever your code changes. What are they
+      for, and what would a returning visitor run into without them?
+    evaluation: |
+      Expected: the letters are a hash of the file's content, used for cache
+      busting. A new build gets a new name, so the browser has to download it.
+      Without the hash the name stays `index.js` and a returning visitor keeps
+      the old file from the browser cache, so they see the old version.
+      Required: (1) names the idea of cache busting or forcing a fresh
+      download; (2) says the visitor would otherwise get the cached, old file.
+      Partial: only one of the two, for example "it is a hash of the content"
+      with nothing about caching.
+      Incorrect: says it makes the file unique per user, or that it is for
+      security or compression.
+
+  - id: research-and-operator
+    title: "Two commands in one line"
+    question: |
+      A script runs `tsc --noEmit && biome check .`. What does `&&` do when
+      `tsc` reports an error, and how would the line behave with `;` in place
+      of `&&`?
+    evaluation: |
+      Expected: `&&` runs the second command only when the first one finished
+      successfully (exit code 0), so a failing `tsc` stops the line and
+      `biome check .` never runs. With `;` both commands run, whatever the
+      first one did.
+      Required: (1) with `&&` the second command is skipped after a failure;
+      (2) with `;` the second command runs anyway.
+      Partial: only one of the two halves.
+      Incorrect: claims `&&` runs both commands at the same time, or that
+      `&&` and `;` do the same thing.
+
+  - id: verify-after-type-error
+    title: "A quiet Biome"
+    question: |
+      Your `package.json` has `"verify": "tsc --noEmit && biome check ."`.
+      You run it and get:
+
+      ```
+      src/index.ts(11,7): error TS6133: 'unusedThing' is declared but its value is never read.
+      ```
+
+      Biome printed nothing at all. Does that mean your formatting and lint
+      rules are fine? What do you do next?
+    evaluation: |
+      Expected: no. Biome never ran, because the type check failed and stopped
+      the line, so you know nothing about Biome's findings yet. Remove or use
+      `unusedThing`, then run `npm run verify` again.
+      Required: (1) says Biome did not run, so its silence proves nothing;
+      (2) fix the type error and run `npm run verify` again.
+      Partial: only one of the two, for example "fix the unused variable"
+      without noticing that Biome was skipped.
+      Incorrect: says Biome found nothing and the code is clean, or that
+      Biome is broken.
+
+  - id: dist-not-in-git
+    title: "The folder that stays out"
+    question: |
+      `.gitignore` lists `dist/`, so your built page is never committed. Give
+      the reason, and say how a classmate who clones your repository gets the
+      built page anyway.
+    evaluation: |
+      Expected: `dist/` is generated output, rebuilt from the source files the
+      repository already holds, so storing it would only duplicate them (and
+      it goes stale after every edit). The classmate runs `npm install` and
+      `npm run build` themselves.
+      Required: (1) `dist` is generated or built output, not source; (2) the
+      classmate rebuilds it with `npm run build`.
+      Partial: only one of the two, for example "because it is generated"
+      without saying how the classmate gets it.
+      Incorrect: says `dist` is too secret or too large to share, or that the
+      built page cannot be recreated.

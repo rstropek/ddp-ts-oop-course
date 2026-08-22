@@ -1,0 +1,104 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden answers for 0050-beehive-quiz.yaml ("Grids, hexagons, and a small game").
+# Teacher-only test data. Never publish as an activity, never mint a code.
+
+id: beehive-quiz-eval
+target: ./0050-beehive-quiz.yaml
+
+questions:
+  - question: research-hexagon-corners
+    answers:
+      - expect: correct
+        answer: |
+          x = centerX + radius * Math.cos(a) and y = centerY + radius *
+          Math.sin(a), and a goes up by 60 degrees each corner. cos and sin
+          need radians so you do degrees * Math.PI / 180.
+      # Formula and step right, radians missing.
+      - expect: partial
+        answer: |
+          you loop 6 times and take cos and sin of the angle times the radius
+          and add the center, the angle grows by 60 each time
+      - expect: incorrect
+        answer: |
+          you just add the radius to x and y of the center for every corner
+
+  - question: research-defs-symbol-use
+    answers:
+      - expect: correct
+        answer: |
+          defs is for stuff that is defined but not drawn, a symbol in there is
+          a shape you can reuse, and use draws a copy of it where you want. use
+          points at it with href="#hex".
+      # German correct answer for this quiz.
+      - expect: correct
+        answer: |
+          in defs steht etwas das nicht gezeichnet wird, das symbol ist die
+          form die man wiederverwendet und use zeichnet eine kopie davon. use
+          zeigt mit href darauf.
+      # Roles right, attribute missing.
+      - expect: partial
+        answer: |
+          defs holds shapes that are not drawn and use puts copies of them on
+          the picture
+      - expect: incorrect
+        answer: |
+          defs is drawn like a normal group and use points at the symbol with
+          src="#hex"
+
+  - question: research-arrow-keys
+    answers:
+      - expect: correct
+        answer: |
+          ArrowLeft, ArrowRight, ArrowUp and ArrowDown
+      # Only two of the four.
+      - expect: partial
+        answer: |
+          ArrowLeft and ArrowRight
+      - expect: incorrect
+        answer: |
+          you get the numbers 37, 38, 39 and 40
+
+  - question: research-prevent-default-keydown
+    answers:
+      - expect: correct
+        answer: |
+          it stops what the browser would do by itself with that key. for the
+          arrows that is scrolling the page. my handler still runs.
+      # Default action idea without naming scrolling.
+      - expect: partial
+        answer: |
+          it cancels the thing the browser normally does for that key
+      - expect: incorrect
+        answer: |
+          then the keydown event is not fired anymore and my listener never
+          runs
+
+  - question: state-not-attributes
+    answers:
+      - expect: correct
+        answer: |
+          the x attribute is a string with pixels so he has to convert it every
+          time, and to check if the bee is still inside the hive he has to
+          calculate the column back from the pixels which is annoying with the
+          offset rows
+      # One reason only.
+      - expect: partial
+        answer: |
+          he always has to turn the string into a number first
+      - expect: incorrect
+        answer: |
+          nothing gets harder, it is exactly the same amount of work
+
+  - question: row-offset
+    answers:
+      - expect: correct
+        answer: |
+          at STEP_X / 2, because row 1 is an odd row and gets pushed half a
+          step right so the hexagons fit into each other
+      # Right value, no reason.
+      - expect: partial
+        answer: |
+          half of STEP_X
+      - expect: incorrect
+        answer: |
+          also at 0, the column is still 0 so nothing moves

@@ -1,0 +1,273 @@
+---
+title: "A picture made of text"
+---
+
+Last year you told p5.js what to draw, one command after another, and it
+painted pixels onto a canvas. The browser can draw too, and it does it in a way
+that looks strange for about five minutes: the picture is written as tags,
+inside your HTML, where you can read it. Type one and see.
+
+## A circle you can read {#sec-svg-by-hand-circle}
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template inside `coursework/` of your course repository, call the folder
+   `svg-experiment`, and run `npm install` and `npm start`.
+2. In `index.html`, replace the `<h1>` line with this:
+
+   ```html
+   <svg viewBox="0 0 200 200" width="200" role="img" aria-label="A gold circle">
+     <circle cx="100" cy="100" r="60" fill="gold" stroke="black" stroke-width="4" />
+   </svg>
+   ```
+
+3. Delete both lines in `src/index.ts`. They talked to the heading you just
+   replaced, so leave the file empty for the moment.
+4. Look at the browser.
+
+A gold circle with a black outline, 200 pixels wide. Change `r="60"` to
+`r="90"` and save. Change the fill to `fill="tomato"` and save. Each time, the
+browser has the new picture on screen before your hand is off the keyboard.
+
+The pair `role="img" aria-label="A gold circle"` is the picture's alternative
+text, and a screen reader announces it instead of reading out shapes it cannot
+describe. Biome's accessibility rule refuses an `<svg>` without such a name, so
+put the pair on every drawing you write.
+
+Now press F12 and open the **Elements** tab. There is your `<circle>`, a line
+in the tree next to your headings and buttons. Double click the `60` in
+`r="60"`, type `20`, and press Enter: the circle shrinks. A shape is an element,
+with a tag name and attributes, living in the DOM exactly like a `<p>` does.
+
+## The same rings, twice {#sec-svg-by-hand-rings}
+
+Year one ended its first part with the Olympic rings. Five circles, no fill,
+a fat outline, three on top and two hanging below:
+
+```ts
+function setup() {
+  createCanvas(400, 200);
+  noFill();
+  strokeWeight(5);
+  stroke('blue');
+  circle(100, 100, 80);
+  stroke('black');
+  circle(200, 100, 80);
+  stroke('red');
+  circle(300, 100, 80);
+  // yellow at (150, 140) and green at (250, 140) take the same two lines each
+}
+```
+
+Here are the same five rings as SVG. Put them into your `index.html` in place of
+the gold circle and compare them with the picture you drew last year:
+
+```html
+<svg viewBox="0 0 400 200" width="400" role="img" aria-label="The five Olympic rings">
+  <circle cx="100" cy="100" r="40" fill="none" stroke="blue" stroke-width="5" />
+  <circle cx="200" cy="100" r="40" fill="none" stroke="black" stroke-width="5" />
+  <circle cx="300" cy="100" r="40" fill="none" stroke="red" stroke-width="5" />
+  <circle cx="150" cy="140" r="40" fill="none" stroke="yellow" stroke-width="5" />
+  <circle cx="250" cy="140" r="40" fill="none" stroke="green" stroke-width="5" />
+</svg>
+```
+
+Same rings, two ways of thinking. The p5.js version is a list of orders in a
+fixed sequence: switch the fill off, set the thickness, set a color, draw a
+circle, set the next color, draw the next one. The settings stay in force until
+a later line changes them, so moving a single `stroke` line repaints half the
+picture in the wrong color.
+
+The SVG version orders nobody around. It says what is there: five circles, each
+with its own place, size, and color, each carrying everything it needs. Reading
+it out loud describes the finished picture, not the way there.
+
+Programmers call the first style **imperative**, from a word for command: you
+write the steps and the machine follows them. The second is **declarative**:
+you write what the result should be and let the machine work out the steps.
+The difference pays off when the picture has to change. In p5.js you clear the
+canvas and run all the drawing commands again. In SVG you change the one
+attribute you mean, and the browser redraws that shape by itself.
+
+## The drawing brings its own coordinates {#sec-svg-by-hand-viewbox}
+
+`viewBox="0 0 400 200"` sets up the coordinate system inside the drawing. The
+four numbers are the x and y where the drawing starts, then its width and its
+height. Every `cx`, `cy`, `x`, and `r` inside is counted in those units, never
+in pixels.
+
+`width="400"` is a different measurement: it says how much room the drawing
+takes on the page. Write `width="200"` instead and the whole picture shrinks to
+half size, outlines and all, without touching a single coordinate. That is the
+scalable in Scalable Vector Graphics.
+
+The y axis points down, the way it did on the p5.js canvas: 0,0 is the top left
+corner, and a bigger y moves a shape further down.
+
+## Shapes are elements, one tag each {#sec-svg-by-hand-shapes}
+
+```html
+<svg viewBox="0 0 200 120" width="200" role="img" aria-label="One shape of each kind">
+  <rect x="10" y="10" width="80" height="40" rx="8" fill="lightblue" />
+  <line x1="10" y1="70" x2="90" y2="70" stroke="black" stroke-width="3" />
+  <polygon points="120,10 190,10 155,50" fill="seagreen" />
+  <path d="M 120 100 L 190 100 L 155 60 Z" fill="none" stroke="purple" stroke-width="3" />
+  <text x="10" y="110" font-size="14">Hello SVG</text>
+</svg>
+```
+
+A `rect` is placed by its top left corner, and `rx` rounds the corners off. A
+`line` gets the two ends it runs between, and it needs a `stroke`: a line has no
+inside, so a fill has nothing to color and the line stays invisible. A `polygon`
+takes a list of `points` and closes the shape for you.
+
+`path` is the shape that can draw anything, and its `d` attribute is a little
+language of its own. `M 120 100` moves the pen to a point without drawing,
+`L 190 100` draws a straight line to the next point, and `Z` closes the shape
+back to where the `M` started. Those three letters already give you every
+triangle and every zigzag.
+
+`text` puts letters on the drawing. Its `y` is the baseline, the line the
+letters sit on, so `y="110"` means the bottom of the letters is at 110, not the
+top.
+
+Two attributes decide how a shape looks: `fill` colors the inside, `stroke`
+colors the outline, and `stroke-width` says how thick that outline is. A shape
+with no `fill` attribute is filled black, and one with no `stroke` has no
+outline at all.
+
+Shapes that belong together go into a `g`, a group. Attributes on the group
+count for everything inside it, which saves repeating the same `fill` on eight
+dots:
+
+```html
+<g fill="black">
+  <circle cx="40" cy="40" r="7" />
+  <circle cx="90" cy="40" r="7" />
+</g>
+```
+
+There are more shapes than these, and far more attributes.
+[MDN's SVG element reference](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element)
+lists every one of them with an example. Keep that page open while you draw.
+
+## A picture in its own file {#sec-svg-by-hand-file}
+
+An SVG drawing does not need a page around it. Create a file `rings.svg` in the
+`assets/` folder of your project, and put the rings in it with one extra
+attribute on the `<svg>` tag:
+
+```html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" role="img" aria-label="The five Olympic rings">
+  <circle cx="100" cy="100" r="40" fill="none" stroke="blue" stroke-width="5" />
+  <!-- the other four circles, exactly as in your page -->
+</svg>
+```
+
+Inside an HTML page, the `<svg>` tag itself tells the browser that the tags
+inside it are shapes. A file on its own gets no such hint, and `circle` could
+mean anything. The attribute `xmlns="http://www.w3.org/2000/svg"` names the
+vocabulary the tags come from. Leave it out of a stand-alone file and the
+browser shows you text or an error instead of a picture.
+
+Open `http://localhost:5173/assets/rings.svg` in a browser tab and the rings
+appear on their own, with no HTML anywhere. The same file opens in a drawing
+program such as Inkscape, because SVG is a standard that everybody reads.
+
+To get the file onto your page, use it like any other image:
+
+```html
+<img src="/assets/rings.svg" alt="The five Olympic rings" width="400">
+```
+
+Now try to color the shapes from CSS. Put this into `src/styles.css` and import
+the stylesheet from `src/index.ts` with `import './styles.css';`:
+
+```css
+circle:hover {
+  fill: tomato;
+}
+```
+
+Hover the outline of a ring you wrote into `index.html`, the thin line itself,
+and the ring fills with red. Hover the rings inside the `<img>` and nothing
+happens. To the page that `<img>` is one picture, and its shapes sit in another
+file, outside this page's DOM. Written inline, every shape is in the DOM, so CSS
+selectors reach it and from the next chapter on your TypeScript does too. That
+is why the rest of this part writes SVG inline.
+
+::: {.research title="Curves, line ends, and centered text"}
+The smiley in the exercise below needs a curved mouth, and the `L` command only
+draws straight lines. The domino next to it needs a label that stays centered
+under the tile.
+
+1. The `A` command of a `path` takes seven numbers, as in
+   `A 55 45 0 0 0 145 115`. What does each number mean? Name at least the two
+   radii, the large-arc flag, the sweep flag, and the end point.
+2. What does `stroke-linecap="round"` change about a `<line>`, and what do the
+   line's ends look like without it?
+3. What does `text-anchor="middle"` do to a `<text>` element, measured against
+   its `x`?
+
+The two flags of `A` and `text-anchor` are exam material: the exam has no
+internet and no AI next to you.
+:::
+
+## Exercise: smiley and domino {#sec-svg-by-hand-exercise}
+
+Year one's smiley comes back, this time written as tags, and a domino tile
+stands next to it. Everything is hand-written SVG in `index.html`, so there is
+no TypeScript in this exercise beyond one import.
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template inside `homework/` of your course repository, call the folder
+   `smiley-domino`, and run `npm install` and `npm start`.
+2. Replace both lines in `src/index.ts` with `import './styles.css';`, and
+   create an empty `src/styles.css` next to it.
+3. In `index.html`, replace the `<h1>` line with an `<svg>` that has
+   `viewBox="0 0 200 200"`, `width="200"`, `role="img"`, an `aria-label` of
+   `A smiley face`, and one `circle` for the face: `cx="100"`, `cy="100"`,
+   `r="90"`, `fill="gold"`, `stroke="black"`, `stroke-width="5"`. Keep the
+   `<script>` line at the end of the body. Expected result: a big gold face.
+4. Add the eyes: two circles with `r="8"` and `fill="black"`, both at
+   `cy="75"`, one at `cx="70"` and one at `cx="130"`. Give both of them
+   `class="eye"`.
+5. Add the mouth as a `path` with `fill="none"`, `stroke="black"`, and
+   `stroke-width="5"`. Its `d` starts at `M 55 115` and then uses one `A`
+   command with the radii 55 and 45 to reach the end point `145 115`. Choose
+   the three numbers in between so the mouth smiles, which means it bulges
+   downward. Expected result: a friendly face. Flip the sweep flag once, save,
+   and watch the smiley turn sad.
+6. Below the first drawing, start a second `<svg>` for the domino, with
+   `viewBox="0 0 120 230"`, `width="120"`, and an `aria-label` of its own next
+   to `role="img"`. Draw the tile as a `rect` at `x="10"`, `y="10"`, with
+   `width="100"`, `height="190"`, `rx="12"`, `fill="white"`, `stroke="black"`,
+   and `stroke-width="4"`. Expected result: an upright tile with rounded
+   corners.
+7. Divide the tile with a `line` from `10,105` to `110,105`, in black and
+   `stroke-width="4"`.
+8. Put the dots in. Every dot is a circle with `r="7"`, and all of them go into
+   one `g` with `fill="black"` so no dot repeats the color. The top half shows
+   3: three dots on a diagonal running from the upper left to the lower right.
+   The bottom half shows 5: one dot in each corner of that half and one in the
+   middle. Work out the coordinates yourself, and keep every dot at least 10
+   units away from the border and from the dividing line.
+9. Label the tile with a `text` element under it, at `x="60"` and `y="222"`,
+   with `font-size="16"` and `text-anchor="middle"`, reading `3 : 5`. Expected
+   result: the label sits centered below the tile. Delete the `text-anchor`
+   attribute once and watch the label slide to the right.
+10. In `src/styles.css`, make the eyes react to the mouse: a rule for `.eye`
+    with `:hover` that sets `fill` to `royalblue`. Expected result: pointing at
+    an eye turns it blue, and the rest of the face stays as it is.
+11. Optional: put the two drawings side by side. `body { display: flex; gap:
+    2rem; align-items: flex-start; }` in your stylesheet is enough.
+12. Run `npm run check`. If Biome complains that an alternative text title
+    element cannot be empty, one of your two drawings is missing its
+    `role="img"` and `aria-label`.
+
+## Check your understanding {#sec-svg-by-hand-quiz}
+
+Six short questions, and the first three are the research questions from above.
+
+{{< quiz svg-by-hand title="SVG by hand" >}}

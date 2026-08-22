@@ -1,0 +1,367 @@
+---
+title: "Animation with requestAnimationFrame"
+---
+
+Every SVG you have drawn so far holds still. The shapes appear, and there they
+stay until a click or a redraw changes them. Year one already had moving
+pictures: a ball crossing the p5.js canvas, bouncing off the walls forever.
+The browser can do the same thing without p5.js, and the whole trick is one
+function.
+
+## A circle that slides away {#sec-animation-slide}
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template inside `coursework/` of your course repository, call the folder
+   `animation-experiment`, and run `npm install`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Slide</h1>
+   <svg id="stage" viewBox="0 0 400 120" width="400" height="120" role="img" aria-label="A sliding circle">
+     <circle id="ball" cx="20" cy="60" r="20" fill="tomato" />
+   </svg>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Replace everything in `src/index.ts` with this:
+
+   ```ts
+   const ball = document.querySelector<SVGCircleElement>('#ball');
+
+   if (!ball) {
+     throw new Error('The stage has no ball');
+   }
+
+   let x = 20;
+
+   const tick = () => {
+     x += 2;
+     ball.setAttribute('cx', String(x));
+     requestAnimationFrame(tick);
+   };
+
+   requestAnimationFrame(tick);
+   ```
+
+4. Run `npm start`.
+
+The circle glides to the right. It reaches the edge of the stage and keeps
+going, and because the SVG cuts off everything outside its box, you watch the
+ball slip out of the picture. Nothing has stopped, though. `tick` is still
+running 60 times a second, and `x` is somewhere past 4000 by the time you read
+this sentence.
+
+## The bounce {#sec-animation-bounce}
+
+Year one's ball turned around at the wall by flipping the sign of its
+direction, and that idea moves over unchanged. Give the direction its own
+variable and name the two numbers that describe the stage. Then check the wall
+before you write the attribute:
+
+```ts
+const WIDTH = 400;
+const R = 20;
+
+let x = 20;
+let dx = 2;
+
+const tick = () => {
+  x += dx;
+  if (x > WIDTH - R || x < R) {
+    dx = -dx;
+  }
+  ball.setAttribute('cx', String(x));
+  requestAnimationFrame(tick);
+};
+```
+
+The ball now runs between the two walls and never leaves. The condition
+compares against `WIDTH - R` and `R` rather than `WIDTH` and 0, so the ball's
+edge touches the wall instead of its center sinking into it.
+
+## You ask for each frame yourself {#sec-animation-loop}
+
+p5.js hid the loop from you. You wrote a function called `draw` and p5.js
+called it about 60 times a second, and the machinery that did the calling was
+never on your screen.
+
+`requestAnimationFrame` turns that around. You hand it a function, and the
+browser calls that function exactly once, right before it paints the next
+frame. Once, and then it forgets you. Another frame means another request,
+which is why the last line inside `tick` is another
+`requestAnimationFrame(tick)`. Every frame books the next one. Delete that
+line and the ball moves two pixels and stops, with no error and no warning,
+because a single frame is a perfectly legal thing to ask for.
+
+The values that survive between frames live in `let` variables outside the
+function. `x` and `dx` work exactly like the count in a click counter: the
+function forgets everything when it returns, the variables do not.
+
+A `while (true)` loop would look simpler, and it would freeze the page. Your
+code and the browser's painting take turns on one thread, so a loop that never
+returns never lets the browser paint.
+
+## Frames are not all the same length {#sec-animation-delta}
+
+`x += 2` means two pixels per frame. On a 60 Hz screen that adds up to 120
+pixels per second, on a 144 Hz gaming monitor to 288, and on a busy machine to
+whatever the browser manages. Speed in pixels per frame is speed you cannot
+predict.
+
+The browser passes your function one number, a reading from its own clock.
+Keep the previous reading in a variable and subtract, and you know how long
+the last frame really took. Then you can name the speed in pixels per second
+and let the arithmetic handle the frame rate:
+
+```ts
+const SPEED = 150;
+
+let lastTime = 0;
+
+const tick = (timestamp: number) => {
+  if (lastTime === 0) {
+    lastTime = timestamp;
+  }
+  const deltaSeconds = (timestamp - lastTime) / 1000;
+  lastTime = timestamp;
+
+  x += SPEED * dx * deltaSeconds;
+  ball.setAttribute('cx', String(x));
+  requestAnimationFrame(tick);
+};
+```
+
+`deltaSeconds` is the length of the frame that just went by. With `dx` holding
+1 or -1 it now carries only the direction, and `SPEED` carries the speed. The
+very first frame has no frame before it, so the guard sets `lastTime` to the
+current reading and that frame moves the ball by nothing.
+
+## Stopping the animation {#sec-animation-stop}
+
+The simplest way to stop the chain is a flag the loop checks before it books
+the next frame:
+
+```ts
+let running = true;
+
+const tick = () => {
+  // ... move the ball ...
+  if (running) {
+    requestAnimationFrame(tick);
+  }
+};
+```
+
+Set `running` to `false` and the animation ends after the current frame,
+because nothing asks for another one. Starting again means calling
+`requestAnimationFrame(tick)` once, and once only: two chains running side by
+side move the ball twice per frame.
+
+The browser also lets you call off a frame you have already booked, with
+`cancelAnimationFrame`. What that function needs to know is research question
+2 below.
+
+## Moving a shape without touching `cx` {#sec-animation-transform}
+
+Writing `cx` works for a circle. A rectangle would need `x` and `y`, and a
+`<g>` group has no position attributes at all. The `transform` attribute moves
+any of them:
+
+```ts
+ball.setAttribute('transform', `translate(${x} 0)`);
+```
+
+`translate(x y)` shifts the element away from where its own attributes put it,
+so the circle stays at `cx="20"` and the transform decides where it appears.
+For a group that is the only way to move all its children at once.
+
+`transform` can turn a shape as well, with `rotate`. A rotation always needs a
+point to turn around, and choosing that point is research question 3.
+
+## Code or CSS {#sec-animation-css}
+
+Not every moving thing needs a loop. You already met `transition` in the
+layout chapter: it animates a change that something else makes, such as a
+`:hover` rule or a class your code adds. For motion that just runs by itself,
+CSS has `@keyframes` and the `animation` property:
+
+```css
+.beacon {
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+```
+
+The `@keyframes` rule describes what the animation looks like at points along
+its way, and the `animation` line names the rule, the length of one round, and
+the number of repeats. The browser fills in everything between the steps.
+
+Use CSS when the motion simply plays, such as a pulse or a spinner. Use
+`requestAnimationFrame` when the motion depends on state or input, because a
+`@keyframes` rule cannot ask where the wall is or which key the player is
+holding down.
+
+::: {.research title="What the browser hands you, and what it takes back"}
+The two exercises below need four answers this chapter does not give. Without
+them you cannot stop an animation cleanly, restart it without a jump, write a
+`@keyframes` rule of your own, or turn a clock hand around the middle of its
+face.
+
+1. `requestAnimationFrame` calls your function with one number. What does that
+   number measure, and does it keep counting while you are not asking for
+   frames?
+2. `cancelAnimationFrame` takes one argument. What is it, and where in your
+   code do you get hold of that value?
+3. The SVG attribute `transform="rotate(...)"` accepts either one number or
+   three. What do the second and third numbers stand for, and which point does
+   the browser turn around when you write only the first?
+4. A `@keyframes` rule lists the steps of an animation. What is the smallest
+   number of steps a useful rule needs, and which two keywords can stand in
+   for `0%` and `100%`?
+
+The `rotate` question comes back in every exam task that turns something, so
+that one has to work without looking it up.
+:::
+
+## Exercise: a bouncing ball {#sec-animation-ball}
+
+Year one's diagonal ball, rebuilt in SVG and with a Start/Stop button.
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template inside `coursework/` of your course repository, run `npm install`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Bouncing ball</h1>
+
+   <svg id="stage" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="A bouncing ball">
+     <circle id="ball" cx="60" cy="60" r="20" fill="tomato" />
+   </svg>
+
+   <p>
+     <button id="toggleButton" type="button">Start</button>
+   </p>
+
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Create `src/styles.css` and give `#stage` a white background and a solid
+   border, so you can see the walls. Replace everything in `src/index.ts` with
+   `import './styles.css';`. Run `npm start`: one red ball sits in the corner
+   of a bordered box.
+4. Select the circle with `document.querySelector<SVGCircleElement>` and the
+   button with `document.querySelector<HTMLButtonElement>`, and throw an error
+   when either one is missing.
+5. Add the constants `WIDTH`, `HEIGHT`, and `R`, one more for the speed in
+   pixels per second, and the `let` variables `x`, `y`, `dx`, `dy`, and
+   `lastTime`. Give `dx` and `dy` the value 1, so they carry only the
+   direction.
+6. Write `const tick = (timestamp: number) => { ... };` that computes
+   `deltaSeconds` the way this chapter shows, moves `x` and `y`, and writes
+   both `cx` and `cy` with `setAttribute`. End it with
+   `requestAnimationFrame(tick)`.
+7. Bounce off all four walls with two separate `if` statements: one for the
+   side walls that flips `dx`, one for the top and bottom that flips `dy`.
+   Merged into one condition, a touch of the side wall would flip the vertical
+   direction too, and the ball would stagger along the edge.
+8. Start the animation with one `requestAnimationFrame(tick)` at the end of
+   the file. The ball travels diagonally and leaves every wall at the mirrored
+   angle.
+9. Now the button takes over, so delete that start call again. Keep the id of
+   the booked frame in a `let` variable that begins at 0, and let 0 mean "not
+   running", because the browser never hands out 0 as a frame id. The button's
+   `click` listener starts the chain when the variable is 0 and calls
+   `cancelAnimationFrame` otherwise, and it swaps the button's `textContent`
+   between `Start` and `Stop`.
+10. Test the restart. The ball jumps right across the box on the first frame
+    after a pause, because the browser's clock kept running while your
+    animation did not. Set `lastTime` back to 0 on every start.
+11. While the ball moves it should breathe. In `src/styles.css`, write a
+    `@keyframes` rule named `pulse` with two steps, from full opacity to about
+    `0.4`, and a rule `#ball.moving` that plays it with
+    `animation: pulse 0.8s infinite alternate;`. The click listener adds the
+    class `moving` on start and removes it on stop.
+
+### Optional: a speed slider {#sec-animation-ball-slider}
+
+1. Add a slider under the button in `index.html`:
+
+   ```html
+   <p>
+     <label for="speedRange">Speed</label>
+     <input id="speedRange" type="range" min="20" max="600" step="10" value="150">
+   </p>
+   ```
+
+2. Turn your speed constant into a `let` variable and give it the slider's
+   `valueAsNumber` as its starting value.
+3. Give the slider an `input` listener that writes `speedRange.valueAsNumber`
+   into that variable. Drag the slider while the ball flies: the ball speeds
+   up and slows down under your finger, and it never changes direction,
+   because the sign lives in `dx` and `dy`.
+
+## Exercise: a clock {#sec-animation-clock}
+
+{{< exercise svg-clock >}}
+
+The `index.html` you copied holds a 200 by 200 SVG with a face, 12 marks
+around it, and three hands drawn as `<line>` elements with the ids `hourHand`,
+`minuteHand`, and `secondHand`. All three point straight up at 12, and the
+middle of the face sits at 100, 100 in the SVG's coordinate system.
+
+1. Replace everything in `src/index.ts` with `import './styles.css';` and run
+   `npm start`. You see a clock face whose three hands all point at 12.
+2. Select the three hands with `document.querySelector<SVGLineElement>` and
+   throw an error when one of them is missing.
+3. Write `const update = () => { ... };`. Inside it, read the current time
+   with `const now = new Date();` and pull the three numbers you need out of
+   it with `now.getHours()`, `now.getMinutes()`, and `now.getSeconds()`.
+4. Turn each number into an angle in degrees, measured clockwise from 12:
+
+   * the second hand: `seconds * 6`, because a full turn is 360 degrees and a
+     minute has 60 seconds;
+   * the minute hand: `minutes * 6 + seconds * 0.1`, so the hand creeps
+     forward during the minute instead of jumping;
+   * the hour hand: `(hours % 12) * 30 + minutes * 0.5`. The `% 12` folds
+     afternoon hours back onto the face, and the minutes carry the hand from
+     one hour mark towards the next.
+5. Give each hand a `transform` attribute that rotates it by its angle around
+   the middle of the face. Question 3 of the research task tells you how to
+   name that point. Reload the page: the clock shows the current time.
+6. Call `update` from a `requestAnimationFrame` loop, the same shape as the
+   ball's `tick`. The second hand still jumps once per second, even though
+   your code now recomputes the angles 60 times a second. Three `setAttribute`
+   calls per frame with values the browser already has cost almost nothing,
+   and the next step pays them back.
+
+### Optional: a smooth second hand {#sec-animation-clock-smooth}
+
+`now.getMilliseconds()` gives you the part of the second that has passed. Add
+it to your seconds value as a fraction of a second before you compute the
+angle, and the second hand sweeps instead of ticking. That sweep is what the
+loop bought you, because one update per second leaves nothing to glide
+between.
+
+## Check your understanding {#sec-animation-quiz}
+
+Six short questions, four of them the research task. If a research question is
+still open, look it up first and come back.
+
+{{< quiz animation title="Animation" >}}

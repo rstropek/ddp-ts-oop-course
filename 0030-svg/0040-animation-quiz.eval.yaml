@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the animation chapter quiz
+# (0030-svg/0040-animation.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz. Teacher-only test data;
+# never publish as an activity. Grading runs on the quiz's own small model
+# (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run it after rubric changes, not
+# routinely.
+
+id: animation-quiz-eval
+target: ./0040-animation-quiz.yaml
+
+questions:
+  - question: research-timestamp
+    answers:
+      - expect: correct
+        answer: |
+          it is the time since the page was loaded, in milliseconds. that
+          clock never stops, so it also runs on while my animation is paused.
+      # Knows it is a time, thinks it is the frame duration.
+      - expect: partial
+        answer: |
+          it is a time value, i think it tells you how long the last frame
+          took
+      - expect: incorrect
+        answer: |
+          it counts the frames, so the first call gets 1, the next one 2
+
+  - question: research-cancel
+    answers:
+      - expect: correct
+        answer: |
+          the id number that requestAnimationFrame gave back when i booked the
+          frame. i save it in a let variable and pass that.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          die id, die requestAnimationFrame zurueckliefert. man speichert sie
+          in einer variable und uebergibt sie dann.
+      # Right thing, no idea where it comes from.
+      - expect: partial
+        answer: |
+          you pass a number, the id of the animation
+      - expect: incorrect
+        answer: |
+          you pass the tick function again so the browser knows which one to
+          stop
+
+  - question: research-rotate-center
+    answers:
+      - expect: correct
+        answer: |
+          they are the x and y of the point it turns around. with only the
+          angle it turns around 0 0, the top left corner.
+      # Center right, default wrong.
+      - expect: partial
+        answer: |
+          x and y of the rotation center. if you leave them out it spins
+          around the middle of the shape.
+      - expect: incorrect
+        answer: |
+          the second and third number are how far it moves in x and y while
+          it turns
+
+  - question: research-keyframes-steps
+    answers:
+      - expect: correct
+        answer: |
+          two steps are enough, a start and an end. you can write from instead
+          of 0% and to instead of 100%.
+      # Keywords right, count missing.
+      - expect: partial
+        answer: |
+          you can use from and to
+      - expect: incorrect
+        answer: |
+          you need at least three steps and the keywords are start and end
+
+  - question: one-frame-only
+    answers:
+      - expect: correct
+        answer: |
+          the ball hops 2 pixels once and then stays there. tick never calls
+          requestAnimationFrame again so no next frame is booked.
+      # Sees the bug, does not say what happens on screen.
+      - expect: partial
+        answer: |
+          he forgot requestAnimationFrame(tick) at the end of tick
+      - expect: incorrect
+        answer: |
+          the ball slides across the page like he wanted, the code is fine
+
+  - question: why-delta-time
+    answers:
+      - expect: correct
+        answer: |
+          on a 144hz monitor the frames come more often, so x += 3 makes the
+          ball much faster. the delta time one still moves the same pixels per
+          second, that is the right one.
+      # Situation there, no verdict.
+      - expect: partial
+        answer: |
+          if the computer is slow and drops frames the two look different
+      - expect: incorrect
+        answer: |
+          they are always the same because a frame is always 16 ms

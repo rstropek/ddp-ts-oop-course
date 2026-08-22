@@ -1,0 +1,167 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "A picture made of text"
+# (0030-svg/0010-svg-by-hand.qmd). The first three questions are the chapter's
+# research-box questions.
+
+id: svg-by-hand-quiz
+name: "Quiz: A picture made of text"
+title: "Check your understanding: SVG by hand"
+description: |
+  Six short questions about the chapter *A picture made of text*. Answer in
+  your own words. There are no answer options to pick from, and this quiz is
+  anonymous: it's here for you, so you can see what you already understand
+  and what you should read again. One or two sentences are enough for most
+  answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml" # repo root, resolves on GitHub and locally
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="M 55 115 L 145 115"
+      scope="after the first SVG chapter"
+      reveal=false
+      knows=(array
+        "hand-written SVG inside index.html: `svg`, `viewBox`, `circle`, `rect`, `line`, `polygon`, `path` with M, L and Z, `text`, `g`"
+        "`fill`, `stroke`, and `stroke-width` as attributes on a shape"
+        "the SVG coordinate system, y growing downward, and `width` scaling the whole drawing"
+        "an SVG as a stand-alone file with `xmlns`, shown with `<img>`, against inline SVG in the page"
+        "CSS selectors including `:hover`, and `src/styles.css` imported from `src/index.ts`"
+        "HTML elements, attributes, ids, and the DOM as a tree of objects from Part 2"
+        "p5.js drawing from year one: `circle`, `rect`, `line`, `arc`, `fill`, `stroke`"
+        "arrays, loops, `if`, and functions from year one")
+      not_yet=(array
+        "building SVG elements from TypeScript with `createElementNS`"
+        "classes, `this`, and inheritance"
+        "animation and `requestAnimationFrame`"
+        "automated tests with Vitest or Playwright"
+        "`fetch`, `async`, and `localStorage`")}}
+
+questions:
+  - id: research-arc-command
+    title: "The seven numbers of A"
+    question: |
+      A `path` can curve with the `A` command, as in
+      `A 55 45 0 0 0 145 115`. The command takes seven numbers. What does each
+      of them mean? Name at least the two radii, the large-arc flag, the sweep
+      flag, and the end point.
+    evaluation: |
+      Expected: in order, the two radii of the ellipse the arc is cut from
+      (rx and ry), the rotation of that ellipse in degrees, the large-arc flag
+      (0 takes the shorter of the two possible arcs, 1 the longer one), the
+      sweep flag (which of the two directions the arc runs in, so which side it
+      bulges to), and the x and y of the point the arc ends at.
+      Required: 1) the first two numbers are the radii; 2) the large-arc flag
+      picks the short or the long arc; 3) the sweep flag picks the direction or
+      the side it curves to; 4) the last two numbers are the end point.
+      Partial: three of those four, for example both flags described but the
+      last two numbers called something else.
+      Incorrect: fewer than two right, or the first two numbers called a start
+      point.
+
+  - id: research-stroke-linecap
+    title: "The ends of a line"
+    question: |
+      What does `stroke-linecap="round"` change about a `<line>`, and what do
+      the line's ends look like without it?
+    evaluation: |
+      Expected: `round` puts a half circle on each end, so the line ends in a
+      rounded cap that sticks out by half the stroke width. Without it the
+      default is `butt`, which cuts the line off flat exactly at its end point.
+      Required: 1) rounded ends with `round`; 2) flat or square-cut ends by
+      default (naming `butt` is a plus, not a must).
+      Partial: only the rounded ends, with nothing about the default.
+      Incorrect: says it rounds the corners of a shape, or that it changes the
+      line's color or thickness.
+
+  - id: research-text-anchor
+    title: "Centering a label"
+    question: |
+      A `<text>` element has `x="60"` and `text-anchor="middle"`. What does
+      `text-anchor="middle"` do with the text, measured against that `x`?
+    evaluation: |
+      Expected: the text is centered on `x`, so 60 is the middle of the line of
+      text and it grows equally to the left and to the right. Without it the
+      default is `start`, where `x` is where the text begins.
+      Required: `x` marks the middle of the text instead of its start.
+      Partial: says it centers the text but claims it centers it in the whole
+      drawing rather than on `x`.
+      Incorrect: says it centers the text vertically, or that it has anything
+      to do with `y` or the baseline.
+
+  - id: rect-position
+    title: "Where the rectangle lands"
+    question: |
+      A drawing contains this:
+
+      ```html
+      <svg viewBox="0 0 100 100" width="100" role="img" aria-label="One rectangle">
+        <rect x="60" y="10" width="30" height="20" fill="teal" />
+      </svg>
+      ```
+
+      Whereabouts in the square drawing does the rectangle appear, and how big
+      is it compared with the whole drawing?
+    evaluation: |
+      Expected: near the top right corner, because `x` and `y` are the top left
+      corner of the rectangle and y counts downward from the top of the
+      drawing. It is 30 of 100 units wide and 20 of 100 tall, so it covers
+      about a third of the width and a fifth of the height.
+      Required: 1) top right area; 2) a size roughly stated as a share of the
+      drawing (30 by 20 out of 100 by 100 counts).
+      Partial: the right corner named with nothing about the size, or the size
+      right and the corner wrong.
+      Incorrect: bottom right or bottom left, which reads the y axis upside
+      down.
+
+  - id: line-needs-stroke
+    title: "The invisible line"
+    question: |
+      This line is in the drawing, but the page shows nothing at all:
+
+      ```html
+      <line x1="10" y1="70" x2="90" y2="70" fill="black" />
+      ```
+
+      Why does it stay invisible, and what turns it into a visible line?
+    evaluation: |
+      Expected: `fill` colors the inside of a shape and a line has no inside,
+      so the fill paints nothing. A line is drawn by its outline, so it needs
+      `stroke` (and a `stroke-width`), for example
+      `stroke="black" stroke-width="3"`.
+      Required: 1) fill does nothing on a line because a line has no inside or
+      area; 2) adding `stroke` makes it show.
+      Partial: only "you have to add stroke", with no reason why `fill` does
+      nothing.
+      Incorrect: blames the coordinates, or says a `line` needs a `path`
+      instead.
+
+  - id: imperative-vs-declarative
+    title: "Two ways to draw rings"
+    question: |
+      Last year you drew the Olympic rings with p5.js commands, and in this
+      chapter you drew them again as SVG elements. One way is called
+      imperative, the other declarative. Say in one sentence each what those
+      two words mean here.
+    evaluation: |
+      Expected: imperative means you write the steps in the order the machine
+      carries them out, as the p5.js code does with `stroke` and `circle` calls
+      one after another. Declarative means you describe what should be there,
+      as the five `circle` elements with their attributes do, and the browser
+      works out how to paint it.
+      Required: 1) imperative as steps or commands in order; 2) declarative as
+      a description of the result, with the machine doing the how.
+      Partial: one of the two explained, or both named the right way round with
+      no explanation.
+      Incorrect: the two words swapped, or explained as "with code" against
+      "without code".
