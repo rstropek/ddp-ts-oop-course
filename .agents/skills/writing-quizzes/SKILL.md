@@ -121,34 +121,32 @@ on each other), `question_count` (chapter quizzes ask everything).
 
 ## Rubric (`evaluation`) template
 
-Slim, one shape for every question:
+Year two grades with a frontier judge (`gpt-5.6-terra` on Azure Foundry,
+`reasoning: low`; `gpt-5.4-mini` where cost matters). Everything generic
+about verdicts lives ONCE in `ddp-quiz-fragments.yaml` (what `partial`
+means, paraphrases count, no length reward, fail safe, feedback rules), so
+a rubric states only what the judge must verify:
 
 ```
-Expected: <the expected answer, stated ONCE, 2-3 lines. Questions with a
-literal result (an array, a number, a line of code) state the exact value.>
-
-- `correct`   - <the boundary, concretely: which elements must be present>
-- `partial`   - <the typical half-right answer — be concrete HERE; this is
-                where a small judge model wobbles>
-- `incorrect` - anything else<, plus at most one classic misconception>.
-
-Feedback: <ONE question-specific hint, e.g. "if the student wrote radius,
-name the exact word: diameter">
+Expected: <the expected answer, stated ONCE, 1-3 lines; literal results
+stay literal (a value, a line of code)>.
+Required: <the aspects the student must state, numbered when more than
+one>.
+<optional> Partial: <one specific half-right answer worth naming>.
+<optional> Incorrect: <at most one classic misconception>.
 ```
 
-Write verdict bullets as procedures a human marker would perform ("says the
-background is painted after the circle"), never adjectives ("shows good
-understanding"), and list accepted everyday paraphrases where students will
-use them ("size" counts for diameter) — synonym handling is where small
-judge models fail most. Do not restate the expected answer inside verdict
-bullets, do not add generic tone rules (the shared preamble and the app's
-grading frame already demand encouraging feedback in simple English, forbid
-rewarding length, and make uncertain verdicts fail safe), and do not exceed
-~12 lines. The
-rubric is server-only and never reaches the browser — it may state answers
-freely. The discussion agent never sees it; the shared preamble already tells
-the grader to state the correct answer in feedback when the verdict isn't
-`correct` (that feedback is the only channel into the discussion chat).
+Technical correctness is the whole rubric. No paraphrase lists, no
+procedural verdict bullets, no per-question feedback wording, no tone rules;
+the frontier judge and the shared preamble handle those. Stay under ~8
+lines. The rubric is server-only and may state answers freely.
+
+Research quizzes (the ones a `::: {.research quiz=...}` box links to) add
+`{{fragment "shared.research_context"}}` to `instructions:` and pass
+`reveal=false` to `discussion_frame`, so feedback and chat send the student
+to the source instead of revealing the answer. Their rubrics are the same
+shape; the only research-specific content is the question itself.
+
 
 ## Images in questions
 
@@ -210,41 +208,29 @@ One per book part, e.g. `0010-introduction/introduction-quiz.yaml`:
 
 ## Golden-answer evals
 
-Treat the paired `<chapter>-quiz.eval.yaml` as part of the quiz, not as an
-optional afterthought. Its synthetic student answers pin down what `correct`,
-`partial`, and `incorrect` mean so rubric improvements cannot silently break a
-previous boundary.
+Treat the paired `<chapter>-quiz.eval.yaml` as part of the quiz. Its
+synthetic student answers pin down what `correct`, `partial`, and
+`incorrect` mean so rubric changes cannot silently move a boundary.
 
-- Create or update the eval in the same change as its quiz. Cover every new or
-  materially changed question; preserve cases for unchanged questions as
-  regression tests.
-- Model how these students really answer: short fragments, everyday words,
-  lowercase starts, occasional harmless typos, and at least one German answer
-  where the concept can be expressed naturally in German. Do not paste or
-  lightly anonymize a real student's answer; all cases must be synthetic.
-- For each covered question, include a clearly correct answer, each meaningful
-  half-right branch named by the rubric, and a confidently wrong answer. Add
-  adversarial cases where relevant: a terse correct paraphrase, a verbose
-  correct answer padded with irrelevant facts, fluent technical prose with one
-  decisive error, swapped values, or an exact code boundary such as a missing
-  required semicolon.
-- Make cases discriminate between verdicts. An answer copied from `Expected:`
-  proves little; a partial case should closely mirror the rubric's declared
-  boundary, and a wrong case should probe the misconception most likely to be
-  over-graded. Use `expect: [partial, incorrect]` only when both really are
-  defensible, never to hide uncertainty about the rubric.
-- Keep short comments above non-obvious cases explaining the boundary or bias
-  being tested. This makes future rubric changes reviewable.
+- Create or update the eval in the same change as its quiz. Cover every new
+  or materially changed question; keep cases for unchanged questions.
+- Small and discriminating: per question one clearly correct answer, one
+  partial that mirrors the rubric's boundary, one confidently wrong answer.
+  Once per quiz, one correct answer in German. Add a case beyond that only
+  when a real grading failure shows a gap.
+- Write answers the way 16-year-olds type: short, everyday words, lowercase
+  starts. All cases are synthetic; never a real student's answer.
+- Keep a one-line comment above a non-obvious case.
 
-The reference contains the exact skeleton, CLI commands, cost/auth cautions,
-report interpretation, and repair loop. Validation is free and must happen
-whenever the pair changes. Running `eval` calls the real model and spends tokens,
-so validate first and obtain user approval before a large or repeated run.
+Running `eval` calls the frontier judge and costs money: validate first,
+run after a rubric change, never routinely. The reference has the skeleton,
+CLI commands, and report interpretation.
+
 
 ## Publish workflow
 
 Quizzes are served straight from the book's public GitHub repo
-(`rstropek/ddp-ts-p5-beginner-course`); the novedu server re-reads the raw
+(`rstropek/ddp-ts-oop-course`); the novedu server re-reads the raw
 URL on every load, so publishing an edit = `git push`. The CLI runs from the
 novedu repo (`cd ~/github/chat-prototype`, prefix commands with
 `npm run cli --silent --`, and pass ABSOLUTE paths for files in the book

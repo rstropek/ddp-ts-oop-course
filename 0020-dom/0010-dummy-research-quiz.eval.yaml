@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the placeholder research quiz
+# (0020-dom/0010-dummy.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz. Teacher-only test data;
+# never publish as an activity. Runs cost money (frontier judge): run after
+# rubric changes, not routinely.
+
+id: dummy-research-quiz-eval
+target: ./0010-dummy-research-quiz.yaml
+
+questions:
+  - question: return-type
+    answers:
+      - expect: correct
+        answer: |
+          a NodeList
+      # Wrong name, but the idea "not an array, a list of elements" is there.
+      - expect: partial
+        answer: |
+          some kind of list of all the li elements, not a real array
+      - expect: incorrect
+        answer: |
+          an array of HTMLLIElement
+
+  - question: loop
+    answers:
+      - expect: correct
+        answer: |
+          for (const item of items) {...} or items.forEach(item => ...)
+      # German correct answer.
+      - expect: correct
+        answer: |
+          mit for...of oder mit einer normalen for-schleife über items.length
+      # Only one working way.
+      - expect: partial
+        answer: |
+          items.forEach
+      - expect: incorrect
+        answer: |
+          items.map(item => ...) and items.filter(item => ...)
+
+  - question: live-or-static
+    answers:
+      - expect: correct
+        answer: |
+          no, it's a static nodelist, a snapshot from when you called it.
+          the new li isn't in there.
+      # Right answer, missing the static/snapshot aspect.
+      - expect: partial
+        answer: |
+          no
+      - expect: incorrect
+        answer: |
+          yes, the list is live and always shows the current li elements

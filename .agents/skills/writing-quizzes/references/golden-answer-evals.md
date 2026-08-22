@@ -6,9 +6,11 @@ contains a synthetic student answer and the verdict the real grader should
 return. Students never see eval files, the app stores nothing from a run, and an
 eval never gets an activity code.
 
-Use the 0010 Introduction evals as the local quality bar. They go beyond one
-textbook answer per verdict: they test realistic short answers, rubric
-boundaries, language fairness, verbosity bias, and confident misconceptions.
+Year two uses a frontier judge, so the case set is small: one correct, one
+partial, one incorrect per question, plus one German correct answer per quiz
+(see `0020-dom/0010-dummy-research-quiz.eval.yaml`). The larger matrix below
+is kept for reference; reach for a row only when a real grading failure
+shows the gap.
 
 ## File skeleton
 
