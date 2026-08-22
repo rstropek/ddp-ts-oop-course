@@ -2,8 +2,9 @@
 # Golden-answer regression cases for the placeholder research quiz
 # (0020-dom/0010-dummy.qmd). One correct, one partial, one incorrect per
 # question, plus one German correct answer per quiz. Teacher-only test data;
-# never publish as an activity. Runs cost money (frontier judge): run after
-# rubric changes, not routinely.
+# never publish as an activity. Grading runs on the quiz's own small model
+# (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run after rubric changes, not routinely.
 
 id: dummy-research-quiz-eval
 target: ./0010-dummy-research-quiz.yaml

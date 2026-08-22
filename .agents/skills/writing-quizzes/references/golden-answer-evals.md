@@ -6,11 +6,13 @@ contains a synthetic student answer and the verdict the real grader should
 return. Students never see eval files, the app stores nothing from a run, and an
 eval never gets an activity code.
 
-Year two uses a frontier judge, so the case set is small: one correct, one
-partial, one incorrect per question, plus one German correct answer per quiz
-(see `0020-dom/0010-dummy-research-quiz.eval.yaml`). The larger matrix below
-is kept for reference; reach for a row only when a real grading failure
-shows the gap.
+Year two keeps quizzes and evals short: one correct, one partial, one
+incorrect per question, plus one German correct answer per quiz (see
+`0020-dom/0010-dummy-research-quiz.eval.yaml`). Grading runs on the small
+model the students get; the eval shows where that model grades wrong, and
+that is the basis, and the only basis, for adding context to a question's
+rubric. The larger matrix below is kept for reference; reach for a row only
+when a real grading failure shows the gap.
 
 ## File skeleton
 

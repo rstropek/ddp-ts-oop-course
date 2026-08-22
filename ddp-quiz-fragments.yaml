@@ -7,11 +7,13 @@
 #                                a research quiz)
 #   discussion.instructions: -> {{fragment "shared.discussion_frame" ...}}
 #
-# Year two grades with a frontier judge, so everything generic about verdicts
-# (what partial means, paraphrases count, no length reward) is said ONCE here
-# and the per-question rubric in a quiz lists only the expected answer and the
-# aspects the student must state. Edit the text here, push, and every quiz
-# serves the new wording immediately (the server re-reads the raw URL).
+# Grading runs on a small model (Qwen 3.8 27B on SCCH). Everything generic
+# about verdicts (what partial means, paraphrases count, no length reward) is
+# said ONCE here; the per-question rubric in a quiz lists only the expected
+# answer and the aspects the student must state, and grows only when its
+# golden-answer eval shows the small grader needs more. Edit the text here,
+# push, and every quiz serves the new wording immediately (the server
+# re-reads the raw URL).
 #
 # Keep this library minimal — a broken fragment fails ALL quizzes at once.
 # Validate the library AND a couple of quizzes after every edit here:

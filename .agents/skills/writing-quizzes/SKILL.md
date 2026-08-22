@@ -121,11 +121,10 @@ on each other), `question_count` (chapter quizzes ask everything).
 
 ## Rubric (`evaluation`) template
 
-Year two grades with a frontier judge (`gpt-5.6-terra` on Azure Foundry,
-`reasoning: low`; `gpt-5.4-mini` where cost matters). Everything generic
-about verdicts lives ONCE in `ddp-quiz-fragments.yaml` (what `partial`
-means, paraphrases count, no length reward, fail safe, feedback rules), so
-a rubric states only what the judge must verify:
+Grading runs on a small model (`Qwen/Qwen3.8-27B-FP8` on SCCH, free).
+Everything generic about verdicts lives ONCE in `ddp-quiz-fragments.yaml`
+(what `partial` means, paraphrases count, no length reward, fail safe,
+feedback rules), so a rubric starts with only what the grader must verify:
 
 ```
 Expected: <the expected answer, stated ONCE, 1-3 lines; literal results
@@ -136,10 +135,13 @@ one>.
 <optional> Incorrect: <at most one classic misconception>.
 ```
 
-Technical correctness is the whole rubric. No paraphrase lists, no
-procedural verdict bullets, no per-question feedback wording, no tone rules;
-the frontier judge and the shared preamble handle those. Stay under ~8
-lines. The rubric is server-only and may state answers freely.
+Technical correctness is the whole rubric. Start WITHOUT paraphrase lists,
+procedural verdict bullets, per-question feedback wording, or tone rules.
+Then run the golden-answer eval: where the small grader gets a case wrong,
+add the one line that fixes it (an accepted paraphrase, a sharper `partial`
+boundary, the literal value) and nothing more. A rubric grows only on
+evidence from its eval. Stay under ~8 lines unless evals forced more. The
+rubric is server-only and may state answers freely.
 
 Research quizzes (the ones a `::: {.research quiz=...}` box links to) add
 `{{fragment "shared.research_context"}}` to `instructions:` and pass
@@ -222,9 +224,13 @@ synthetic student answers pin down what `correct`, `partial`, and
   starts. All cases are synthetic; never a real student's answer.
 - Keep a one-line comment above a non-obvious case.
 
-Running `eval` calls the frontier judge and costs money: validate first,
-run after a rubric change, never routinely. The reference has the skeleton,
-CLI commands, and report interpretation.
+Run the eval after writing or changing a quiz. Grading runs on the quiz's
+own small model; the audit of the feedback text uses a frontier judge via
+`--judge-llm-provider "Azure Foundry" --judge-llm-model <frontier model>`
+(costs money, so `--no-judge-feedback` for a verdict-only check). A failing
+case is the trigger, and the only trigger, for adding context to that
+question's rubric. The reference has the skeleton, CLI commands, and report
+interpretation.
 
 
 ## Publish workflow
