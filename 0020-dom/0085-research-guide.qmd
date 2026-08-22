@@ -1,0 +1,75 @@
+---
+title: "Your own research guide"
+---
+
+Six research boxes are behind you. Every one of them ended the same way. You
+picked a source and typed something into it. Then you did something with what
+came back. That is a method, and it is already yours. Most people never write theirs
+down, so it stays a habit they cannot look at and cannot improve. Today you
+write it down.
+
+## Write your research guide {#sec-research-guide-task}
+
+Write your personal research guide in your own words, between 150 and 300
+words. English or German, whichever you think in. Write it in the first person,
+and describe what you actually do rather than what a good student would do. A
+guide that admits you ask an AI first is worth more to you than one that claims
+you open MDN first when you don't.
+
+Answer these while you write:
+
+* Which of the three sources you reach for first, and what makes you switch to
+  another one.
+* When you open MDN Web Docs, and what you do once the page is in front of you.
+* Which AI you actually use. Name it.
+* What you type in each place. One real example you remember beats a rule.
+* How you check something an AI told you before you build on it.
+* What you write down afterwards, and where that note ends up.
+
+The last one carries the most weight. Your exam runs on a computer with no
+internet and no AI, with your own course material allowed, so whatever you
+wrote down in your own words during the year is what walks into that room with
+you.
+
+## How the writing activity works {#sec-research-guide-activity}
+
+The link at the end of this chapter opens a writing activity on novedu, and it
+gives you two panes. You write your guide on one side. On the other side sits
+an AI coach that reads whatever stands in the editor at that moment and talks
+to you about it. It can ask you about a sentence and it can tell you a sentence
+is vague, but it has no way to type into your draft. Every word in the guide
+stays yours.
+
+Write a few sentences, ask the coach what is still unclear, then keep writing.
+When the guide says what you wanted it to say, press Save.
+
+This activity is not anonymous, so your teacher reads what you saved, with your
+name on it. Nobody grades your research habits and there are no points here.
+Your teacher reads the guides to learn how this class really works, and to have
+something concrete to talk about with you in the next lesson.
+
+## There is no correct guide {#sec-research-guide-no-right-answer}
+
+Two people in your class can write guides that contradict each other, and both
+can be good. Your order of sources is yours. How much you lean on an AI is
+yours. The coach will not argue with any of that.
+
+What the coach does instead is push for detail. It quotes your own words back
+at you and asks the question the sentence left open. You write "I just google
+it", and it wants to know what you typed the last time and what you did with
+the first result. One or two questions per turn, and then it is your move
+again.
+
+The coach steps in with a correction in one case, which is a claim in your
+draft that is simply wrong. What MDN is and who writes it, what an AI chat can
+and cannot see, what you are allowed to bring into the exam: those are facts,
+not preferences. The coach says so briefly and then goes back to asking
+questions.
+
+## Keep it {#sec-research-guide-keep}
+
+Save the text, and keep your own copy of it somewhere you will find again. A
+later chapter of this book asks you to open this guide and look at what has
+changed.
+
+{{< writing research-guide title="Your own research guide" >}}

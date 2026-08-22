@@ -34,6 +34,7 @@ book:
         - 0020-dom/0060-creating-elements.qmd
         - 0020-dom/0070-coding-buddy.qmd
         - 0020-dom/0080-selectors.qmd
+        - 0020-dom/0085-research-guide.qmd
         - 0020-dom/0090-git.qmd
         - 0020-dom/0100-layout.qmd
         - 0020-dom/0110-forms.qmd

@@ -28,6 +28,14 @@ activities:
 
   tutors: {}
 
+  # Writing activities: the student drafts a text, an AI coach reads it and
+  # asks questions but cannot edit it. Not anonymous: the teacher reads the
+  # saved texts.
+  writing:
+    research-guide:
+      file: 0020-dom/0085-research-guide-writing.yaml
+      note: "Creative Coding 2 book: Your own research guide (0085), personal research guide reflection — GitHub-hosted"
+
   # One quiz per chapter, keyed by chapter slug. Each quiz also asks the
   # chapter's research-box questions (ids `research-*`).
   quizzes:

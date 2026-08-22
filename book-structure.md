@@ -170,7 +170,19 @@ and names the concept afterwards.
 * Exercise: given a blog page, select and style; then from TypeScript, count
   and toggle all paragraphs with class `highlight`.
 
-### 2.9 Git and your course repository [NEW]
+### 2.9 Your own research guide [NEW, novedu writing activity]
+* Placed after six research boxes. No experiment, no quiz: the chapter is one
+  task. The student writes their personal research guide (150 to 300 words,
+  English or German, first person): when MDN, when a search engine, when an
+  AI and which one, what they type, how they check an AI answer, what they
+  write down for the exam.
+* A novedu **writing** activity (`{{< writing research-guide >}}`) hosts it:
+  draft pane plus a Socratic coach that reads the draft, asks one or two
+  questions per turn, never rewrites, never criticizes personal habits, and
+  corrects only factual errors (what MDN is, what the exam allows). Not
+  anonymous; the teacher reads the saved guides.
+
+### 2.10 Git and your course repository [NEW]
 * Placed here because students now have four small projects worth keeping.
 * The required repo layout (`coursework/`, `homework/`, `projects/`) and why
   a clean repo is part of the grade; the daily loop `add`, `commit`, `push`;
@@ -180,7 +192,7 @@ and names the concept afterwards.
 * Exercise: create the course repo, move the projects so far into it, commit
   and push.
 
-### 2.10 CSS by doing: layout with Flexbox and Grid [NEW; replaces LY's float lesson]
+### 2.11 CSS by doing: layout with Flexbox and Grid [NEW; replaces LY's float lesson]
 * Experiment: eight `div`s, `display: grid`, `repeat(8, 1fr)`; watch them snap
   into a board.
 * Concepts: the box model in one figure; Flexbox for rows and columns (`gap`,
@@ -192,7 +204,7 @@ and names the concept afterwards.
   with condition classes and hover lift [LY 20-weather-dashboard], including
   the optional TypeScript part that cycles the weather classes.
 
-### 2.11 Forms and validation [NEW, prepares the bubble chart exam]
+### 2.12 Forms and validation [NEW, prepares the bubble chart exam]
 * Experiment: a `<form>` with a submit button; watch the page reload; add
   `preventDefault`.
 * Concepts: `<label for>`, the `submit` event, `input type=number / color /
@@ -237,7 +249,7 @@ the "creative" part of the course after the form-heavy Part 2.
 * Drawing axes, ticks, and labels in loops; redraw = clear and rebuild.
 * Exercise A: 12-month bar chart with a threshold line and red/green bars [LY].
 * Exercise B: bubble chart with color/x/y/size form and range validation
-  [EX 2025-10-09]. Chapter 2.11 promises that this form uses `number`,
+  [EX 2025-10-09]. Chapter 2.12 promises that this form uses `number`,
   `color`, and `range` inputs, so the size field becomes a `range` slider
   (the original exam used three number inputs).
 
@@ -452,7 +464,7 @@ this part tests them through the browser and ends with a project.
   what the `webServer` block in `playwright.config.ts` does.
 * `page.goto`, `getByRole`, `getByLabel`, `fill`, `click`, `expect(locator)
   .toHaveText/.toBeVisible`. Locators built on roles and labels as the reason
-  semantic HTML and `<label for>` mattered in 2.11.
+  semantic HTML and `<label for>` mattered in 2.12.
 * Exercise: three e2e tests for the to-do list from 2.6.
 
 ### 8.2 Testing the apps of this book [NEW]

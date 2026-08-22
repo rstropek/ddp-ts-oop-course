@@ -112,8 +112,10 @@ matters, in the sentence where it appears.
 
 Link text is descriptive and makes sense on its own, never "click here" or a
 bare URL. Quizzes, tutors, and exercise files are linked through the book's
-shortcodes (`{{< quiz >}}`, `{{< tutor >}}`, `{{< exercise >}}`), never by
-pasted URL.
+shortcodes (`{{< quiz >}}`, `{{< tutor >}}`, `{{< writing >}}`,
+`{{< exercise >}}`), never by pasted URL. A `writing` activity (extension
+`_extensions/writing`, registry group `writing`) is a reflection the student
+drafts next to an AI coach that reads but never edits; it is not anonymous.
 
 ## The coding buddy
 
