@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# RESEARCH quiz for the placeholder chapter (0010-dom-basics/0010-dummy.qmd).
+# Unlike a "check your understanding" quiz, a research quiz comes BEFORE the
+# exercise: its questions are the things the book deliberately does not
+# explain. Students open it, answer what they know, research what they don't
+# (MDN, search engine, AI), and come back until every question is answered.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: dummy-research-quiz
+name: "Research quiz: what querySelectorAll gives back"
+
+title: "Research: what does querySelectorAll give back?"
+description: |
+  Three questions the book does not answer. Read a question; if you can
+  answer it, do. If not, look it up on MDN, with a search engine, or ask
+  your AI, then come back and answer in your own words. This quiz is
+  anonymous and is here to steer your research, not to grade you.
+  Answering in German is fine too.
+
+llm:
+  model: RedHatAI/gemma-4-31B-it-FP8-Dynamic
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const items = document.querySelectorAll('li');"
+      scope="during a research task in the DOM part, before the selectors exercise"
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "that the browser turns HTML into a tree of element objects (the DOM)"
+        "`document.getElementById` and `document.querySelector` for one element"
+        "`textContent`, `createElement`, and `append`")
+      not_yet=(array
+        "classes, inheritance, or generics"
+        "what a NodeList is (that is what they are researching right now)")}}
+
+questions:
+  - id: return-type
+    title: "What comes back"
+    question: |
+      `document.querySelectorAll("li")` does not return an array. What
+      does it return, and how do you find that out on MDN?
+    evaluation: |
+      Expected: it returns a `NodeList` (a `NodeListOf<HTMLLIElement>`
+      in TypeScript). Found on the MDN page for `Document.querySelectorAll`,
+      in the "Return value" section.
+
+      - `correct`   - names NodeList (any spelling) AND says where it is
+                      documented (MDN page of querySelectorAll, its return
+                      value section, or "hovering the call in VS Code"
+                      counts too).
+      - `partial`   - names NodeList without saying how they found out, or
+                      describes "a list of elements that is not an array"
+                      without the name.
+      - `incorrect` - says it returns an array, or a single element.
+
+      Feedback: if the student said array, ask them to open the MDN page and
+      read the heading right below the syntax box.
+
+  - id: loop
+    title: "Looping over it"
+    question: |
+      You have `const items = document.querySelectorAll("li");`. Name two
+      different ways to visit every element in `items` in TypeScript.
+    evaluation: |
+      Expected any two of: `for (const item of items)`, `items.forEach(...)`,
+      a counting `for` with `items.length` and `items[i]`, or
+      `Array.from(items)` followed by any array loop.
+
+      - `correct`   - two working ways named (code or words).
+      - `partial`   - one way, or two ways where one would not work on a
+                      NodeList (e.g. `items.map`).
+      - `incorrect` - no working way, or the claim that you must convert
+                      to an array first.
+
+      Feedback: the MDN page for NodeList lists its methods; which of them
+      takes a function, and which loop keyword works on anything iterable?
+
+  - id: live-or-static
+    title: "Does it update itself?"
+    question: |
+      After `const items = document.querySelectorAll("li");` your program
+      adds a new `li` to the page. Does `items` now contain the new element?
+      Explain the word MDN uses for this behaviour.
+    evaluation: |
+      Expected: no. `querySelectorAll` returns a *static* NodeList, a
+      snapshot taken at the time of the call; it does not change when the
+      page changes. (MDN contrasts this with *live* collections such as
+      the result of `getElementsByTagName` or `element.childNodes`.)
+
+      - `correct`   - says no AND uses or explains "static" (snapshot,
+                      "Momentaufnahme" counts), ideally contrasting it
+                      with "live".
+      - `partial`   - says no without the reason, or explains static vs
+                      live without committing to an answer.
+      - `incorrect` - says yes.
+
+      Feedback: search the MDN NodeList page for the words "live" and
+      "static"; which one applies to querySelectorAll?

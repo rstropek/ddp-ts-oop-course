@@ -1,0 +1,104 @@
+---
+title: "Your coding buddy"
+---
+
+Last year you asked an AI tutor questions and typed every line of code
+yourself. This year you get a second kind of helper: a **coding agent**, a
+program that reads your project, writes into your files, and runs commands in
+your terminal. The agent is called `pi`, and the model behind it is hosted by
+your school's Novedu platform. This chapter connects the two. You do it once,
+and it works for the whole year.
+
+## What the coding buddy is, and is not {#sec-buddy-what}
+
+The model behind `pi` has been given the rules of this course. It knows the
+starter project, the coding style your teachers expect, and, most important,
+which part of the book you are in. A coding agent in the wild would happily
+answer a question about a button with a class, a generic, and three arrow
+functions. Yours stays at your level: if your code has no classes yet, it
+writes none. When you ask for something the book hasn't covered, it tells you
+so and then does it anyway, because you asked.
+
+Two things never change:
+
+* Every line the agent writes is a line you must be able to explain. Exams
+  happen without the agent, and "the AI wrote it" is not an answer.
+* The agent's mistakes are your mistakes. Read what it changed before you
+  commit it.
+
+## Install pi {#sec-buddy-install}
+
+`pi` is a command-line program. Open a terminal and run the installer from
+[pi.dev](https://pi.dev):
+
+```bash
+curl -fsSL https://pi.dev/install.sh | bash
+```
+
+On Windows, run that line in Git Bash or in WSL. Close the terminal, open a
+new one, and check that `pi --version` prints a version number.
+
+## Tell pi where the model is {#sec-buddy-models}
+
+`pi` keeps its settings in a folder named `.pi/agent` inside your home folder.
+Two files in that folder matter here. The first, `models.json`, says where the
+Novedu endpoint is and what the model is called. It is the same for everybody
+in the course, so copy it as it is:
+
+```json
+{{< include ../models.json >}}
+```
+
+Save it as `~/.pi/agent/models.json` (on Windows:
+`C:\Users\<you>\.pi\agent\models.json`). Create the folder if it is missing.
+
+## Add your key {#sec-buddy-key}
+
+The second file, `auth.json`, holds the **activity code**. Your teacher hands
+it out in class. The code is the key that opens the door to the model, so it
+is not printed in this book. Create `~/.pi/agent/auth.json` with this content
+and put the code in place of the placeholder:
+
+```json
+{
+  "novedu": {
+    "type": "api_key",
+    "key": "<activity code from your teacher>"
+  }
+}
+```
+
+::: {.callout-warning}
+## The key is for your class
+
+Treat the code like a password. Do not post it anywhere, and do not commit
+`auth.json` into a git repository. It can expire; if `pi` reports an
+authentication error, ask your teacher for a new one.
+:::
+
+## First run {#sec-buddy-first-run}
+
+Open a terminal in a copy of the starter project and start the agent:
+
+```bash
+pi
+```
+
+In the `pi` prompt, pick the model with `/model` and choose *Coding buddy for
+the Creative Coding 2 course*. Then type a first task:
+
+> Add a paragraph below the heading that shows today's date.
+
+Watch what happens. The agent reads `index.html` and `src/index.ts`, proposes
+a change, and applies it. Run `npm start` and look at the page. Then open
+`src/index.ts` and read the new lines. Could you have written them? Could you
+explain them to the person next to you? If not, ask the agent to walk you
+through them. That conversation is the real exercise of this chapter.
+
+::: {.callout-tip}
+## When the agent is the wrong tool
+
+The agent is for getting unstuck and for work you already understand. Before an
+exam, practise without it. A good test: close `pi`, delete what it wrote, and
+write it again yourself.
+:::

@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/registry/registry-yaml.schema.json
+# Activity registry for the Creative Coding 2 book.
+#
+# Every novedu activity a chapter links to is listed here under a stable KEY;
+# the chapters reference that key, never a code:
+#
+#     {{< quiz dom-basics title="The DOM" >}}
+#
+# Reconcile it with novedu and regenerate the lock file with:
+#
+#     npx @novedu/cli codes sync ddp-activities.yaml
+#
+# Commit BOTH this file and ddp-activities.lock.yaml. Full format reference:
+# https://github.com/Teaching-HTL-Leonding/novedu-chat-mvp/blob/main/docs/registry.md
+
+# novedu re-reads the activity YAML from this repository's raw URLs on every
+# load, so publishing a quiz or tutor edit stays a plain `git push`.
+base-url: "https://raw.githubusercontent.com/rstropek/ddp-ts-oop-course/refs/heads/main/"
+
+activities:
+  # The one coding activity of the year: the endpoint students point the `pi`
+  # coding agent at, from the first chapter on. The code IS the API key, so
+  # the book explains the setup and the teacher hands the code out in class.
+  coding:
+    coding-buddy:
+      file: ddp-coding-buddy.yaml
+      note: "Creative Coding 2 book: coding buddy with the course coding guidelines built in (whole year) — GitHub-hosted"
+
+  tutors: {}
+
+  # Research quizzes drive a `::: {.research quiz="<key>"}` box: their
+  # questions are what the book deliberately leaves to the student to find out.
+  quizzes:
+    research-nodelist:
+      file: 0010-dom-basics/0010-dummy-research-quiz.yaml
+      note: "Creative Coding 2 book: research quiz, placeholder chapter (0010) — GitHub-hosted"

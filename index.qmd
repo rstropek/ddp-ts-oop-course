@@ -1,0 +1,13 @@
+# Preface {.unnumbered}
+
+Welcome back to **Creative Coding**. In the first year you learned to program
+by drawing with p5.js: variables, conditions, loops, arrays, and functions,
+all on a canvas you could see. This year you keep making things you can see,
+but the things change. Instead of painting pixels onto a canvas, you build
+web pages out of HTML elements, style them with CSS, draw with SVG, and make
+them react to clicks and keystrokes with TypeScript.
+
+Along the way you meet the big idea of this year: **objects**. A web page is
+full of them, and by working with the page's objects you learn what an object
+is, how objects are found, grouped, changed, and how they talk to each other.
+Once that feels natural, you write your own.

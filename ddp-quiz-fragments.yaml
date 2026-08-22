@@ -1,0 +1,121 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/fragments/fragment-yaml.schema.json
+# Shared fragment library for the Creative Coding book's novedu quizzes.
+#
+# A quiz has TWO template hosts, and this library feeds both:
+#   instructions:            -> {{fragment "shared.quiz_context"}}
+#   discussion.instructions: -> {{fragment "shared.discussion_frame" ...}}
+# Edit the text here, push, and every quiz serves the new wording immediately
+# (the novedu server re-reads the raw URL on every load).
+#
+# Served live from GitHub: chapter quizzes reference it as
+# ../ddp-quiz-fragments.yaml (repo root), so a `git push` updates every quiz.
+# (A legacy app-hosted copy `ddp-quiz-fragments` exists for the retired
+# app-hosted 0020 quiz; ignore it unless that copy is deleted.)
+#
+# Keep this library minimal — a broken fragment fails ALL quizzes at once, and
+# a bad marker fails its quiz closed (students see no quiz). Validate the
+# library AND a couple of quizzes after every edit here.
+
+id: ddp-quiz-fragments
+fragments:
+  # Shared context for BOTH the quiz grader and the discussion chat (the app
+  # prepends the rendered `instructions:` to both system prompts). Keep it
+  # audience-neutral and chapter-agnostic: no "students don't know X yet"
+  # claims — those belong in each chapter's discussion.instructions.
+  #
+  # The single-quotes bullet is load-bearing, not style: the SCCH provider's
+  # guided JSON decoding treats a raw `"` inside the feedback string as its
+  # terminator, so feedback like `"lightblue"` inside inline code gets silently
+  # cut off mid-sentence (novedu issue #115; measured there — 28/66 gradings
+  # truncated without the line, 0/69 with it). The app detects and retries a
+  # truncated feedback, but steering the grader away from the trigger belongs
+  # here, next to the other course rules. Don't drop it.
+  - id: quiz_context
+    content: |
+      The students are beginners in a creative-coding course (TypeScript with
+      the p5.js drawing library), age 15 to 17, working in a web playground.
+      The course book is in English; the students are Austrian and speak German
+      as their first language.
+
+      - Answers in English or German are equally fine. Respond to the content,
+        not the language; spelling and grammar mistakes never count.
+      - The students use their own words. Accept everyday wording whenever the
+        idea is right; never require technical terms the criteria don't demand.
+      - Write in simple English that a 15-year-old English learner understands:
+        short sentences, common words.
+      - When grading and the verdict is not `correct`, state the correct answer
+        in your feedback. A question back to the student never replaces it: ask
+        it after the answer, never instead of it.
+      - Never mention scores, grades, marks, or what would earn a better
+        verdict. The student sees the feedback, not the grading criteria.
+      - When the verdict is `partial`, never present the answer as a whole as
+        correct. Naming the part that IS right is good and encouraged ("You are
+        right that ...", "You correctly noticed ..."), as long as the same
+        feedback goes on to say what is missing.
+      - Short answers are fine: a concise answer scores equal to or better
+        than a long one at the same correctness. Never reward length.
+      - In your feedback, write TypeScript string literals with single quotes
+        inside inline code (write `'lightblue'`, never `"lightblue"`).
+      - When unsure between two verdicts, choose the lower one (partial
+        rather than correct).
+      - Course rule: every code statement ends with a semicolon. TypeScript
+        would accept code without them, but this course does not. If the
+        question asks the student to write code, an answer whose code is
+        right except for missing end-of-statement semicolons is `partial`,
+        never `correct`; point out the missing semicolon in your feedback.
+        If the question does not ask for code, missing semicolons in code
+        the student volunteers never lower the verdict; at most add a
+        friendly reminder to your feedback.
+
+  # The discussion chat's guidance, appended AFTER the app's built-in
+  # discussion prompt (which already sets the role, the available context, and
+  # "concise, encouraging, stay on this question"). The policy sentences —
+  # reveal-the-answer, keep-it-tiny, answer-in-German — live HERE so a change
+  # is one edit instead of 21. Each quiz supplies only what is chapter-specific:
+  # the code example, the scope phrase, and the two concept lists.
+  #
+  # `scope` is a phrase that completes "…what a beginner knows ___", e.g.
+  # "after the dice chapter". `knows` / `not_yet` are lists of short noun
+  # phrases, rendered as bullets. Omit `example` for a chapter with no code
+  # yet; override `german_tail` only when there are no code names to keep in
+  # English.
+  - id: discussion_frame
+    input_schema:
+      type: object
+      required:
+        - scope
+        - knows
+        - not_yet
+      properties:
+        example:
+          type: string
+          default: ""
+        scope:
+          type: string
+        knows:
+          type: array
+          items:
+            type: string
+        not_yet:
+          type: array
+          items:
+            type: string
+        german_tail:
+          type: string
+          default: "code and command names"
+    content: |
+      You may reveal and explain the correct answer. Keep explanations tiny and concrete: one idea at a time, with {{#if example}}a short code line like `{{example}}`{{else}}a small everyday example{{/if}} where it helps.
+
+      Stay strictly within what a beginner knows {{scope}}:
+
+      {{#each knows}}
+      - {{this}}
+      {{/each}}
+
+      Do not introduce:
+
+      {{#each not_yet}}
+      - {{this}}
+      {{/each}}
+
+      If the student writes in German, you may answer in German; keep {{german_tail}} in English.

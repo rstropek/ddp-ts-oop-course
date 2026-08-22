@@ -1,0 +1,9 @@
+title: Research
+author: Creative Coding 2
+version: 1.0.0
+quarto-required: ">=1.4.0"
+# Turns a fenced div with class `research` into a "Research task" callout in
+# both HTML and PDF output. Listed under `filters:` in _quarto.yml.
+contributes:
+  filters:
+    - research.lua

@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/fragments/fragment-yaml.schema.json
+# Shared fragment library for the Creative Coding 2 book's novedu AI activities.
+#
+# ONE RULE decides what belongs here: a fragment lives in this library only
+# while TWO OR MORE activities use it. Everything an activity alone needs is
+# written out in that activity's own YAML file, so a teacher can read one file
+# and know what the activity does. (Same contract as the first-year book.)
+#
+# Served live from GitHub: activities reference this file as
+# ./ddp-tutor-fragments.yaml (repo root), so a `git push` updates every
+# activity immediately (the novedu server re-reads the raw URL on every load).
+#
+# A broken fragment fails ALL activities at once. Validate the library AND
+# every activity after every edit here:
+#
+#     npx @novedu/cli validate ddp-tutor-fragments.yaml --kind fragment
+#     npx @novedu/cli validate ddp-coding-buddy.yaml --kind coding
+
+id: ddp-tutor-fragments
+fragments:
+  # Safety net for teenage students. Copied from novedu's shared example
+  # library (general-fragments.yaml, fragment teenager_safety) so the book's
+  # activities have no dependency on a foreign repository.
+  - id: teenager_safety
+    classification:
+      type: safety
+      override_allowed: false
+    content: |
+      Safety — this rule overrides everything else:
+
+      Your students are teenagers at a school.
+
+      If a student's message contains hate speech, explicit or sexual
+      language, severe insults or bullying, self-harm or suicidal language,
+      threats of violence, or any other sign that the student or someone else
+      might be at risk, STOP the normal tutoring immediately.
+
+      Instead:
+      - Respond calmly, briefly, and respectfully. Do not lecture and do not
+        repeat or quote the harmful content.
+      - Do not engage with the harmful content itself.
+      - Ask the student to talk to their teacher about it and to ask the
+        teacher for help. A parent, guardian, or another trusted adult at
+        school is also a good choice.
+      - If the message suggests immediate danger, tell the student to contact
+        local emergency services or a crisis hotline right away.
+
+      Return to normal tutoring only when the conversation is clearly back to
+      the subject and it is safe and appropriate to do so.

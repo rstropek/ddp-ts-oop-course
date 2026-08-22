@@ -1,0 +1,38 @@
+---
+title: "Placeholder chapter"
+---
+
+This is a placeholder chapter that only exists so that the book skeleton
+builds. It will be replaced once the book structure in `book-structure.md`
+has been agreed on.
+
+## A first look at the DOM {#sec-dummy-dom}
+
+The browser turns this HTML:
+
+```html
+<ul id="todos">
+  <li>Buy milk</li>
+  <li>Write code</li>
+</ul>
+```
+
+into a tree of objects, and TypeScript can ask for them:
+
+```ts
+const list = document.querySelector<HTMLUListElement>("#todos");
+const items = document.querySelectorAll("li");
+console.log(items.length); // 2
+```
+
+::: {.callout-tip}
+Every element in the tree is an **object**. That word follows you through the
+whole book.
+:::
+
+::: {.research quiz="research-nodelist" title="What does `querySelectorAll` give back?"}
+The next exercise selects every `li` on the page and changes them all. The
+book shows you the call and nothing more. What comes back, how you loop over
+it, and whether it notices new elements is yours to find out. For the exam you
+need to be able to loop over the result without looking it up.
+:::

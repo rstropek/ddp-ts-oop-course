@@ -1,0 +1,124 @@
+# ---------------------------------------------------------------------------
+# Project-wide Quarto configuration — a *book* project.
+#
+# Same setup as the first-year book (ddp-first/ts-ddp-first): the files under
+# `book.chapters` are stitched into ONE ordered document and rendered as
+#   * html -> a book-style website (chapter sidebar + prev/next navigation)
+#   * pdf  -> ONE combined PDF, each `# Chapter` starting on its own page
+#
+# Chapters live in numbered folders (e.g. 0010-dom-basics/) grouped into book
+# parts below. See book-structure.md for the planned part/chapter outline.
+# ---------------------------------------------------------------------------
+
+project:
+  type: book
+  output-dir: _output    # rendered book + PDF land here (git-ignored)
+
+book:
+  title: "Creative Coding 2"
+  subtitle: "From the DOM to your own classes"
+  author: "Rainer Stropek"
+  date: 2026-08-22
+  chapters:
+    - index.qmd
+    - part: "Welcome back"
+      chapters:
+        - 0010-welcome/0010-coding-buddy.qmd
+    - part: "The DOM"
+      chapters:
+        - 0010-dom-basics/0010-dummy.qmd
+  page-footer:
+    left: "© 2026 — Creative Coding 2"
+    right: "Made with [Quarto](https://quarto.org)"
+
+# Base URL of the TypeScript playground server. The `example` shortcode turns
+# each exercise into an "Open in the playground" link built from this base
+# (and the same base powers the standalone `{{< playground <url> >}}` shortcode).
+# The server's FQDN may change — when it does, edit ONLY this line.
+playground-base-url: "https://ts-web-playground-server-bfdfbjcthubcardq.westeurope-01.azurewebsites.net"
+
+# Base URL of the novedu chat app. The `quiz` and `tutor` shortcodes turn an
+# activity code into a link built from this base (<base>/<code>). If the app
+# ever moves, edit ONLY this line.
+novedu-base-url: "https://novedu.at"
+
+# The generated key -> code map for every novedu activity this book links to.
+# A chapter names a quiz or a tutor by its registry KEY ({{< quiz
+# number-systems >}}) and the shortcode looks that key up in the
+# `activity-codes` map contributed here.
+# ddp-activities.yaml is hand-written, ddp-activities.lock.yaml is regenerated
+# by `novedu-cli codes sync ddp-activities.yaml`; both are committed (README).
+metadata-files:
+  - ddp-activities.lock.yaml
+
+# Project-wide Pandoc/Lua filters. emoji-pdf.lua replaces emoji with plain
+# words in PDF output only — the PDF fonts have no emoji glyphs and xelatex
+# would drop them silently (turning `"🪨"` into `""` in printed listings).
+filters:
+  - emoji-pdf.lua
+  - research          # `::: {.research}` divs -> "Research task" callouts
+
+# --- Output formats --------------------------------------------------------
+format:
+  html:
+    theme: cosmo         # one of Quarto's built-in Bootstrap themes
+    css: styles.css      # our small custom stylesheet
+    code-copy: true      # "copy" button on code blocks
+    code-overflow: wrap
+    smooth-scroll: true
+    link-external-newwindow: true  # external links open in a new tab
+    link-external-icon: true       # + a small "leaves the site" icon
+
+  pdf:
+    # A book uses a *chapter*-aware class. scrreprt (KOMA report) gives each
+    # top-level chapter its own page without the heavier front-matter of a
+    # full scrbook — a good fit for course handouts.
+    documentclass: scrreprt
+    papersize: a4
+    # The handout gets printed and handed out, so it is laid out for paper:
+    # 10pt body text with 1.1 leading on a page with narrow margins. Every
+    # further page saving comes from `pdf-compact.tex` (see include-in-header
+    # below), which trims whitespace and never the text.
+    fontsize: 10pt
+    linestretch: 1.1          # a touch more leading -> easier to read
+    geometry:
+      # A4 with narrow margins. Top and bottom are tighter than the sides:
+      # nothing is printed in them except the page number, which sits in the
+      # bottom margin (`footskip` is its distance below the last text line).
+      - top=18mm
+      - bottom=20mm
+      - left=20mm
+      - right=20mm
+      - footskip=11mm
+    toc-depth: 1              # TOC shows parts + chapters only, not `##` sections
+    number-sections: true
+    colorlinks: true          # clickable, colored links (not ugly boxed ones)
+    linkcolor: tsblue         # internal links / TOC  (defined below)
+    urlcolor: tsblue          # external URLs
+    highlight-style: github   # nicer, lighter code coloring than the default
+    code-block-bg: true       # subtle grey background behind code blocks
+    # A custom hex colour must be *defined* before xcolor can use it by name.
+    # The second entry, pdf-compact.tex, holds the print layout (spacing around
+    # headings, lists, code blocks, callouts and figures) — see that file.
+    include-in-header:
+      - text: |
+          \definecolor{tsblue}{HTML}{3178C6}
+          % scrreprt numbers parts with Roman numerals by default (Part I);
+          % switch to arabic so it reads "Part 1: Introduction".
+          \renewcommand*{\thepart}{\arabic{part}}
+          % Number chapters *within* their part: reset the chapter counter at
+          % each new part and prefix it with the part number. So the chapters
+          % under part 1 (Introduction) read 1.1, 1.2, ...; part 2's read 2.1, ...
+          \counterwithin{chapter}{part}
+          % Don't bold chapter entries in the table of contents (KOMA bolds them
+          % by default). With many top-level parts, a lighter TOC reads better.
+          \setkomafont{chapterentry}{\normalfont}
+          % Chapter entries in the TOC:
+          %   numwidth   - KOMA reserves only 1.5em for the number, too narrow
+          %                once a part has ten or more chapters ("1.10" then
+          %                runs into the title). Widen it for two-digit numbers.
+          %   beforeskip - KOMA adds ~1em above every chapter entry, which makes
+          %                a chapter list read as loose, disconnected rows. Drop
+          %                it so a part's chapters form one compact block.
+          \DeclareTOCStyleEntry[numwidth=3em,beforeskip=0pt]{tocline}{chapter}
+      - file: pdf-compact.tex

@@ -1,0 +1,41 @@
+/* Styling for `::: {.research}` callouts — HTML output only.
+   (PDF gets Quarto's `important` callout styling.) A purple accent so the
+   research box is not mistaken for a quiz (blue), a tutor (green), or a
+   warning. */
+
+.research-box .callout.callout-important {
+  border-left-color: #6f42c1;
+}
+
+.research-box .callout.callout-important .callout-header {
+  background-color: rgba(111, 66, 193, 0.1);
+}
+
+.research-box .callout.callout-important .callout-icon::before {
+  /* A magnifier instead of the exclamation mark. */
+  background-image: none;
+  content: "\1F50D";
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* The call-to-action button, purple like the box's accent. */
+.research-cta p {
+  margin: 0;
+}
+
+.research-cta a {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.4rem;
+  background: #6f42c1;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.research-cta a:hover,
+.research-cta a:focus {
+  filter: brightness(1.08);
+  text-decoration: none;
+}

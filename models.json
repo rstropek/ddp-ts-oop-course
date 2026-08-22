@@ -1,0 +1,20 @@
+{
+  "providers": {
+    "novedu": {
+      "api": "openai-completions",
+      "baseUrl": "https://novedu.at/api/coding/v1",
+      "apiKey": "dummy",
+      "models": [
+        {
+          "id": "coding",
+          "name": "Coding buddy for the Creative Coding 2 course",
+          "reasoning": false,
+          "input": ["text"],
+          "contextWindow": 131072,
+          "maxTokens": 32768,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        }
+      ]
+    }
+  }
+}
