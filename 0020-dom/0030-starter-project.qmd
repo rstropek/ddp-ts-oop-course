@@ -1,0 +1,335 @@
+---
+title: "The starter project, file by file"
+---
+
+You have built three apps now, and each one started as a copy of the same
+folder. You opened `index.html` and `src/index.ts` and left the rest alone.
+From here on you change some of those other files yourself, so this chapter
+opens the box.
+
+## The one line that connects two files {#sec-starter-project-experiment}
+
+Make a fresh app from the
+[vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+template and name the folder `starter-tour`. Run `npm install` and `npm start`
+in it. The browser shows `Hello World!`, with an exclamation mark that
+`src/index.ts` glued on.
+
+Open `index.html` and delete this line from the bottom of the `<body>`:
+
+```html
+<script src="./src/index.ts" type="module"></script>
+```
+
+Save the file. The page reloads and the heading now reads `Hello World`,
+without the exclamation mark. Press F12 and look at the browser console. All
+that stands there is Vite's own `[vite] connected.` message. Nothing failed,
+because nobody asked for your program.
+
+Put the line back and save again. The exclamation mark is back.
+
+That one line is the whole connection between your HTML and your TypeScript.
+A page runs the code it names, and nothing else. The browser cannot run
+TypeScript at all, so the development server behind `npm start` translates
+`src/index.ts` into JavaScript on the way. The `type="module"` part marks the
+file as a module, which is what lets it use `import` in a later chapter.
+
+## What is in the box {#sec-starter-project-tour}
+
+Here is the whole starter, seen from above:
+
+```
+starter-tour/
+├── .agents/skills/     instructions for AI coding agents
+├── .vscode/            settings for VS Code
+├── assets/             images and SVG files you add later
+├── src/
+│   ├── index.ts        your program
+│   └── vite-env.d.ts   one line of type information for Vite
+├── .gitignore          what git leaves out
+├── biome.json          formatter and linter rules
+├── index.html          the page the browser opens
+├── package.json        the project's ID card
+├── package-lock.json   written by npm, never by you
+├── skills-lock.json    which agent skills the project pulled in
+└── tsconfig.json       the promises you make to the compiler
+```
+
+## index.html and src/index.ts {#sec-starter-project-html}
+
+`index.html` is the only HTML file in the starter, and the development server
+serves it as the start page. Its `<head>` sets the character set and the title
+in the browser tab. Its `<body>` holds one heading with the id
+`helloWorldHeader`, plus the script line from the experiment above.
+
+`src/index.ts` is your program, all two lines of it:
+
+```ts
+const helloWorldHeader = document.getElementById('helloWorldHeader') as HTMLHeadingElement;
+
+helloWorldHeader.innerText += '!';
+```
+
+The starter writes `innerText` here. This course writes `textContent`, and on a
+heading that holds plain text the two do the same thing. Everything you build
+in the next chapters starts in this file.
+
+## package.json, the project's ID card {#sec-starter-project-package}
+
+`package.json` is the file npm reads. Two parts of it matter to you every day.
+
+**`scripts`** gives long commands short names:
+
+```json
+"scripts": {
+  "start": "vite",
+  "build": "tsc && vite build",
+  "check": "biome check .",
+  "check:fix": "biome check --write ."
+}
+```
+
+`npm run check` looks up `check` in that list and runs `biome check .` for you.
+That is all `npm run` does. `start` is the one name that also works without
+`run`, which is why `npm start` starts Vite. `build` runs two programs in a row:
+`tsc` checks your types, and only if that succeeds does `vite build` write the
+finished page into a folder named `dist`.
+
+**`devDependencies`** lists the tools the project needs while you work on it:
+
+```json
+"devDependencies": {
+  "@biomejs/biome": "^2.5.10",
+  "typescript": "^7.0.2",
+  "vite": "^8.2.2"
+}
+```
+
+Each of those three version strings starts with a `^`. The research box below
+asks what that character allows npm to do.
+
+`npm install` reads this list and builds `node_modules` from it. That folder
+passes 100 MB in a fresh starter, because every tool brings its own program
+files along. Nobody edits it and nobody sends it to anybody. It never goes into
+a git repository either, because npm rebuilds it from `package.json` in half a
+minute, which is also why the starter you downloaded was so small.
+
+`package-lock.json` sits next to `package.json` and is written by npm. Unlike
+`node_modules` it does belong in git, and what npm uses it for is the second
+research question.
+
+## tsconfig.json, promises you make to the compiler {#sec-starter-project-tsconfig}
+
+Read `tsconfig.json` as a list of promises. Each option is you telling the
+TypeScript compiler "hold me to this", and the compiler complains the moment
+you break one. These four are the ones you will meet this year.
+
+* `strict` switches on the whole strict family at once. The one you already
+  know from year one is that a variable of type `string` never holds `null`.
+* `noUnusedLocals` and `noUnusedParameters` turn a variable or a parameter that
+  nobody reads into an error. Half-finished code stops being invisible.
+* `noImplicitReturns` says that if one path through a function returns a value,
+  every path has to. Forget the `else` branch and you get
+  `error TS7030: Not all code paths return a value.`
+* `noUncheckedIndexedAccess` is the strict option that surprises people, so
+  here it is in three lines:
+
+  ```ts
+  const names = ['Ada', 'Grace'];
+  const first = names[0];
+  console.log(first.toUpperCase());
+  ```
+
+  That last line does not compile:
+  `error TS18048: 'first' is possibly 'undefined'.` An array can be empty, so
+  the compiler refuses to believe that position 0 holds anything. Reading
+  `names[0]` gives you a string or `undefined`, and the fix is to handle the
+  second case:
+
+  ```ts
+  if (first !== undefined) {
+    console.log(first.toUpperCase());
+  }
+  ```
+
+One more line explains a habit of this course: `"noEmit": true`. The compiler
+only checks your code here and never writes JavaScript, because Vite does the
+translating. That makes `npx tsc --noEmit` a full check of every file in `src`,
+worth running before you hand work in. The red squiggles in VS Code come from
+the same compiler, but only for the files you have open.
+
+## biome.json, one tool for two jobs {#sec-starter-project-biome}
+
+Biome is the formatter and the linter of this course, and you met both jobs
+last year. `biome.json` is where this project decides what they do. The
+formatter section sets two-space indentation and a line width of 150
+characters, and the JavaScript part below it pins the style rules you have been
+following by hand: single quotes, semicolons always, trailing commas. The
+linter section switches on Biome's recommended rules, which is the set that
+caught `var` and `==` for you in year one.
+
+Two commands use that file:
+
+```bash
+npm run check
+npm run check:fix
+```
+
+`npm run check` reports and changes nothing. `npm run check:fix` writes the
+fixes it can make safely, which covers everything the formatter owns. A rule
+that needs a decision from you is still only reported.
+
+## The .vscode folder {#sec-starter-project-vscode}
+
+`.vscode` holds settings that travel with the project instead of living in your
+personal VS Code, and the starter puts two files there.
+
+`extensions.json` lists the extensions this project recommends, Biome among
+them. Open the folder in VS Code and it offers to install them; saying yes puts
+Biome's squiggles and its formatter into your editor.
+
+`tasks.json` registers `npm run build` as the default build task of the
+project, so **Ctrl+Shift+B** runs it without a terminal.
+
+What the starter does not bring is format on save. Turn it on yourself, once
+per project, by creating `.vscode/settings.json` with these two lines:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome"
+}
+```
+
+From then on every save formats the file you are editing, and
+`npm run check:fix` is only for the files you have not opened.
+
+## Four more files {#sec-starter-project-rest}
+
+`.gitignore` lists what git leaves out, and the two entries that matter here
+are `node_modules/` and `dist/`. Both are rebuilt from files the repository
+already has, so storing them twice would only waste space. Git gets its own
+chapter later.
+
+`assets/` is empty on purpose. Pictures and `.svg` files you want to load go in
+there, starting in the SVG part.
+
+`src/vite-env.d.ts` holds a single line that teaches TypeScript about the extra
+things Vite allows, such as importing a CSS file. Leave it alone.
+
+`.agents/skills/` and `skills-lock.json` are instructions for AI coding agents,
+shipped with the project so every agent that opens the folder gets the same
+briefing. The chapter on your coding buddy sets one up.
+
+::: {.research title="What package.json says between the lines"}
+The exercise below asks you to compare what `package.json` requested with what
+npm actually installed, so you need to be able to read both files.
+
+1. `package.json` asks for `"vite": "^8.2.2"`. Which versions may npm install
+   for that, and which ones may it not?
+2. `package-lock.json` is written by npm and kept in git. What does npm use it
+   for, and what goes wrong for a team that deletes it?
+3. `package.json` contains a line `"type": "module"`, and the script tag in
+   `index.html` carries an attribute `type="module"`. What does the line in
+   `package.json` change, and is it the same thing as the attribute?
+
+For the exam, the `^` rule has to be in your head: you will read version
+strings without a search engine.
+:::
+
+## Exercise: break it on purpose {#sec-starter-project-exercise}
+
+The first four steps below break the project on purpose, and a different tool
+answers each break. Work in the `starter-tour` folder from the experiment, with
+`npm start` running in the terminal.
+
+1. **Cut the connection.** Delete the `<script>` line from `index.html` again,
+   save, and reload the page with the browser console open. Write down what the
+   console shows, and one sentence saying why none of it is an error. Put the
+   line back.
+
+2. **Rename the program.** Rename `src/index.ts` to `src/main.ts` and reload
+   the page. The terminal where `npm start` runs prints:
+
+   ```
+   [vite] (client) Pre-transform error: Failed to load url /src/index.ts (resolved id: /src/index.ts). Does the file exist?
+   ```
+
+   The page loses its exclamation mark again. Two fixes work here: rename the
+   file back, or point the `src` attribute in `index.html` at `./src/main.ts`.
+   Try the second one, watch the page come back, then undo it and rename the
+   file to `index.ts` again.
+
+3. **Leave something unused.** Add this line at the end of `src/index.ts` and
+   save:
+
+   ```ts
+   const clickCount = 0;
+   ```
+
+   Run both checkers and compare them:
+
+   ```bash
+   npx tsc --noEmit
+   npm run check
+   ```
+
+   The compiler answers with one line:
+
+   ```
+   src/index.ts(5,7): error TS6133: 'clickCount' is declared but its value is never read.
+   ```
+
+   Biome answers with a whole block that points at the variable and ends in
+   `Found 1 warning.` Write down which `tsconfig.json` option asked for the
+   compiler's error, and notice that the two tools disagree about how serious
+   an unused variable is. Then delete the line.
+
+4. **Write it badly.** Add these two lines at the end of `src/index.ts`,
+   exactly as they stand, with the wrong indentation, the double quotes, and no
+   semicolons:
+
+   ```ts
+       const greeting =    "hi there"
+   console.log(greeting)
+   ```
+
+   Run `npm run check`. It prints the file as it thinks the file should look,
+   with `-` in front of your lines, `+` in front of its own, and a small dot for
+   every space. Now run `npm run check:fix` and open the file. Both lines are
+   indented like the rest of the file now. The double quotes have become single
+   quotes, and each line ends in a semicolon. Delete the two lines when you are
+   done.
+
+5. **Turn on format on save.** Install the recommended Biome extension if you
+   have not already, create `.vscode/settings.json` with the two settings from
+   this chapter, and restart VS Code. Now put four random spaces in front of a
+   line in `src/index.ts` and save. The spaces disappear.
+
+6. **Read what npm did.** Open `package-lock.json` and search for
+   `"node_modules/vite"`. The `version` right below it is what actually landed
+   in your `node_modules`. Compare it with the `^8.2.2` in `package.json`, then
+   add one comment at the top of `src/index.ts` naming both numbers and saying
+   why the `^` allowed this one:
+
+   ```ts
+   // package.json asks for vite ^8.2.2, npm installed ..., because ^ allows ...
+   ```
+
+   Finish with `npm run check` and `npx tsc --noEmit`. Both stay quiet, and
+   your page shows `Hello World!` again.
+
+::: {.callout-tip}
+## Breaking things is cheap here
+
+Every break here is one save away from being repaired, and none of them can
+damage anything outside the folder. Read each message slowly now and it will be
+obvious in three months, when it turns up in a project you care about.
+:::
+
+## Check your understanding {#sec-starter-project-quiz}
+
+Six short questions, the first three of them the research task. Answer in your
+own words.
+
+{{< quiz starter-project title="The starter project" >}}

@@ -86,9 +86,16 @@ instructions: |
   The book teaches its topics in this order. Each rung builds on the ones
   before it:
 
-  1. DOM basics — `document.querySelector`, `textContent`, `classList`,
-     `createElement`/`append`, `addEventListener`, forms and input values,
-     CSS in `styles.css` imported from `src/index.ts`. Everything procedural:
+  1. DOM basics — `document.querySelector<T>('#id')` with a null check that
+     throws, `textContent`, `addEventListener` with arrow functions and the
+     `event` object, `element.style.*`, `createElement`/`append`/`remove`,
+     `classList`, `querySelectorAll` with `for...of` (and `Array.from` when
+     `map`/`join` is needed), the `submit` event with `preventDefault`,
+     `input.value`/`valueAsNumber`, `Number()`/`Number.isNaN`, CSS in
+     `src/styles.css` imported from `src/index.ts`, Flexbox and Grid. The
+     very first chapters still copy the starter's
+     `getElementById(...) as HTMLHeadingElement`; once the student's code
+     uses `querySelector<T>`, never write `as` again. Everything procedural:
      functions, loops, plain object literals, no classes.
   2. SVG — elements written by hand in HTML, created from TypeScript with
      `document.createElementNS(SVG_NS, ...)` and `setAttribute`, styled with
@@ -178,6 +185,13 @@ instructions: |
     (a position, a color picked by the user).
   - Elements the program needs are looked up once at the top of
     `src/index.ts` and held in constants, not queried again in every handler.
+  - Every `<button>` carries an explicit `type="button"` (or `type="submit"`
+    inside a form); Biome's recommended rules demand it.
+  - Helpers that use the elements looked up at the top are written as
+    `const name = (...) => { ... };`, because a `function` declaration loses
+    the null narrowing of those constants under strict TypeScript.
+  - `querySelectorAll` is called inside the handler that needs it when the
+    page changes between calls (the result is a static snapshot).
 
   Classes (rung 3 and up):
   - One class per module, exported. `src/index.ts` only wires the UI:

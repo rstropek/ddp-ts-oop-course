@@ -1,0 +1,163 @@
+---
+title: "Research is part of the job"
+---
+
+Two paragraphs, one string, two different results. Create a fresh app from the
+starter and run `npm install`. Replace the `<h1>` in `index.html` with these
+two lines:
+
+```html
+<p id="asText"></p>
+<p id="asHtml"></p>
+```
+
+Now replace everything in `src/index.ts` with this:
+
+```ts
+const asText = document.querySelector<HTMLParagraphElement>('#asText');
+const asHtml = document.querySelector<HTMLParagraphElement>('#asHtml');
+if (!asText || !asHtml) {
+  throw new Error('A paragraph is missing from index.html');
+}
+
+asText.textContent = '<b>bold?</b>';
+asHtml.innerHTML = '<b>bold?</b>';
+```
+
+Start the app with `npm start` and look at the page. The same string went into
+both paragraphs, and they do not look the same. Finding out why is your job in
+this chapter, not the book's.
+
+## Why this book stops explaining {#sec-research-why}
+
+The web platform is documented already. Every element, every property, and
+every event has a page written by the people who build browsers, and those
+pages stay more current than any book. Copying a slice of them in here would
+only go stale. So this book teaches the ideas and the vocabulary, then sends
+you to the source for the details. You have met two of these stops already, in
+the chapters on events and on the starter project.
+
+The other reason is the exam. It runs on a computer with no internet and no
+AI, and your own course material is allowed. What you looked up, understood,
+and wrote down in your own words is what you carry into that room. Looking
+something up once beats reading about it twice.
+
+## MDN, the reference for the web {#sec-research-mdn}
+
+MDN Web Docs is the site you used in year one for string methods, and it
+covers far more than JavaScript. HTML elements, CSS properties, and the whole
+DOM live there too. When a developer wonders what a property does, they type
+"mdn" plus its name into a search box and land on the page.
+
+Open [MDN's page for `textContent`](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
+and read how the page is built, because every page in the reference follows
+the same plan.
+
+* The heading names exactly what is documented: *Node: textContent property*.
+  `Node` is the general kind of object your paragraph is a special version of,
+  so the page applies to your paragraph too.
+* **Value** describes what you get when you read the property and what happens
+  when you write to it. Under it sit short comparisons with the two properties
+  that look similar.
+* **Examples** are small pieces of code, written in JavaScript. Read them and
+  rebuild the idea in your own file rather than pasting them.
+* **Browser compatibility** is a table of browsers and versions. Everything
+  this course uses is green there, so skip it until the day you try something
+  brand new.
+
+A page for a method, such as `querySelector`, is laid out the same way with
+one difference: instead of *Value* it has **Syntax**, **Parameters**, and
+**Return value**.
+
+## A search engine {#sec-research-search}
+
+MDN answers "what does this do". A search engine answers "why is my thing
+broken", which is the question you actually have most of the time.
+
+Paste the error message from the browser console into the search box and put
+quotation marks around it, so the engine looks for that exact wording. For a
+"how do I" question, write it the way you would ask a person and name the
+technology in it: *how do I read the text a user typed into an input in
+typescript*.
+
+Then look at the date. A well-written answer from 2014 may describe browsers
+nobody runs any more and recommend a way of working that has been replaced
+twice since. An old result is still worth reading, and worth checking against
+MDN before you copy anything out of it.
+
+## An AI {#sec-research-ai}
+
+An AI does the one thing the other two sources cannot: it explains at your
+level. Ask it to say an MDN sentence again in simpler words, or to explain why
+your own code behaves oddly, and the answer comes back written for you.
+
+It can also be wrong while sounding completely sure, inventing property names
+that sound plausible or answering about a version of a library you are not
+using. Treat its answer as a lead, and check whatever you rely on against MDN.
+
+Ask precisely. Paste the code you actually ran, then write what you expected
+and what happened instead. "It doesn't work" gets you a guess back.
+
+Two chapters from now you set up your own coding buddy, an AI that knows the
+rules of this course. It points you at the source instead of ending your
+research for you.
+
+## How a research box works {#sec-research-boxes}
+
+A research box lists questions and stops there. The answers are not further
+down the chapter. You find them now, with the three sources above, and you
+write them down in your own words.
+
+The exercise after the box needs those answers, and the quiz at the end of the
+chapter asks the same questions again. Let the quiz drive you: answer what you
+know, look up the rest, and come back until nothing is left open.
+
+::: {.research title="`textContent` or `innerHTML`?"}
+The exercise below shows text that a user typed, and you have to choose one of
+the two properties for it. Find out:
+
+1. A program sets a paragraph's content to the string `<b>bold?</b>`. What
+   does the reader see with `textContent`, and what do they see with
+   `innerHTML`?
+2. Putting text that a user typed into `innerHTML` is dangerous. Why, and what
+   is the name of the attack this allows?
+3. Which of the two do you use to show text a user typed, and why?
+4. Ask an AI the same question you asked MDN. Name one thing the AI added that
+   MDN did not say, or one thing the AI got wrong.
+
+For the exam, the rule for user text has to stick without looking it up.
+:::
+
+## Exercise: show what the user typed {#sec-research-exercise}
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template, run `npm install`, and start it with `npm start`.
+2. Replace the `<h1>` in `index.html` with this markup:
+
+   ```html
+   <label for="messageInput">Your message</label>
+   <input id="messageInput" type="text">
+   <button id="showButton" type="button">Show</button>
+   <p id="output"></p>
+   ```
+
+3. Delete the starter's two lines in `src/index.ts`. Look up the input,
+   the button, and the paragraph with `document.querySelector`, each with its
+   element type, and throw an error when one of them is missing.
+4. Add a click listener to the button. In the listener, write the input's
+   `value` into the paragraph using `innerHTML`.
+5. Run the app, type `<b>hi</b>` into the input, and click the button. Write
+   down what stands in the paragraph.
+6. Change that one line to use `textContent` instead. Type `<b>hi</b>` again
+   and click. Write down what stands in the paragraph now.
+7. Keep the property that belongs in this app. Above that line, write one
+   comment naming the property and saying why this app uses it. Your research
+   answers are the reason.
+8. Run `npm run check` before you call the exercise done.
+
+## Check your understanding {#sec-research-quiz}
+
+Six questions, four of them the research task from this chapter.
+
+{{< quiz research title="Research is part of the job" >}}

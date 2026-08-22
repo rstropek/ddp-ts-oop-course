@@ -1,0 +1,50 @@
+/* Base layout of the blog. You do not have to change anything above the
+   task comments; the six tasks are waiting at the bottom of this file. */
+
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 40rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  line-height: 1.5;
+}
+
+article {
+  border-top: 1px solid #ddd;
+  padding-top: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.tags {
+  list-style: none;
+  padding: 0;
+}
+
+.tags li {
+  display: inline-block;
+  background-color: #eee;
+  border-radius: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  margin-right: 0.25rem;
+}
+
+.meta {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+#controls p {
+  font-weight: bold;
+}
+
+/* Task 1: every heading inside an article gets the color #1d3557. */
+
+/* Task 2: every highlighted paragraph gets the background color #fff3b0. */
+
+/* Task 3: the first paragraph of every post gets font-size 1.15rem. */
+
+/* Task 4: every odd tag gets the background color #d8e2dc. */
+
+/* Task 5: every link that points to another website gets the color #b5179e. */
+
+/* Task 6: a tag under the mouse pointer gets the background color #ffb703. */

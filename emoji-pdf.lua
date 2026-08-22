@@ -29,6 +29,7 @@ local substitutions = {
   { "✂", "scissors" },      -- U+2702 without variation selector
   { "🪨", "rock" },          -- U+1FAA8
   { "📃", "paper" },         -- U+1F4C3
+  { "➜", "->" },             -- U+279C, Vite's dev-server banner
   { "\u{FE0F}", "" },        -- stray variation selector: invisible, drop it
 }
 

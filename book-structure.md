@@ -106,8 +106,9 @@ and names the concept afterwards.
   with the four strict options they will actually hit; `biome.json`, `npm run
   check` / `check:fix`, format on save; `.vscode/`, `.gitignore`, `assets/`;
   the `.agents/skills` folder gets a teaser only.
-* Exercise: break the project on purpose three times (remove the script tag,
-  rename `index.ts`, leave a variable unused) and read the three errors.
+* Exercise: break the project on purpose (remove the script tag, rename
+  `index.ts`, leave a variable unused, format it badly) and read each tool's
+  answer; turn on format on save; read the installed version in the lock file.
 
 ### 2.4 Types for elements [NEW, merges the `as` casts LY used without explaining]
 * Experiment: `getElementById` of an id that does not exist; read the error.
@@ -236,7 +237,9 @@ the "creative" part of the course after the form-heavy Part 2.
 * Drawing axes, ticks, and labels in loops; redraw = clear and rebuild.
 * Exercise A: 12-month bar chart with a threshold line and red/green bars [LY].
 * Exercise B: bubble chart with color/x/y/size form and range validation
-  [EX 2025-10-09].
+  [EX 2025-10-09]. Chapter 2.11 promises that this form uses `number`,
+  `color`, and `range` inputs, so the size field becomes a `range` slider
+  (the original exam used three number inputs).
 
 ### 3.4 Animation with requestAnimationFrame [LY 20-svg]
 * The animation loop compared with p5.js `draw()`; delta time in one sentence.

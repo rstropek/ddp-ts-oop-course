@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the "Types for elements" chapter quiz
+# (0020-dom/0040-types-for-elements.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes, not routinely.
+
+id: types-for-elements-quiz-eval
+target: ./0040-types-for-elements-quiz.yaml
+
+questions:
+  - question: research-number-conversion
+    answers:
+      - expect: correct
+        answer: |
+          Number('abc') is NaN, Number('') is 0
+      # The surprise (empty string becomes 0) is missing.
+      - expect: partial
+        answer: |
+          abc gives NaN
+      - expect: incorrect
+        answer: |
+          both are NaN because neither one is a number
+
+  - question: research-parsefloat-vs-number
+    answers:
+      - expect: correct
+        answer: |
+          parseFloat gives 12, Number gives NaN
+      # German correct answer.
+      - expect: correct
+        answer: |
+          parseFloat liefert 12, weil es vorne aufhört zu lesen. Number('12abc') ist NaN.
+      # Describes parseFloat's behavior but never gives the value.
+      - expect: partial
+        answer: |
+          parseFloat reads the number at the start and stops, Number('12abc') is NaN
+      - expect: incorrect
+        answer: |
+          both give 12, the letters are just ignored
+
+  - question: research-select-value
+    answers:
+      - expect: correct
+        answer: |
+          select.value, i found it on the mdn page for HTMLSelectElement
+      # Right property, no source named.
+      - expect: partial
+        answer: |
+          you use .value
+      - expect: incorrect
+        answer: |
+          selectedIndex, it gives you the value of the chosen option (from MDN)
+
+  - question: possibly-null-error
+    answers:
+      - expect: correct
+        answer: |
+          querySelector can find nothing and then gives back null. so
+          statusParagraph might be null and setting textContent on null
+          would crash. typescript wants me to check it first.
+      # Knows it can be null, says nothing about checking or crashing.
+      - expect: partial
+        answer: |
+          the variable could be null
+      - expect: incorrect
+        answer: |
+          the id #statusText is written wrong, that is why typescript
+          complains
+
+  - question: value-is-a-string
+    answers:
+      - expect: correct
+        answer: |
+          value is the string "3.5" and amount is the number 3.5
+      # Both values right, but the string aspect never stated.
+      - expect: partial
+        answer: |
+          both are 3.5
+      - expect: incorrect
+        answer: |
+          amount is NaN because value is text and Number cannot convert it
+
+  - question: replace-the-cast
+    answers:
+      - expect: correct
+        answer: |
+          const nameInput = document.querySelector<HTMLInputElement>('#nameInput');
+          if (nameInput === null) {
+            throw new Error('Element #nameInput not found');
+          }
+      # querySelector with the kind is right, the null check is missing.
+      - expect: partial
+        answer: |
+          const nameInput = document.querySelector<HTMLInputElement>('#nameInput');
+      - expect: incorrect
+        answer: |
+          const nameInput = document.querySelector('#nameInput') as HTMLInputElement;

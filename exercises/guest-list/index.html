@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest list</title>
+  </head>
+  <body>
+    <h1>Guest list</h1>
+    <form id="guestForm" novalidate>
+      <div class="field">
+        <label for="guestName">Name</label>
+        <input id="guestName" type="text">
+      </div>
+      <div class="field">
+        <label for="guestAge">Age</label>
+        <input id="guestAge" type="number" min="0" max="120" step="1">
+      </div>
+      <button id="addGuest" type="submit">Add guest</button>
+    </form>
+    <p id="guestError" class="error"></p>
+    <ul id="guests"></ul>
+    <p id="guestCount"></p>
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

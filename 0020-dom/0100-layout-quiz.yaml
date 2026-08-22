@@ -1,0 +1,164 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "CSS by doing: layout with Flexbox and Grid"
+# (0020-dom/0100-layout.qmd).
+# The first four questions are the chapter's research box (ids `research-*`):
+# they get the research feedback rule, so the grader names the source instead
+# of the answer. The last two check the chapter's own concepts, the grid row
+# fill order and the default box model.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: layout-quiz
+name: "Quiz: CSS by doing: layout with Flexbox and Grid"
+
+title: "Check your understanding: layout with Flexbox and Grid"
+description: |
+  Six short questions about the chapter *CSS by doing: layout with
+  Flexbox and Grid*, four of them the research task. Answer in your own
+  words; if you cannot answer a research question yet, look it up and
+  come back. One or two sentences are enough. This quiz is anonymous and
+  is here for you, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="grid-template-columns: repeat(8, 1fr);"
+      scope="after the layout chapter of the DOM part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "HTML elements, the DOM tree, events, and `classList`"
+        "CSS selectors: tag, `#id`, `.class`, `tag.class`, descendant, and `:hover`"
+        "`querySelector<T>` with a null check, `querySelectorAll`, and `for...of`"
+        "the box model: content, padding, border, and margin, and that `width` sets the content width"
+        "block boxes such as `div` versus inline boxes such as `span`"
+        "`display: flex` with `flex-direction`, `gap`, and `flex-wrap`"
+        "`display: grid` with `grid-template-columns` and `repeat`"
+        "the units `px`, `rem`, and `%`, and colors as a name, a hex code, or `rgb()`"
+        "`border-radius`, `box-shadow`, and `transition` by name")
+      not_yet=(array
+        "classes, inheritance, or generics other than `querySelector<T>`"
+        "SVG"
+        "CSS positioning, `float`, media queries, or named grid areas")}}
+
+questions:
+  - id: research-flex-center
+    title: "Centering with Flexbox"
+    question: |
+      A `<div>` has `display: flex` and holds one child element. You want
+      that child centered horizontally *and* vertically inside the div.
+      Which two CSS properties do you set on the div, and which value does
+      each one get?
+    evaluation: |
+      Expected: `justify-content: center;` and `align-items: center;` on the
+      flex container.
+      Required: (1) both property names; (2) the value `center` for each.
+      Partial: only one of the two properties named with `center`, or both
+      names given without saying the value is `center`.
+      Incorrect: `text-align: center`, `margin: auto` alone, or `display:
+      flex` given as one of the two answers.
+
+  - id: research-fr-unit
+    title: "What 1fr means"
+    question: |
+      A grid container has `grid-template-columns: repeat(4, 1fr);`. What
+      does the unit `fr` mean here, and how wide does each of the four
+      columns end up?
+    evaluation: |
+      Expected: `fr` is a fraction (a share) of the free space in the grid
+      container. All four columns ask for one share each, so they end up
+      equally wide and together fill the container.
+      Required: (1) `fr` is a share or fraction of the available space, not a
+      fixed length; (2) the four columns are equally wide.
+      Partial: says the columns are equally wide but never mentions the
+      share-of-the-space idea.
+      Incorrect: calls `fr` a fixed length such as pixels, or says one column
+      is wider than the others.
+
+  - id: research-space-between
+    title: "space-between"
+    question: |
+      A flex row holds four buttons and gets
+      `justify-content: space-between;`. Describe where the four buttons
+      end up.
+    evaluation: |
+      Expected: the first button sits at the start of the row, the last one at
+      the end, and the leftover space is shared equally between the buttons.
+      There is no extra space before the first or after the last one.
+      Required: (1) equal space between the buttons; (2) the outer two sit at
+      the two edges, with no space outside them.
+      Partial: says the buttons are spread out or pushed apart, without the
+      edges (or without the equal gaps).
+      Incorrect: describes centering, stacking, or equal space on the outside
+      edges too.
+
+  - id: research-translate-y
+    title: "translateY"
+    question: |
+      A `:hover` rule contains `transform: translateY(-4px);`. What does that
+      do to the element while the mouse is over it?
+    evaluation: |
+      Expected: it moves the element 4 pixels up the screen; a negative y
+      value goes up because the y axis points down.
+      Required: (1) the element moves up; (2) by 4 pixels.
+      Partial: says it moves 4 pixels vertically without naming the direction,
+      or says up without the amount.
+      Incorrect: says it moves down, or says it changes the element's size,
+      color, or opacity.
+
+  - id: grid-rows
+    title: "Filling a grid"
+    question: |
+      A `<div id="gallery">` holds seven `<div>` children and is styled like
+      this:
+
+      ```css
+      #gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+      ```
+
+      How many rows do you see, and how many boxes stand in the last row?
+    evaluation: |
+      Expected: three rows; the last row holds one box (3 + 3 + 1 = 7). The
+      browser fills a row and starts a new one when the columns are full.
+      Required: both numbers, 3 rows and 1 box in the last row.
+      Partial: one of the two numbers right, the other wrong or missing.
+      Incorrect: one row of seven, seven rows, or three boxes in the last row.
+
+  - id: box-width
+    title: "How wide is the box?"
+    question: |
+      No `box-sizing` is set anywhere on the page. How many pixels wide is
+      this element on the screen, and how do you get to that number?
+
+      ```css
+      .box {
+        width: 100px;
+        padding: 10px;
+        border: 5px solid black;
+      }
+      ```
+    evaluation: |
+      Expected: 130 pixels. `width` sets the content width only, so the
+      padding and the border are added on both sides: 100 + 10 + 10 + 5 + 5.
+      Required: (1) the number 130; (2) padding and border come on top of
+      `width`.
+      Partial: says padding and border are added on top but the arithmetic is
+      wrong (for example 115 or 120, counting one side only), or gives 130
+      with no reason at all.
+      Incorrect: 100 px, with the claim that `width` already contains the
+      padding and the border.

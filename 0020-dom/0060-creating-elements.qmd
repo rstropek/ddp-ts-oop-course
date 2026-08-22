@@ -1,0 +1,209 @@
+---
+title: "Creating elements"
+---
+
+Every element you have changed so far was already sitting in `index.html`. You
+looked it up and wrote into it. Most real pages are not like that. A to-do list
+starts empty and grows while the user types. A web shop shows one row per
+article in the cart, and nobody wrote those rows by hand. The page comes from
+data, and your program builds it.
+
+## Three names, three list items {#sec-creating-elements-experiment}
+
+Make a fresh app from the starter and open `index.html`. Change the heading and
+put an empty list under it:
+
+```html
+<h1 id="helloWorldHeader">Names</h1>
+<ul id="nameList"></ul>
+```
+
+Now replace everything in `src/index.ts` with this:
+
+```ts
+const names = ['Ada', 'Grace', 'Linus'];
+
+const list = document.querySelector<HTMLUListElement>('#nameList');
+if (!list) {
+  throw new Error('No element with the id nameList');
+}
+
+for (const name of names) {
+  const item = document.createElement('li');
+  item.textContent = name;
+  list.append(item);
+}
+```
+
+Run `npm start`. Three list items appear under the heading, one per name, even
+though the `<ul>` in your HTML is empty. Add a fourth name to the array and
+save. The page reloads and shows four.
+
+## Data in, elements out {#sec-creating-elements-pattern}
+
+That loop is the pattern this book comes back to in almost every project.
+You have data in a variable, and you want the user to see it, so you walk over
+the data and build one element per entry.
+
+Three steps make one element:
+
+1. `document.createElement('li')` builds a new element object of that tag.
+2. `item.textContent = name` fills it, exactly like the elements you already
+   know.
+3. `list.append(item)` puts it into the page.
+
+Step 2 uses `textContent` on purpose. The to-do list below puts text that a
+user typed into an element, and `textContent` writes those characters onto the
+page as characters. Type `<b>hi</b>` and the page shows the angle brackets.
+`innerHTML` would read the same characters as markup and build a bold element
+out of them, which hands anyone who types into your page a way to put their own
+HTML into it. Text from a user goes in through `textContent`.
+
+Step 3 is the one people forget. `createElement` gives you a real object with
+all the properties you know, but that object has no parent yet, so it is
+nowhere on the page. You can set its text and change its style, and the user
+still sees nothing. An element becomes visible the moment you attach it to an
+element that is already in the tree.
+
+::: {.callout-warning}
+## Nothing appears, no error
+
+If your new elements never show up, the missing `append` is the first thing to
+check. The browser reports no error for it. From its point of view you built an
+object and then never used it.
+:::
+
+`append` puts the new element after the parent's existing children.
+`prepend` puts it in front of them, so the newest entry sits at the top of the
+list. And `item.remove()` takes an element out of the tree again. You call it
+on the element itself, and it disappears from the page together with everything
+inside it.
+
+## A stylesheet of your own {#sec-creating-elements-styles}
+
+Setting `item.style.color` on every single element gets tiring fast, and it
+mixes the look of the page into the logic of your program. CSS does that job
+better. You have copied a stylesheet into an app before; this time you write
+one. Create the file `src/styles.css`:
+
+```css
+li:hover {
+  background-color: #eee;
+}
+
+li.done {
+  text-decoration: line-through;
+  color: gray;
+}
+```
+
+Then make the very first line of `src/index.ts` the import that pulls it in:
+
+```ts
+import './styles.css';
+```
+
+Vite sees the import and puts the styles into the page for you. Every project
+from here on has a `src/styles.css` reaching the page this way.
+
+Each block in the file has a **selector** in front of the braces, which says
+which elements the rules apply to. `li:hover` means any `li` while the mouse
+pointer is over it. `li.done` means any `li` that carries the label `done`. Try
+the hover rule right now: reload the page and move the mouse over the names. A
+later chapter takes the selector language apart properly.
+
+## Labels on elements {#sec-creating-elements-classlist}
+
+A **class** in HTML is a label you stick on an element so CSS can find it. An
+element can carry several of them, and every element has a `classList`
+property to manage them. Add a click handler to the loop in your experiment:
+
+```ts
+for (const name of names) {
+  const item = document.createElement('li');
+  item.textContent = name;
+  item.addEventListener('click', () => {
+    item.classList.add('done');
+  });
+  list.append(item);
+}
+```
+
+Click a name. It turns gray and gets a line through it, because
+`classList.add('done')` put the label on the element and the `li.done` rule in
+your stylesheet was waiting for exactly that. `classList.remove('done')` peels
+the label off again.
+
+This is a better habit than reaching for `item.style` every time. The
+stylesheet decides how "done" looks, your program decides which items are
+done, and you can restyle the whole app without touching a line of TypeScript.
+
+::: {.callout-note}
+## Two meanings of one word
+
+The word `class` in HTML and CSS has nothing to do with the `class` keyword in
+TypeScript, which arrives in a later part of this book. Same word, two
+completely different things. When this chapter says class, it means the label.
+:::
+
+::: {.research title="What else can classList do?"}
+`add` and `remove` are two of several `classList` methods, and the to-do list
+below needs two more. MDN documents all of them on one page, the reference
+page for the `classList` property of an element.
+
+1. Which `classList` method switches a class on when it is off and off when it
+   is on, in a single call?
+2. Which `classList` method answers `true` or `false` for the question "does
+   this element already carry that class?"
+3. `append` and `appendChild` both put an element into a parent. Name one thing
+   `append` accepts that `appendChild` refuses.
+
+For the exam you need to switch a class on and off and ask whether it is set,
+without looking either up.
+:::
+
+## Exercise: a to-do list {#sec-creating-elements-exercise}
+
+{{< exercise todo-list >}}
+
+The `index.html` you copied has a text input with the id `todoText`, a button
+with the id `addTodo`, an empty `<ul id="todos">`, and an empty paragraph
+`<p id="openCount">` under the list. The stylesheet already styles
+`#todos li.done` and highlights an item on hover.
+
+1. Add `import './styles.css';` as the first line of `src/index.ts`, then look
+   up the input, the button, the list, and the paragraph with
+   `querySelector<T>`. Throw an error if one of them is missing. Run
+   `npm start`. The page shows the heading, the input, and the button, and
+   nothing happens yet.
+2. Listen for a click on the button. Read `input.value`, build an `li` with
+   that text, and append it to the list. Empty text is ignored, so check for it
+   and stop early. After adding, set `input.value` back to an empty string so
+   the field is ready for the next item. Type something, click **Add**, and the
+   item appears in the list.
+   *Tip:* `input.value.trim()` gives you the text without spaces at the start
+   and the end, so a field with only spaces counts as empty.
+3. Give every new `li` a click handler that flips the class `done` on it. One
+   click crosses the item out, the next click brings it back. The research task
+   above tells you which `classList` method does both directions in one call.
+4. Inside every new `li`, add a small button with the text `x` and give that
+   button its own click handler. When it is clicked, remove the whole item with
+   `remove()`. Watch out for one thing: the handler must remove the `li`, not
+   the button, so create the `li` first, keep it in a variable, and use that
+   variable inside the button's handler.
+5. Test all three actions together: add four items, cross two of them out, and
+   delete one of the crossed-out ones. The rest of the list stays as it was.
+
+**Bonus.** Fill the paragraph `#openCount` with a line like `3 open` and update
+it after every add, every toggle, and every delete. To count, walk over
+`list.children`, which is the collection of the elements currently inside the
+list, and count the ones that do *not* carry the class `done`. The research
+task above tells you which `classList` method answers that. Writing the
+counting code in its own function pays off here, because you call it from three
+places.
+
+## Check your understanding {#sec-creating-elements-quiz}
+
+Six short questions, three of them the research task. Answer in your own words.
+
+{{< quiz creating-elements title="Creating elements" >}}

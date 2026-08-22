@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden answers for 0110-forms-quiz.yaml ("Forms and validation").
+# Teacher-only test data. Never publish as an activity, never mint a code.
+
+id: forms-quiz-eval
+target: ./0110-forms-quiz.yaml
+
+questions:
+  - question: research-input-types
+    answers:
+      - expect: correct
+        answer: |
+          number is a field for digits with little arrows, color opens a color
+          picker, range is a slider you drag
+      # Names without descriptions.
+      - expect: partial
+        answer: |
+          number, color and range
+      - expect: incorrect
+        answer: |
+          type="slider", type="picker" and type="name"
+
+  - question: research-value-as-number
+    answers:
+      - expect: correct
+        answer: |
+          value is a string, valueAsNumber is already a number so i don't need
+          Number(). if the field is empty you get NaN
+      # German correct answer for this quiz.
+      - expect: correct
+        answer: |
+          value ist ein string, valueAsNumber ist schon eine zahl. wenn das
+          feld leer ist bekommt man NaN.
+      # The difference without the empty case.
+      - expect: partial
+        answer: |
+          valueAsNumber gives back a number instead of a string
+      - expect: incorrect
+        answer: |
+          both give a number, valueAsNumber is just shorter to write. empty
+          means 0.
+
+  - question: research-min-max-step
+    answers:
+      - expect: correct
+        answer: |
+          min is the smallest and max the biggest value, step is how far the
+          arrows jump. you can still type 500 into it, the browser doesn't cut
+          it down.
+      # Attributes right, second half answered wrong.
+      - expect: partial
+        answer: |
+          min and max are the smallest and biggest allowed number and step is
+          the jump of the arrows, so the value can never be outside.
+      - expect: incorrect
+        answer: |
+          step says how many decimal places are allowed and min and max are
+          only there for the design
+
+  - question: no-prevent-default
+    answers:
+      - expect: correct
+        answer: |
+          the page reloads and the name ends up in the url, the field is empty
+          again. event.preventDefault() is missing.
+      # Names the fix but not the effect.
+      - expect: partial
+        answer: |
+          preventDefault is missing
+      - expect: incorrect
+        answer: |
+          nothing happens because pressing enter does not submit a form, you
+          have to click the button
+
+  - question: label-for
+    answers:
+      - expect: correct
+        answer: |
+          if you click the text the cursor goes into the field, and a screen
+          reader can read out what the field wants
+      # One reason only.
+      - expect: partial
+        answer: |
+          because clicking on the label focuses the input
+      - expect: incorrect
+        answer: |
+          it just looks nicer than writing the text before the input
+
+  - question: missing-return
+    answers:
+      - expect: correct
+        answer: |
+          the error text shows up but addGuest runs anyway, so an empty guest
+          is added. put return; inside the if.
+      # Fix without the effect.
+      - expect: partial
+        answer: |
+          you need a return in the if
+      - expect: incorrect
+        answer: |
+          the code is fine, the real problem is that preventDefault stops the
+          form from working

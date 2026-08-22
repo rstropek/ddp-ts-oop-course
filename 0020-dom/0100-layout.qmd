@@ -1,0 +1,275 @@
+---
+title: "CSS by doing: layout with Flexbox and Grid"
+---
+
+Your pages so far have been a stack. One element under the other, in the order
+they stand in `index.html`, because that is what the browser does when nobody
+tells it otherwise. A chessboard needs eight columns. A row of weather cards
+needs to sit in a line and wrap when the window gets narrow. This chapter
+gives you the two tools that put boxes where you want them.
+
+## Eight boxes that snap into a row {#sec-layout-experiment}
+
+Create a fresh app from the starter and run `npm install`. In `index.html`,
+replace the `<h1>` with eight empty boxes:
+
+```html
+<div id="board">
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+</div>
+```
+
+Replace everything in `src/index.ts` with one line:
+
+```ts
+import './styles.css';
+```
+
+Create `src/styles.css` next to it:
+
+```css
+.cell {
+  height: 3rem;
+  background-color: #b58863;
+}
+```
+
+Run `npm start`. You get eight brown bars, each as wide as the window, stacked
+from top to bottom. Now add one rule above the `.cell` rule:
+
+```css
+#board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+```
+
+Save the file. The eight bars snap into a single row of eight boxes with a
+thin line between them. Change the `8` inside `repeat(8, 1fr)` to a `4` and
+save again: two rows of four. You never touched the HTML. The boxes are the
+same eight `div`s in the same order, and one rule on their parent decided how
+they are arranged.
+
+## Every element is a box {#sec-layout-box}
+
+Every element the browser draws is a rectangle, even when you never see its
+edges. That rectangle has four layers, and CSS lets you set each of them.
+
+![The four layers of an element's box. Content in the middle, then padding,
+then the border, then the margin.](images/box-model.svg){width=340}
+
+The content is the text or the image itself. Padding is space inside the
+element, between the content and the border, and it is painted in the
+element's background color. The border is a line you can draw around the
+padding. Margin is space outside the element, between this box and its
+neighbors, and it always stays transparent.
+
+One detail catches everybody once. By default, `width` sets the width of the
+*content* only, and padding and border are added on top of it. A box with
+`width: 200px`, `padding: 10px`, and a 2 pixel border therefore covers 224
+pixels of screen, not 200.
+
+A `div`, a `p`, and an `h1` are **block** boxes: each takes all the width it
+can get and starts on a new line. A `span` and an `a` are **inline**: they sit
+inside the running text and are only as wide as their content. That is why the
+eight `div`s of the experiment started life as a stack of full-width bars.
+
+## Flexbox lays out a line {#sec-layout-flexbox}
+
+`display: flex` on a container puts its children next to each other in one
+line, and they stop taking the full width. `flex-direction: column` stands
+that line upright. `gap` sets the space between the children, and
+`flex-wrap: wrap` lets a child move down to a new line when the row runs out
+of room.
+
+```css
+#toolbar {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+```
+
+Two more properties, `justify-content` and `align-items`, decide where the
+children sit in the space that is left over. Their values are the research
+task below.
+
+Flexbox has many more properties than this chapter needs. When you want one,
+read [MDN's basic concepts of
+flexbox](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout/Basic_concepts_of_flexbox).
+
+## Grid lays out a board {#sec-layout-grid}
+
+Flexbox thinks in one line. A chessboard and a photo gallery are
+two-dimensional, and that is Grid's job. `display: grid` together with
+`grid-template-columns` says how many columns there are and how wide each one
+is. The browser then fills the columns from left to right and starts a new row
+whenever they are full, so you never write the rows yourself.
+`repeat(8, 1fr)` is short for writing `1fr` eight times.
+
+`gap` works in a grid too. `aspect-ratio: 1` on the children keeps every cell
+exactly as tall as it is wide, no matter how wide the board gets.
+
+[MDN's guide to CSS grid
+layout](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout) is
+the place to go when a grid needs more than equal columns.
+
+::: {.callout-tip}
+## Look at the box in DevTools
+
+Open the browser DevTools with F12, pick an element in the Elements panel, and
+scroll the styles panel to the bottom. The colored box model diagram there
+shows the real content, padding, border, and margin of that element in pixels.
+When a layout does something you did not expect, look there first.
+:::
+
+## Sizes, colors, and type {#sec-layout-values}
+
+Three units cover almost everything you will write this year. `px` is one
+screen pixel, right for a border or a small gap. `rem` is the browser's base
+font size, usually 16 pixels, so a length in `rem` grows when the reader turns
+their font size up. `%` is a share of the parent element.
+
+Colors come in three notations, and you will meet all of them in other
+people's code: a name like `tomato`, a hex code like `#b58863` with two hex
+digits each for red, green, and blue, and `rgb(181 136 99)` with the three
+numbers spelled out.
+
+`font-family` takes a list, and the browser uses the first font it actually
+has. `font-family: system-ui, sans-serif;` asks for the operating system's own
+interface font and falls back to any sans-serif font. `font-size` takes a
+length, and `rem` is the safe unit for it.
+
+Three more properties earn their place in the exercises below.
+`border-radius` rounds the corners of a box, `box-shadow` paints a shadow
+behind it, and `transition` makes a change happen over time instead of
+instantly:
+
+```css
+.card {
+  transition: transform 0.15s;
+}
+```
+
+That line says: whenever this element's `transform` changes, animate the
+change over 0.15 seconds. MDN documents what each of the three accepts; look
+them up when you want a different corner, shadow, or speed.
+
+::: {.research title="Centering, `1fr`, and the hover lift"}
+The weather dashboard below centers the text inside every card and lifts a
+card when the mouse touches it. Both need CSS that this chapter names and does
+not explain.
+
+1. With Flexbox, which two properties center a single child horizontally
+   *and* vertically inside its parent, and which value does each one need?
+2. In `grid-template-columns: repeat(4, 1fr)`, what does `1fr` mean?
+3. What does `justify-content: space-between` do to the children of a flex
+   row?
+4. What does `transform: translateY(-4px)` do to an element?
+
+Centering with Flexbox comes back in almost every exercise from here on, so
+that one has to work in the exam without looking it up.
+:::
+
+## Exercise: a chessboard {#sec-layout-chessboard}
+
+{{< exercise chessboard >}}
+
+The `index.html` you copied holds a `<div id="board">` with 64 `<div>`s inside
+it. Every one of them has the class `cell`, plus a second class, `light` or
+`dark`, that already alternates the way a real board does.
+
+1. Replace everything in `src/index.ts` with `import './styles.css';` and run
+   `npm start`. You see the heading and nothing else, because the cells are
+   empty and have no height yet.
+2. In `src/styles.css`, give `.cell` a height of `3rem`, give `.cell.light`
+   the background color `#f0d9b5`, and give `.cell.dark` the background color
+   `#b58863`. The page fills with 64 wide stripes in alternating colors.
+3. Turn `#board` into a grid with eight equal columns. The stripes become an
+   8 by 8 board that spans the whole window.
+4. Give `#board` a width of `30rem` and center it in the window with
+   `margin: 0 auto`. The board shrinks and moves to the middle of the page.
+5. The cells are wide rectangles now: each column is an eighth of `30rem`,
+   but the height is still stuck at `3rem`. Replace that height with
+   `aspect-ratio: 1`, and every cell becomes exactly as tall as it is wide,
+   whatever width you give the board.
+6. Draw a frame around the board: a 4 pixel solid border on `#board`, in a
+   dark brown such as `#4a3728`.
+7. Now TypeScript. In `src/index.ts`, below the import, select every cell with
+   `document.querySelectorAll<HTMLDivElement>('#board .cell')` and loop over
+   the result with `for...of`. Give each cell a listener for the `click`
+   event.
+8. Inside the listener, remove the class `selected` from every cell first,
+   then add it to the cell that was clicked. `src/styles.css` already carries
+   a `.cell.selected` rule, so the clicked square gets a yellow ring. Click
+   around the board: exactly one square is ever selected.
+9. Clicking the selected square a second time should clear the selection.
+   `classList.contains` tells you whether the cell was already selected,
+   before your loop wipes the board.
+
+## Exercise: a weather dashboard {#sec-layout-weather}
+
+{{< exercise weather-dashboard >}}
+
+The `index.html` you copied holds a `<div id="cards">` with six city cards.
+Each card is a `<div>` with the class `card` and one condition class:
+`sunny`, `rainy`, `cloudy`, or `snowy`. Inside a card sit an `<h2>` with the
+city name, a `<p class="temperature">`, and a `<p class="condition">`.
+
+1. Replace everything in `src/index.ts` with `import './styles.css';` and run
+   `npm start`. The six cards stand under each other, one per line, with no
+   card look yet.
+2. Make `#cards` a flex row with a gap of `1rem`, and let the row wrap so the
+   cards drop to a second line when the window gets narrow. Try it: drag the
+   window edge and watch a card move down.
+3. Give `.card` a width of about `11rem`, `1rem` of padding, rounded corners
+   with `border-radius`, and a soft `box-shadow`.
+4. Center the content of a card horizontally and vertically. Make the card
+   itself a flex container with `flex-direction: column`, then use the two
+   properties from the research task.
+5. Write one rule per condition class that sets a `background-color` and a
+   text `color` you can read on it. Pick colors that fit the weather: warm for
+   `.sunny`, blue for `.rainy`, gray for `.cloudy`, pale blue for `.snowy`.
+   All six cards change with four rules, because two cities share a condition.
+6. Lift a card when the mouse is over it. Write a `.card:hover` rule that
+   moves the card up by 4 pixels with the `transform` property from the
+   research task, and add `transition: transform 0.15s;` to `.card` so the
+   move is animated instead of instant.
+
+### Optional: cycle the conditions {#sec-layout-weather-cycle}
+
+The page carries a button with the id `nextConditionButton`. Make it move
+every card one step through the four conditions: sunny to rainy, rainy to
+cloudy, cloudy to snowy, and snowy back to sunny.
+
+1. In `src/index.ts`, write an array with the four conditions in that order.
+   Each entry needs two pieces, the class name and the text for the card, for
+   example `{ className: 'sunny', label: 'Sunny' }`.
+2. Select the button with `document.querySelector<HTMLButtonElement>` and
+   throw an error when it is not there. Add a `click` listener to it.
+3. In the listener, select every card with
+   `document.querySelectorAll<HTMLDivElement>('.card')` and loop over them.
+4. For one card, find out which of the four class names it carries right now
+   with `classList.contains`. Add 1 to that position, use `%` so the last
+   condition wraps around to the first, remove all four class names from the
+   card, and add the new one.
+5. Set the text as well. `card.querySelector<HTMLParagraphElement>('.condition')`
+   finds the condition paragraph inside that one card, and its `textContent`
+   gets the new label.
+
+Every click now moves all six cards one step, colors and text together.
+
+## Check your understanding {#sec-layout-quiz}
+
+Six short questions, four of them the research task. If a research question is
+still open, look it up first and come back.
+
+{{< quiz layout title="Layout with Flexbox and Grid" >}}

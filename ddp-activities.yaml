@@ -31,6 +31,33 @@ activities:
   # One quiz per chapter, keyed by chapter slug. Each quiz also asks the
   # chapter's research-box questions (ids `research-*`).
   quizzes:
-    dummy:
-      file: 0020-dom/0010-dummy-quiz.yaml
-      note: "Creative Coding 2 book: Placeholder chapter (0010) — GitHub-hosted"
+    elements-are-objects:
+      file: 0020-dom/0010-elements-are-objects-quiz.yaml
+      note: "Creative Coding 2 book: Elements are objects (0010) — GitHub-hosted"
+    events:
+      file: 0020-dom/0020-events-quiz.yaml
+      note: "Creative Coding 2 book: Events: the page talks back (0020) — GitHub-hosted"
+    starter-project:
+      file: 0020-dom/0030-starter-project-quiz.yaml
+      note: "Creative Coding 2 book: The starter project, file by file (0030) — GitHub-hosted"
+    types-for-elements:
+      file: 0020-dom/0040-types-for-elements-quiz.yaml
+      note: "Creative Coding 2 book: Types for elements (0040) — GitHub-hosted"
+    research:
+      file: 0020-dom/0050-research-quiz.yaml
+      note: "Creative Coding 2 book: Research is part of the job (0050) — GitHub-hosted"
+    creating-elements:
+      file: 0020-dom/0060-creating-elements-quiz.yaml
+      note: "Creative Coding 2 book: Creating elements (0060) — GitHub-hosted"
+    selectors:
+      file: 0020-dom/0080-selectors-quiz.yaml
+      note: "Creative Coding 2 book: Selectors: asking for collections (0080) — GitHub-hosted"
+    git:
+      file: 0020-dom/0090-git-quiz.yaml
+      note: "Creative Coding 2 book: Git and your course repository (0090) — GitHub-hosted"
+    layout:
+      file: 0020-dom/0100-layout-quiz.yaml
+      note: "Creative Coding 2 book: CSS by doing: layout with Flexbox and Grid (0100) — GitHub-hosted"
+    forms:
+      file: 0020-dom/0110-forms-quiz.yaml
+      note: "Creative Coding 2 book: Forms and validation (0110) — GitHub-hosted"

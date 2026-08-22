@@ -88,18 +88,37 @@ pi
 In the `pi` prompt, pick the model with `/model` and choose *Coding buddy for
 the Creative Coding 2 course*. Then type a first task:
 
-> Show how many items are still open, in a line below the list.
+> Add a button "Clear done" below the list that removes every item marked as
+> done.
 
 Watch what happens. The agent reads `index.html` and `src/index.ts`, proposes
-a change, and applies it. Run `npm start` and look at the page. Then open
-`src/index.ts` and read the new lines. Could you have written them? Could you
-explain them to the person next to you? If not, ask the agent to walk you
-through them. That conversation is the real exercise of this chapter.
+a change, and applies it. Run `npm start`, add a few items, mark two as done,
+and click the new button. Then open `src/index.ts` and read the new lines.
+Could you have written them? Could you explain them to the person next to
+you? If not, ask the agent to walk you through them. That conversation is the
+real exercise of this chapter.
+
+## Exercise: take it back {#sec-buddy-exercise}
+
+The agent's code is only useful if it could have been yours. Prove it:
+
+1. Read what `pi` changed. The agent lists the files it touched; open each
+   one and compare it with what you remember writing. If you made a copy of
+   the project before starting, compare the two folders.
+2. Write down, in one sentence each, what every new line does. A line you
+   cannot explain is a question for the agent: "Explain line 12 to me, I don't
+   understand why it loops backwards."
+3. Delete the agent's change and write the button yourself, without `pi`.
+   Use what you already have: `querySelectorAll` is not in your toolbox yet,
+   so loop over `list.children` and collect the items whose `classList`
+   contains `done` before you remove them.
+4. Compare your version with the agent's. Different is fine. Wrong is not,
+   so test both the same way.
 
 ::: {.callout-tip}
 ## When the agent is the wrong tool
 
 The agent is for getting unstuck and for work you already understand. Before an
-exam, practise without it. A good test: close `pi`, delete what it wrote, and
+exam, practice without it. A good test: close `pi`, delete what it wrote, and
 write it again yourself.
 :::

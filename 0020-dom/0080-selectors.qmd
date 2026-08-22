@@ -1,0 +1,335 @@
+---
+title: "Selectors: asking for collections"
+---
+
+So far you have asked the page for one element at a time. `querySelector`
+returns the first match and stops looking. A real page has twelve list items
+and forty links, and the first one is rarely the one you want. This chapter is
+about asking for all of them at once.
+
+## Five paragraphs, one loop {#sec-selectors-experiment}
+
+Create a new app from the starter and replace everything inside `<body>` with
+this:
+
+```html
+<h1>Five paragraphs</h1>
+<p>One</p>
+<p>Two</p>
+<p>Three</p>
+<p>Four</p>
+<p>Five</p>
+<script src="./src/index.ts" type="module"></script>
+```
+
+Then replace the content of `src/index.ts` with this:
+
+```ts
+const paragraphs = document.querySelectorAll('p');
+
+for (const paragraph of paragraphs) {
+  paragraph.style.color = 'teal';
+}
+```
+
+Run `npm start`. All five paragraphs turn teal. You wrote the pattern `p`
+once and reached every paragraph on the page.
+
+Now get the same result with no TypeScript at all. Create `src/styles.css`:
+
+```css
+p {
+  color: teal;
+}
+```
+
+Add `import './styles.css';` as the first line of `src/index.ts`, then delete
+the `querySelectorAll` line and the loop. Reload the page. The paragraphs are
+still teal.
+
+## One selector language, two users {#sec-selectors-two-users}
+
+The pattern `p` did the same job twice. In the stylesheet it decided which
+elements the rule paints. In TypeScript it decided which elements came back
+from the document. A **selector** is a pattern that describes elements, and
+the browser reads it the same way in both places.
+
+That halves your work for the rest of the year. Every selector you pick up for
+styling also works in `querySelector` and `querySelectorAll`, and every
+selector you pick up for code also works in a stylesheet.
+
+So which of the two should do a job? When the look never changes, let the
+stylesheet do it and keep your TypeScript short. When the look changes because
+something happened, let TypeScript add or remove a class and let the
+stylesheet hold the colors. That is the `classList` trick from the to-do list,
+and now you can see why it works: both sides speak about the same class name.
+
+## The selector kinds you need now {#sec-selectors-kinds}
+
+Every example below talks about this markup:
+
+```html
+<ul id="shoppingList">
+  <li class="done">Milk</li>
+  <li>Bread</li>
+  <li class="done">Apples</li>
+</ul>
+<input id="newItem" type="text">
+<a href="https://developer.mozilla.org/">MDN</a>
+```
+
+**A tag name** matches every element with that tag.
+
+```css
+li {
+  padding: 0.2rem;
+}
+```
+
+```ts
+const items = document.querySelectorAll('li');
+```
+
+**A class** starts with a dot and matches every element that carries it, so
+`.done` finds Milk and Apples.
+
+```css
+.done {
+  color: gray;
+}
+```
+
+```ts
+const finished = document.querySelectorAll('.done');
+```
+
+**An id** starts with a hash and matches the single element that has it.
+
+```css
+#newItem {
+  width: 12rem;
+}
+```
+
+```ts
+const input = document.querySelector<HTMLInputElement>('#newItem');
+```
+
+**Two conditions on one element** are written with nothing between them.
+`li.done` means an `li` that also has the class `done`.
+
+**A space means "inside"**. `#shoppingList li` matches every `li` somewhere
+inside the list, however deeply it is nested.
+
+```css
+#shoppingList li {
+  cursor: pointer;
+}
+```
+
+```ts
+const listItems = document.querySelectorAll('#shoppingList li');
+```
+
+::: {.callout-warning}
+## One space, two different answers
+
+`ul .done` with a space matches elements with class `done` that sit inside a
+`ul`. `ul.done` without a space matches a `ul` that carries the class itself.
+The browser reports no error either way, so a missing space shows up as an
+empty page instead of a message.
+:::
+
+**A position** is written after a colon. `li:first-child` matches Milk, and
+`li:nth-child(odd)` matches Milk and Apples, the first and the third.
+
+```css
+#shoppingList li:nth-child(odd) {
+  background-color: #eee;
+}
+```
+
+```ts
+const oddItems = document.querySelectorAll('#shoppingList li:nth-child(odd)');
+```
+
+**The mouse pointer** uses a colon too. `li:hover` matches the item the
+pointer is on right now.
+
+```css
+li:hover {
+  background-color: gold;
+}
+```
+
+You can hand `li:hover` to `querySelectorAll` as well and get whatever sits
+under the pointer at that moment, but that is rarely useful. Leave `:hover` in
+the stylesheet, where the browser keeps it correct for free.
+
+**An attribute** goes in square brackets. `input[type="text"]` matches text
+inputs and ignores checkboxes. Write `^=` in place of `=` and only the start
+of the value has to match, so `a[href^="https://"]` picks the links that leave
+your own site.
+
+```css
+a[href^="https://"] {
+  color: purple;
+}
+```
+
+```ts
+const externalLinks = document.querySelectorAll('a[href^="https://"]');
+```
+
+There are many more kinds. When you need one, MDN's
+[CSS selectors reference](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_selectors)
+lists them with examples, and your coding buddy explains any selector you meet
+in someone else's code.
+
+## One object, or a collection of them {#sec-selectors-collection}
+
+`querySelector` answers with one element or with `null`, which is why you
+check the result before you use it. `querySelectorAll` answers with a
+collection of elements. When nothing matches you get an empty collection
+instead of `null`, so there is no null check here. `.length` tells you how
+many elements came back:
+
+```ts
+const finished = document.querySelectorAll('.done');
+console.log(`${finished.length} items are done`);
+```
+
+At the start of this part you met the first idea of object-oriented
+programming: an element on the page is an object with properties you can read
+and write. Here is the second one. Objects come in collections. You ask the
+document once and get many objects back, and a single loop then treats every
+one of them the same way:
+
+```ts
+for (const item of finished) {
+  item.classList.remove('done');
+}
+```
+
+Nearly every program in the rest of this book has that shape. Ask for a
+collection, loop over it, change each object.
+
+When you need a property that only one kind of element has, such as `value` on
+an input, name the type the way you already do with `querySelector`:
+
+```ts
+const inputs = document.querySelectorAll<HTMLInputElement>('input[type="text"]');
+```
+
+## Give the selector string a name {#sec-selectors-const}
+
+A selector string is knowledge about your HTML. Rename a class in
+`index.html`, and every copy of that string is suddenly wrong. In TypeScript
+you can keep the string in one place:
+
+```ts
+const HIGHLIGHTED = '.highlight';
+
+const count = document.querySelectorAll(HIGHLIGHTED).length;
+```
+
+The rename is one edit now. Look closely at what is stored there: the string,
+not the elements the call found. Whether you may store the elements once and
+keep using them later is exactly what the research box asks.
+
+::: {.research title="What does `querySelectorAll` hand back?"}
+The exercise below counts elements and loops over them. It also builds one
+comma-separated line out of a collection. You have seen the call and one loop,
+and the book stops explaining here.
+
+1. `document.querySelectorAll('p')` does not return an array. What does it
+   return, and what is that thing called?
+2. Name two different ways to loop over the result.
+3. Your program adds a new `<p>` to the page after the call. Does the result
+   you stored earlier contain that new paragraph? Which word does MDN use for
+   this behavior?
+4. Array methods such as `map` and `filter` are missing from the result. How
+   do you turn it into a real array?
+
+In the exam you have the course material but no internet and no AI, so
+looping over the result and knowing whether it updates itself should come
+without looking anything up.
+:::
+
+## Exercise: the class blog {#sec-selectors-exercise}
+
+{{< exercise blog-selectors >}}
+
+Open `index.html` and read it once. There are three articles. Each one has a
+heading, three paragraphs inside a `div` with the class `post`, a list of
+tags, and a line of sources. Four buttons sit above the articles and do
+nothing yet. `src/styles.css` already styles the page and ends with six
+comments, one per task of part A.
+
+## Part A: style the blog {#sec-selectors-css}
+
+Work in `src/styles.css` and replace each comment with a rule. Every task
+needs one of the selector kinds from this chapter, and no task needs a new
+class in `index.html`. Run `npm start` and keep the page open while you work.
+
+1. Give every heading inside an article the color `#1d3557`. The three post
+   titles turn dark blue, and the "Class blog" heading at the top keeps its
+   color.
+2. Give every highlighted paragraph the background color `#fff3b0`. One
+   paragraph in each article gets a yellow band.
+3. Give the first paragraph of every post the font size `1.15rem`. Only the
+   paragraph directly under each heading grows.
+4. Give every odd tag the background color `#d8e2dc`. In each tag list the
+   first and the third tag change, the middle one does not.
+5. Give every link that points to another website the color `#b5179e`. The
+   three MDN links change, and the links to `/notes/...` and `/imprint.html`
+   stay as they are.
+6. Give a tag under the mouse pointer the background color `#ffb703`. Move the
+   pointer along a tag list and watch them light up one by one.
+
+## Part B: count and change from TypeScript {#sec-selectors-typescript}
+
+Open `src/index.ts` and delete what is in it. Start with
+`import './styles.css';`, then wire up the four buttons one at a time.
+Reload the page after each step and try the button you just wrote.
+
+1. **Count highlights.** When `#countButton` is clicked, count the paragraphs
+   with the class `highlight` and write the number into the paragraph
+   `#status`, for example `3 highlighted paragraphs`. Right after loading the
+   page the answer is 3.
+2. **Toggle highlights.** When `#toggleButton` is clicked, flip the class
+   `highlight` on every paragraph inside an article. The first click takes the
+   yellow away from three paragraphs and gives it to the other nine. The
+   paragraph under the page heading and the `#status` paragraph never change,
+   because neither of them sits inside an article.
+3. Click "Count highlights" again. It has to say 9 now. If your program still
+   says 3, read question 3 of the research box again and look at where you
+   call `querySelectorAll`.
+4. **Shout.** When `#shoutButton` is clicked, turn the text of every article
+   heading into upper case with a loop. TypeScript warns you that
+   `textContent` can be `null`, so check it before you call `toUpperCase()`.
+5. **List tags.** When `#tagsButton` is clicked, write the text of all nine
+   tags into `#status`, separated by a comma and a space:
+   `html, vite, starter, css, colors, teamwork, debugging, devtools, html`.
+   Do this one without writing a loop. Turn the collection into a real array
+   first, as you found out in question 4 of the research box. Then `map`
+   builds an array of the texts, and `join(', ')` glues that array into one
+   string.
+
+Finish with `npm run check`. Biome formats your file and reports anything it
+does not like.
+
+::: {.callout-tip}
+## Name your selector strings
+
+Put each selector string into a `const` at the top of the file and use the
+name inside the handler. When you rename a class in `index.html` later, your
+TypeScript has one line to fix.
+:::
+
+## Check your understanding {#sec-selectors-quiz}
+
+Six questions: the four from the research box, then two about the selectors
+themselves.
+
+{{< quiz selectors title="Selectors" >}}

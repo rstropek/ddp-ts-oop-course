@@ -1,0 +1,232 @@
+---
+title: "Elements are objects"
+---
+
+Your starter project is running and the page says `Hello World!`. One line in
+`src/index.ts` added that exclamation mark, and that line begins with
+`document.getElementById`. The call hands your program an **object**, and that
+word follows you through the rest of the book. This chapter shows you what the
+object is and what you can do with it.
+
+## Two variables, one heading {#sec-elements-are-objects-experiment}
+
+Open the project from the previous chapter and replace everything in
+`src/index.ts` with these lines:
+
+```ts
+const heading = document.getElementById('helloWorldHeader') as HTMLHeadingElement;
+const sameHeading = document.getElementById('helloWorldHeader') as HTMLHeadingElement;
+
+heading.textContent = 'Two variables, one heading';
+
+console.log(sameHeading.textContent);
+```
+
+Two calls, two variables. The program writes text through the first variable
+and reads text back through the second one. Write your prediction on paper
+before you run anything: what will the console line show?
+
+Start the app with `npm start` and open the address it prints. Then open the
+browser's developer tools with **F12** (`Cmd`+`Option`+`I` on a Mac) and click
+the **Console** tab. Every browser has one.
+
+The console shows `Two variables, one heading`. That is the text you never
+wrote through `sameHeading`.
+
+## The elements panel shows the same page {#sec-elements-are-objects-devtools}
+
+Stay in the developer tools and switch to the **Elements** tab (Firefox calls
+it **Inspector**). It shows your page as HTML, and moving the mouse over a row
+highlights that piece of the page. Double-click the text inside the `<h1>`
+row, type your own words, and press Enter. The heading on the page changes
+while you type.
+
+Now press F5 to reload. Your typing is gone and the heading reads
+`Two variables, one heading` again. The elements panel never touched a file on
+your disk. It changed what the browser is holding in memory at this moment,
+and the page followed along, because the panel and the page show the same
+thing from two sides.
+
+## A page is a tree {#sec-elements-are-objects-tree}
+
+HTML describes a page with **tags**. Here is a small page, shorter than the
+one in your project:
+
+```html
+<html lang="en">
+  <head>
+    <title>Hello</title>
+  </head>
+  <body>
+    <h1 id="helloWorldHeader">Hello World</h1>
+    <p>A page is a tree.</p>
+    <ul>
+      <li>First item</li>
+      <li>Second item</li>
+    </ul>
+  </body>
+</html>
+```
+
+`<h1>` opens a heading and `</h1>` closes it again. The opening tag, the
+closing tag, and everything between them are one **element**. Inside an
+opening tag you can write **attributes**, extra information in the form
+`name="value"`. The heading carries one: `id="helloWorldHeader"` gives that
+single element a name, and a name is what you need to find it again from
+TypeScript.
+
+Elements sit inside other elements. Both `<li>` elements sit inside the
+`<ul>`. That `<ul>` sits inside `<body>`, and `<body>` sits inside `<html>`.
+Nesting like that turns a page into a tree.
+
+![The small page above, drawn as a tree. Every element hangs somewhere below `document`.](images/dom-tree.svg){width=420}
+
+## The DOM {#sec-elements-are-objects-dom}
+
+While the browser reads your HTML, it builds one object for every element it
+finds and hangs those objects into the tree from the picture. The whole set is
+called the **DOM**, short for **Document Object Model**: the browser's objects
+for the elements of your page.
+
+An **object** is a thing in your program that carries named values, and each
+named value is a **property**. You have used two properties of the heading
+object already. `textContent` is the text inside the element, and `id` is the
+name from the HTML attribute. Reading a property looks like reading a
+variable, and writing to one looks like an assignment:
+
+```ts
+console.log(heading.id); // helloWorldHeader
+heading.textContent = 'Changed from TypeScript';
+```
+
+A tree needs a root, and the root of the DOM is `document`, the object for the
+whole page. Every search for an element starts there, which is why your line
+starts with `document.getElementById`.
+
+::: {.callout-note}
+## What `as HTMLHeadingElement` is doing there
+
+`document.getElementById` can return any element, so TypeScript does not know
+that this one is a heading. The `as HTMLHeadingElement` part tells TypeScript
+what kind of element it is. Copy it for now, the chapter on types for elements
+explains it.
+:::
+
+The starter's original line used `innerText` instead of `textContent`. The two
+are cousins: `innerText` asks what a reader sees on screen, `textContent`
+gives you the text as it stands in the tree. This course writes `textContent`
+everywhere, and you can leave the cousin alone.
+
+## One element, many variables {#sec-elements-are-objects-identity}
+
+`getElementById` never creates a heading. It searches the tree for an element
+with that `id` and hands back a **reference** to the object it found. Two
+calls with the same `id` find the same object, so both variables end up
+pointing at it. One heading, two names for it.
+
+You met that idea last year with arrays. An array variable holds an arrow to
+the array instead of the array itself, so two variables can point at one array
+and a change through either one shows up in both. Element variables behave the
+same way. In the experiment at the top of this chapter,
+`heading.textContent = ...` followed the arrow and changed the one heading
+object that exists, and `sameHeading.textContent` followed a second arrow to
+that same object and read the new text.
+
+**Try it.** Add a third variable with a third `getElementById` call and log
+its `textContent` as well. Both logs show the same text, and the page still
+has exactly one heading.
+
+## Looking things up on MDN {#sec-elements-are-objects-mdn}
+
+`textContent` and `id` are two properties out of a long list, and this book
+never prints that list. The people who build the browsers keep it for you on
+MDN Web Docs, the reference for everything a browser can do.
+
+Open the [MDN page for `textContent`](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
+and see how such a page is built. It starts with one sentence saying what the
+property is, then a "Value" section saying what you get, then examples. Later
+chapters send you to MDN on purpose, with questions you answer before you can
+finish the exercise. Getting comfortable with these pages now makes those
+chapters short.
+
+## Exercise: hello again {#sec-elements-are-objects-exercise}
+
+Build a small page that greets you, prints today's date, and counts clicks.
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template and run `npm install`. Start it with `npm start`. The page shows
+   `Hello World!`.
+
+2. Open `index.html` and add three lines below the `<h1>`:
+
+   ```html
+   <h2 id="myName">Your name</h2>
+   <p id="today">Today</p>
+   <button id="clickMe" type="button" onclick="count()">Click me</button>
+   ```
+
+   Reload the page. You see the placeholder texts and a button. Clicking it
+   does nothing yet and the console reports that `count` is not defined.
+
+3. Open `src/index.ts`, delete what the starter wrote there, and put your own
+   name into the second heading. Use the same shape as in the experiment:
+   fetch the element by its `id` into a `const`, then set its `textContent`.
+   The element with the `id` `myName` is an `HTMLHeadingElement`, so the `as`
+   part stays the same as well. After the reload the page greets you by name.
+
+4. Below that, write today's date into the paragraph. The browser knows the
+   date, and this expression gives it to you as a string in the local format:
+
+   ```ts
+   new Date().toLocaleDateString()
+   ```
+
+   Fetch the paragraph with the `id` `today` (its type is
+   `HTMLParagraphElement`) and set its `textContent` to a sentence that
+   contains that date. Reload and check that the date is right.
+
+5. Now the button. The `onclick` attribute you typed in step 2 needs a
+   function named `count` that belongs to the whole page, and a function in
+   `src/index.ts` is not that. The `<script type="module">` tag at the bottom
+   of `index.html` loads your TypeScript as a **module**, and everything
+   declared in a module stays inside that module. So the counter goes into a
+   plain `<script>` tag instead. Add this block right above the
+   `<script type="module">` line in `index.html`:
+
+   ```html
+   <script>
+   let clicks = 0;
+
+   function count() {
+     clicks = clicks + 1;
+     const button = document.getElementById('clickMe');
+     button.textContent = `Clicks: ${clicks}`;
+   }
+   </script>
+   ```
+
+   Click the button three times. It reads `Clicks: 3`.
+
+::: {.callout-warning}
+## The script block is ugly on purpose
+
+That `<script>` block is JavaScript written straight into your HTML file,
+outside every tool you have. TypeScript never sees it, and VS Code may even
+underline `count` as unused, because the checker does not look inside HTML
+attributes. Keep it for one chapter anyway, because it gets your button
+working today. The next chapter builds the same button without any such
+block, from `src/index.ts` alone.
+:::
+
+Look at where the texts on your page come from. The `<h1>` shows what you
+typed into `index.html`. The second heading and the paragraph get their text
+from TypeScript while the page loads, and the button rewrites its own text on
+every click. Those last two do the same thing in the end, setting
+`textContent` on an element object.
+
+## Check your understanding {#sec-elements-are-objects-quiz}
+
+Five short questions about the objects behind your page.
+
+{{< quiz elements-are-objects title="Elements are objects" >}}

@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the layout chapter quiz
+# (0020-dom/0100-layout.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz. Teacher-only test data;
+# never publish as an activity. Grading runs on the quiz's own small model
+# (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run it after rubric changes, not
+# routinely.
+
+id: layout-quiz-eval
+target: ./0100-layout-quiz.yaml
+
+questions:
+  - question: research-flex-center
+    answers:
+      - expect: correct
+        answer: |
+          justify-content: center and align-items: center
+      # Only one of the two properties.
+      - expect: partial
+        answer: |
+          align-items: center on the div
+      - expect: incorrect
+        answer: |
+          text-align: center and vertical-align: middle
+
+  - question: research-fr-unit
+    answers:
+      - expect: correct
+        answer: |
+          fr is a share of the free space in the grid. all four columns take
+          one share, so they are all the same width and together fill the div.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          fr ist ein anteil vom freien platz. alle vier spalten bekommen einen
+          anteil, also sind sie gleich breit.
+      # Right outcome, no idea what fr actually is.
+      - expect: partial
+        answer: |
+          the four columns are all equally wide
+      - expect: incorrect
+        answer: |
+          1fr is one pixel of width, so the columns are 1px each
+
+  - question: research-space-between
+    answers:
+      - expect: correct
+        answer: |
+          first button on the left edge, last one on the right edge, and the
+          space that is left is split evenly between them. no gap outside.
+      # Spread out, but nothing about the edges.
+      - expect: partial
+        answer: |
+          they get pushed apart so there is space between them
+      - expect: incorrect
+        answer: |
+          all four buttons move to the middle of the row next to each other
+
+  - question: research-translate-y
+    answers:
+      - expect: correct
+        answer: |
+          it moves the element 4px up, minus is up because y goes down
+      # Amount is there, direction is missing.
+      - expect: partial
+        answer: |
+          it shifts the element by 4 pixels on the y axis
+      - expect: incorrect
+        answer: |
+          it pushes the element 4 pixels down
+
+  - question: grid-rows
+    answers:
+      - expect: correct
+        answer: |
+          3 rows and the last row has only 1 box
+      # One number right, one wrong.
+      - expect: partial
+        answer: |
+          3 rows, the last one is full with 3 boxes
+      - expect: incorrect
+        answer: |
+          one row with all seven divs next to each other
+
+  - question: box-width
+    answers:
+      - expect: correct
+        answer: |
+          130px. width is only the content, then 10 padding and 5 border on
+          each side, so 100+20+10.
+      # Knows the rule, counts only one side.
+      - expect: partial
+        answer: |
+          115px, you add the padding and the border to the 100
+      - expect: incorrect
+        answer: |
+          100px, the width already includes padding and border

@@ -1,0 +1,164 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Git and your course repository"
+# (0020-dom/0090-git.qmd).
+# One quiz per chapter, at the end. It MUST ask every question of the
+# chapter's research box (ids prefixed `research-`), so the student finds out
+# during the chapter and gets checked here; those questions get the research
+# feedback rule (point to the source, never the answer). Rubrics list only the
+# expected answer and the aspects the student must state; the shared fragments
+# carry every generic rule.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: git-quiz
+name: "Quiz: Git and your course repository"
+
+title: "Check your understanding: git and your course repository"
+description: |
+  Six short questions about the chapter *Git and your course repository*,
+  three of them the research task. Answer in your own words. One or two
+  sentences are enough. If you cannot answer a research question yet, look
+  it up and come back. This quiz is anonymous and is here for you.
+  Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="git commit -m 'Add the click counter'"
+      scope="after the git chapter of the DOM part"
+      reveal=false
+      knows=(array
+        "TypeScript, HTML, CSS, and the DOM from the earlier chapters"
+        "the terminal, `npm install`, and `npm start` in a starter project"
+        "`git init`, `git status`, `git add`, `git commit`, `git remote add origin`, and `git push`"
+        "`.gitignore`, and that `node_modules` and `dist` stay out of a repository"
+        "the course repository layout `coursework/`, `homework/`, `projects/` with `YYYY-MM-DD-topic-name` folders")
+      not_yet=(array
+        "branches, merging, pull requests, or conflicts"
+        "`git log`, `git rm --cached`, and commit message conventions (those are the research questions right now)"
+        "classes, inheritance, generics, or testing")}}
+
+questions:
+  - id: research-commit-message
+    title: "What a commit message should look like"
+    question: |
+      Programmers have written down rules for commit messages. Name two
+      conventions you found, say what at least one of them asks you to
+      write, and name where you found it.
+    evaluation: |
+      Expected: two named conventions, for example Conventional Commits
+      (`type(scope): short summary`, types such as `feat`, `fix`, `docs`) and
+      the classic short-summary style (summary line of about 50 characters,
+      imperative mood, blank line, body wrapped at 72 characters, often called
+      the 50/72 rule or "the seven rules of a great commit message").
+      Required: (1) two conventions named; (2) what at least one of them asks
+      for; (3) a source (conventionalcommits.org, a blog, the git docs, MDN,
+      an AI plus a check).
+      Partial: only one convention, or two names without saying what either
+      requires.
+      Incorrect: only general advice such as "write something clear" with no
+      named convention.
+
+  - id: research-git-log
+    title: "git log --oneline"
+    question: |
+      `git log` prints the history of a repository. What does
+      `git log --oneline` show for each commit, and what does it leave out?
+    evaluation: |
+      Expected: one line per commit, holding the short commit hash and the
+      summary line of the message; it leaves out the author, the date, and the
+      rest of the message body.
+      Required: (1) one line per commit with the short hash and the summary;
+      (2) at least one thing that is left out (author, date, or message body).
+      Partial: says it is a shorter list of commits without naming the hash
+      and summary, or without naming anything that is dropped.
+      Incorrect: claims it shows the changed lines or the file contents.
+
+  - id: research-untrack
+    title: "A file that was committed by mistake"
+    question: |
+      You committed `notes.txt` by mistake and then added it to `.gitignore`,
+      but `git status` keeps reporting changes to it. Why does `.gitignore`
+      not help, and which command stops git tracking the file while the file
+      stays on your disk?
+    evaluation: |
+      Expected: `.gitignore` only applies to untracked files, and a file that
+      is already tracked stays tracked; `git rm --cached notes.txt` removes it
+      from tracking (it disappears from the next commit) and leaves the file
+      in the folder.
+      Required: (1) `.gitignore` does not affect files git already tracks;
+      (2) names `git rm --cached`.
+      Partial: names the command without the reason, or the reason without the
+      command.
+      Incorrect: suggests `git rm notes.txt` or deleting the file, which
+      removes it from the disk too.
+
+  - id: status-next-step
+    title: "What the next commit will store"
+    question: |
+      `git status` prints this:
+
+      ```
+      On branch main
+      Changes to be committed:
+      	new file:   src/styles.css
+
+      Changes not staged for commit:
+      	modified:   src/index.ts
+      ```
+
+      You run `git commit -m "Add the styles"` right now. Which of the two
+      files ends up in that commit, and what do you type so the other change
+      goes in as well?
+    evaluation: |
+      Expected: only `src/styles.css` is stored, because only it is staged;
+      run `git add src/index.ts` (or `git add .`) before committing to include
+      the other change.
+      Required: (1) only `src/styles.css` goes into the commit; (2) `git add`
+      for `src/index.ts`.
+      Partial: exactly one of the two aspects.
+      Incorrect: says both files end up in the commit.
+
+  - id: no-node-modules
+    title: "Why node_modules stays out"
+    question: |
+      A classmate's repository on GitHub contains a `node_modules` folder.
+      Give two reasons why that folder does not belong in a repository.
+    evaluation: |
+      Expected: (a) it holds downloaded packages, not the student's own work,
+      and `npm install` recreates it from `package.json` on any computer;
+      (b) it is huge (around 130 MB for the starter), so the repository
+      becomes slow to clone and hard to read.
+      Required: both reasons, in any wording.
+      Partial: only one of the two reasons.
+      Incorrect: claims the project stops working without it in the
+      repository, or that the packages are secret.
+
+  - id: daily-loop-order
+    title: "The daily loop"
+    question: |
+      You just finished the click counter and it works. Put these four
+      commands in the order you run them: `git push`, `git add .`,
+      `git status`, `git commit -m "..."`. Which one of them is the only
+      command that talks to GitHub?
+    evaluation: |
+      Expected: `git status`, `git add .`, `git commit -m "..."`, `git push`;
+      `git push` is the only one that talks to GitHub.
+      Required: (1) the four commands in that order; (2) `git push` named as
+      the one that reaches GitHub.
+      Partial: the order is right but the GitHub question is wrong or
+      unanswered, or `git push` is named correctly with `status` missing or
+      misplaced while `add` still comes before `commit`.
+      Incorrect: `commit` before `add`, or `push` named as a local command.

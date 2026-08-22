@@ -1,0 +1,134 @@
+---
+title: "From canvas to page"
+---
+
+Last year you painted pixels. p5.js handed you one canvas, and your code drew
+lines and circles onto it. This year the browser builds the page instead, out
+of pieces called elements, and your TypeScript code talks to those pieces. Same
+language, new world.
+
+Before any of that gets explained, get a page running on your own computer.
+
+## Get the starter project running {#sec-from-canvas-to-page-run}
+
+This year's starter project is called
+[vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter),
+and it is the same idea as last year's p5.js starter: a prepared folder you
+copy for every exercise. Work through these steps now.
+
+1. Open the
+   [vite-ts-starter repository](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   on GitHub. Click the green **Code** button and choose **Download ZIP**. The
+   **Use this template** button next to it makes your own copy of the project
+   on GitHub, which is the better route once you work with git. Git gets its
+   own chapter later in this book, so today the ZIP is the faster way in.
+2. Unpack the ZIP into your course folder and rename the unpacked folder to
+   `hello-page`. The folder rule from last year still holds: a short, plain
+   path such as `C:\Code\creative-coding`, and nothing inside OneDrive or
+   Dropbox.
+3. Start VS Code, choose **File > Open Folder**, and open `hello-page`. Say
+   yes when VS Code asks whether you trust the authors.
+4. Open the integrated terminal and run `npm install`. It fetches the packages
+   listed in `package.json` and answers with a line like
+   `added 19 packages, and audited 20 packages in 865ms`.
+5. Run `npm start`. The terminal prints the address of your own development
+   server:
+
+   ```text
+     VITE v8.2.2  ready in 107 ms
+
+     ➜  Local:   http://localhost:5173/
+   ```
+
+6. Open that address in your browser. A big heading says **Hello World!**
+
+## Change the text and watch {#sec-from-canvas-to-page-change}
+
+Leave the server running and open `src/index.ts`. The whole file is two lines
+of code:
+
+```ts
+const helloWorldHeader = document.getElementById('helloWorldHeader') as HTMLHeadingElement;
+
+helloWorldHeader.innerText += '!';
+```
+
+Change the text in the second line to your own name and save the file:
+
+```ts
+helloWorldHeader.innerText += ' from Lena!';
+```
+
+Do not switch to the browser and reload. Just look at it. The page has already
+changed itself and now reads **Hello World from Lena!** That is the development
+server watching your files, the same hot reload you had last year.
+
+Now open `index.html`, the file next to `src`. Find this line:
+
+```html
+<h1 id="helloWorldHeader">Hello World</h1>
+```
+
+Replace `Hello World` with `My page` and save. The heading turns into **My page
+from Lena!**
+
+You just changed the same heading from two different files. Nothing here has
+been explained: not the `<h1>` around the text, not the `id` on it, not
+`getElementById`, and not the strange `as HTMLHeadingElement` at the end of the
+first line. That is on purpose. The next chapters take this project apart, one
+piece per chapter, and you will meet every one of those words again.
+
+## What you know, what is new {#sec-from-canvas-to-page-new}
+
+Most of your first year still counts. Here is what carries over and what
+changes.
+
+| From year one | This year |
+|---|---|
+| TypeScript with variables, loops, arrays, and functions | The same TypeScript, plus objects and classes you write yourself |
+| p5.js painted shapes onto a canvas | The browser builds the page from HTML elements and CSS, and SVG draws the shapes |
+| `draw()` ran 60 times per second | The page sits still until your code or a click changes it |
+| p5.js called `mousePressed()` for you | You attach a listener to the one element that should react |
+| Your program was a single `src/index.ts` | A project of several files that work together |
+| VS Code, npm, and the Vite starter | The same tools, plus git and automated tests |
+
+## How this book works {#sec-from-canvas-to-page-book}
+
+**Experiments come first.** You just ran one. Every chapter opens with
+something to type and watch, and the name for what happened comes afterwards.
+Reading the explanation before you have seen the effect is the slower way
+around.
+
+**Research tasks are part of the course.** This book is not a reference, so it
+names a thing and shows why it matters, then sends you out for the details.
+Those spots are marked by a box titled **Research task**. The box asks three to
+five questions, and the book will not answer them anywhere. You look them up on
+MDN, with a search engine, or by asking an AI, and you write the answers down in
+your own words. The exercise right after the box needs them.
+
+Every research box belongs to a quiz, so you can let the quiz drive you. Read a
+question, answer it if you can, research it if you cannot, and come back until
+every question has an answer.
+
+**Most chapters end with a quiz** on the novedu platform. You answer in your
+own words, an AI reads your answers and tells you what is solid and what to
+read again, and the whole thing is anonymous. German answers are fine. This
+chapter has no quiz, because so far nothing has been explained.
+
+## Two rules for the whole year {#sec-from-canvas-to-page-rules}
+
+**The exam rule.** Exams happen on a computer, without internet and without
+AI. The course material is allowed. So the question to ask yourself all year is
+not whether you can find something, but whether you can rebuild it with only
+this book and your own notes in front of you.
+
+**The AI rule.** Use AI to get unstuck and to explain error messages you
+have never seen before. Every line you hand in is a line you must be able to
+explain out loud, and "the AI wrote it" is not an explanation. Later in the
+book you set up a coding buddy that knows this course and stays at your level.
+
+## Where you stand {#sec-from-canvas-to-page-done}
+
+Your `hello-page` folder holds a real web page, served by your own development
+server, with a heading that carries your name. Keep the folder. The next
+chapter opens the same two files and starts naming what is inside them.

@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the quiz of the chapter
+# "The starter project, file by file" (0020-dom/0030-starter-project.qmd).
+# One correct, one partial, one incorrect per question, plus one German
+# correct answer. Teacher-only test data; never published as an activity.
+
+id: starter-project-quiz-eval
+target: ./0030-starter-project-quiz.yaml
+
+questions:
+  - question: research-caret
+    answers:
+      - expect: correct
+        answer: |
+          anything from 8.2.2 up to but not including 9.0.0. so 8.3.1 is ok,
+          9.0.0 is not, because the first number has to stay the same
+      # Right direction, but the major-version limit is missing.
+      - expect: partial
+        answer: |
+          npm may take a newer version than 8.2.2
+      - expect: incorrect
+        answer: |
+          it means exactly version 8.2.2 and nothing else
+
+  - question: research-lock-file
+    answers:
+      - expect: correct
+        answer: |
+          it writes down the exact versions that got installed, and npm
+          installs those again next time. without it two people can get
+          different versions and the project breaks for one of them
+      # Names the content of the file but not what it is good for.
+      - expect: partial
+        answer: |
+          it lists all the package versions of the project
+      - expect: incorrect
+        answer: |
+          it contains the packages themselves so you don't have to download
+          node_modules again
+
+  - question: research-type-module
+    answers:
+      - expect: correct
+        answer: |
+          in package.json it tells node and the tools to read the js files as
+          es modules with import/export. the attribute in the html is a
+          different setting, that one is for the browser and only for that one
+          script
+      # Gets ES modules but merges the two settings into one.
+      - expect: partial
+        answer: |
+          both mean es modules, it's the same setting written twice
+      - expect: incorrect
+        answer: |
+          it turns on typescript for the project
+
+  - question: script-line
+    answers:
+      - expect: correct
+        answer: |
+          index.html, the script tag at the end of the body that points to
+          ./src/index.ts. probably deleted or the wrong file name
+      # German correct answer.
+      - expect: correct
+        answer: |
+          zuerst index.html aufmachen und schauen ob die script zeile mit
+          src/index.ts noch da ist
+      - expect: partial
+        answer: |
+          index.html
+      - expect: incorrect
+        answer: |
+          package.json, the start script is probably broken
+
+  - question: tsc-unused
+    answers:
+      - expect: correct
+        answer: |
+          clickCount is declared but never used anywhere. noUnusedLocals makes
+          that an error
+      # Problem understood, wrong option named.
+      - expect: partial
+        answer: |
+          the variable is never read. that comes from strict in tsconfig
+      - expect: incorrect
+        answer: |
+          clickCount was never declared, you have to write const in front of it
+
+  - question: formatting-tool
+    answers:
+      - expect: correct
+        answer: |
+          npm run check:fix, biome does it
+      # The reporting command, not the fixing one.
+      - expect: partial
+        answer: |
+          npm run check, that's biome
+      - expect: incorrect
+        answer: |
+          npx tsc --noEmit, the typescript compiler fixes the quotes

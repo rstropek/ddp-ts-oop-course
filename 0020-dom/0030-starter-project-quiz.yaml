@@ -1,0 +1,171 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "The starter project, file by file"
+# (0020-dom/0030-starter-project.qmd).
+# One quiz per chapter, at the end. The first three questions are the
+# chapter's research box word for word (ids prefixed `research-`), so their
+# feedback points at the source instead of handing over the answer. The last
+# three cover what the chapter itself teaches: the script line that connects
+# index.html with src/index.ts, the compiler's unused-variable error and the
+# tsconfig option behind it, and which tool repairs formatting.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: starter-project-quiz
+name: "Quiz: The starter project, file by file"
+
+title: "Check your understanding: the starter project, file by file"
+description: |
+  Six short questions about the chapter *The starter project, file by
+  file*, the first three of them the research task. Answer in your own
+  words; if you cannot answer a research question yet, look it up and
+  come back. One or two sentences are enough. This quiz is anonymous
+  and is here for you, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const first = names[0];"
+      scope="after the chapter on the starter project in the DOM part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "that the browser turns HTML into a tree of element objects (the DOM)"
+        "`document.getElementById('x') as HTMLHeadingElement` copied as a pattern"
+        "`textContent` and `addEventListener('click', ...)`"
+        "npm, `npm install`, `npm start`, and the development server from year one"
+        "Biome as formatter and linter, with `npm run check` and `npm run check:fix`"
+        "the starter's files: `index.html`, `src/index.ts`, `package.json`, `tsconfig.json`, `biome.json`"
+        "the strict compiler options `noUnusedLocals`, `noUncheckedIndexedAccess`, and `noImplicitReturns`")
+      not_yet=(array
+        "`querySelector<T>` and checking an element for `null`"
+        "classes, inheritance, or generics"
+        "automated tests, git commands, or writing their own CSS file")}}
+
+questions:
+  - id: research-caret
+    title: "What the caret allows"
+    question: |
+      `package.json` asks for `"vite": "^8.2.2"`. Which versions may npm
+      install for that, and which ones may it not?
+    evaluation: |
+      Expected: `^8.2.2` allows every version from 8.2.2 up to (but not
+      including) 9.0.0, so 8.2.7 and 8.3.0 are fine while 9.0.0 and 8.2.1 are
+      not. The rule: the first number (major) must stay the same, newer minor
+      and patch versions are allowed.
+      Required: (1) the major version may not change; (2) newer versions
+      within that major are allowed.
+      Partial: says "newer versions are allowed" without the major-version
+      limit, or gives right examples with no rule.
+      Incorrect: says it means exactly 8.2.2, or that any newer version at all
+      is allowed.
+
+  - id: research-lock-file
+    title: "Why the lock file exists"
+    question: |
+      `package-lock.json` is written by npm and kept in git. What does npm
+      use it for, and what goes wrong for a team that deletes it?
+    evaluation: |
+      Expected: it records the exact version of every installed package, and
+      `npm install` reinstalls exactly those versions instead of picking new
+      ones. Without it, two people running `npm install` on the same
+      `package.json` can end up with different versions, so the project builds
+      for one of them and breaks for the other.
+      Required: (1) it pins the exact installed versions; (2) it makes the
+      install the same for everyone (or: without it versions drift apart).
+      Partial: only that it stores versions, with nothing about why that
+      matters.
+      Incorrect: says it holds the packages themselves, or that it is
+      generated output nobody needs.
+
+  - id: research-type-module
+    title: "Two places, same two words"
+    question: |
+      `package.json` contains a line `"type": "module"`, and the script tag
+      in `index.html` carries an attribute `type="module"`. What does the
+      line in `package.json` change, and is it the same thing as the
+      attribute?
+    evaluation: |
+      Expected: `"type": "module"` in `package.json` tells Node.js and the
+      tools running on it to read the project's `.js` files as ES modules
+      (`import`/`export`) instead of the older CommonJS style. It is a
+      different setting from the HTML attribute, which tells the *browser*
+      that this one script is a module; both are about ES modules, but they
+      are read by different programs.
+      Required: (1) the package.json line makes the project's JavaScript ES
+      modules for Node and the tools; (2) it is not the same setting as the
+      HTML attribute.
+      Partial: names ES modules but claims the two are the same setting.
+      Incorrect: says the package.json line configures the script tag, or that
+      it switches TypeScript on.
+
+  - id: script-line
+    title: "The page stays silent"
+    question: |
+      A classmate's page shows its heading, but nothing their TypeScript
+      does ever happens. `src/index.ts` is fine and the development server
+      is running. Which file do you open first, and what do you look for
+      in it?
+    evaluation: |
+      Expected: `index.html`, and the `<script src="./src/index.ts"
+      type="module"></script>` line in the body. It is missing, or its `src`
+      names a file that does not exist.
+      Required: (1) `index.html`; (2) the script line that names
+      `src/index.ts`.
+      Partial: says `index.html` with no idea what to look for in it.
+      Incorrect: sends the reader to `package.json`, `tsconfig.json`, or
+      `node_modules`.
+
+  - id: tsc-unused
+    title: "Reading the compiler"
+    question: |
+      You run `npx tsc --noEmit` and get:
+
+      ```
+      src/index.ts(5,7): error TS6133: 'clickCount' is declared but its value is never read.
+      ```
+
+      What is wrong with line 5, and which option in `tsconfig.json` asked
+      the compiler to report it?
+    evaluation: |
+      Expected: line 5 declares the variable `clickCount` and no code ever
+      reads it; `noUnusedLocals` is the option that turns an unused local
+      variable into an error.
+      Required: (1) an unused (never read) variable; (2) `noUnusedLocals`.
+      Partial: explains the unused variable correctly but names `strict` or
+      another option instead of `noUnusedLocals`.
+      Incorrect: reads it as an undeclared or misspelled variable, or as a
+      missing value.
+
+  - id: formatting-tool
+    title: "Who fixes the layout"
+    question: |
+      Your file contains this line, with extra spaces, double quotes, and
+      no semicolon:
+
+      ```typescript
+          const greeting =    "hi there"
+      ```
+
+      Name a command that repairs the line for you, and say which tool
+      does the work.
+    evaluation: |
+      Expected: `npm run check:fix` (`npm run format` and saving with format
+      on save also repair it), and the tool is Biome, the project's formatter.
+      Required: (1) a command or action that writes the fix; (2) Biome.
+      Partial: names Biome but only `npm run check`, which reports the
+      difference and changes nothing; or names the right command without the
+      tool.
+      Incorrect: names `tsc`, `npm install`, or Vite as the tool that fixes
+      formatting.

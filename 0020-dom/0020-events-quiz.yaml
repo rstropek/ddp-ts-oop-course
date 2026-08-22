@@ -1,0 +1,175 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Events: the page talks back"
+# (0020-dom/0020-events.qmd). The first three questions are the chapter's
+# research box, word for word (ids prefixed `research-`), so the student looks
+# them up during the chapter and gets checked here; those get the research
+# feedback rule (point to the source, never the answer). The last three are
+# the chapter's own concepts: what a listener logs, the `()` that breaks a
+# listener, and where the counter variable belongs.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: events-quiz
+name: "Quiz: Events"
+
+title: "Check your understanding: events"
+description: |
+  Six short questions about the chapter *Events: the page talks back*,
+  three of them from the research task. Answer in your own words. One or
+  two sentences are enough, and if you cannot answer a research question
+  yet, look it up and come back. This quiz is anonymous and is here for
+  you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="button.addEventListener('click', () => { count += 1; });"
+      scope="after the events chapter of the DOM part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "that the browser turns HTML into a tree of element objects (the DOM)"
+        "`document.getElementById('x') as HTMLButtonElement` and `textContent`"
+        "`addEventListener` with an arrow function, and passing a declared function by name"
+        "the `event` object with `type`, `target`, `clientX`, `clientY`, and `key`"
+        "`element.style.backgroundColor` for changing the look from TypeScript")
+      not_yet=(array
+        "classes, inheritance, or generics"
+        "`querySelector`, `createElement`, or stylesheets of their own"
+        "which event names fire for the mouse and the keyboard (that is what they are researching right now)")}}
+
+questions:
+  - id: research-pointer-enters-leaves
+    title: "Pointer on, pointer off"
+    question: |
+      Name the two mouse events that fire when the pointer moves onto an
+      element and when it moves off it again.
+    evaluation: |
+      Expected: `mouseenter` when the pointer arrives and `mouseleave` when it
+      goes away.
+      Required: both event names, in the right roles.
+      Partial: only one of the two, or the pair `mouseover` / `mouseout` (they
+      do fire, but they also fire for child elements).
+      Incorrect: names that are not events, or `hover`, which is CSS and not an
+      event.
+      Naming the source (the MDN page for the element or for MouseEvent) is a
+      plus, never a requirement.
+
+  - id: research-key-down-up
+    title: "Down first, up later"
+    question: |
+      A key goes down and comes back up. Name the two keyboard events for
+      those two moments, and say which of them fires first.
+    evaluation: |
+      Expected: `keydown` fires first, while the key is going down; `keyup`
+      fires when the key is released.
+      Required: (1) both names; (2) `keydown` named as the first one.
+      Partial: both names but no statement about the order, or the right order
+      with only one name.
+      Incorrect: `keyup` named as the first one, or `keypress` given as one of
+      the two (it is deprecated).
+
+  - id: research-enter-key
+    title: "What Enter looks like"
+    question: |
+      The user presses the Enter key and your listener reads `event.key`.
+      What exactly does that property hold then?
+    evaluation: |
+      Expected: the string `'Enter'`, spelled with a capital E.
+      Required: the literal value `Enter` as a string.
+      Partial: says it is the name of the key as text but gives a different
+      spelling, such as `enter` or `Return`.
+      Incorrect: a line break `\n`, the number 13, or an empty string.
+
+  - id: order-of-logs
+    title: "What the console shows"
+    question: |
+      This is the whole of `src/index.ts`:
+
+      ```ts
+      const goButton = document.getElementById('goButton') as HTMLButtonElement;
+      let count = 0;
+
+      goButton.addEventListener('click', (event) => {
+        count += 1;
+        console.log(count, event.type);
+      });
+
+      console.log('ready');
+      ```
+
+      The page loads and you then click the button twice. What does the
+      console show, in order?
+    evaluation: |
+      Expected: `ready` first, right after the page loads, then `1 click` and
+      `2 click`, one line per click.
+      Required: (1) `ready` comes first, before any click; (2) each click logs
+      the count and the word `click`, counting 1 then 2.
+      Partial: the right lines but `ready` placed after the clicks, or the
+      counting right without mentioning `click` as the event type.
+      Incorrect: says the listener runs once at load time as well.
+
+  - id: listener-called-at-once
+    title: "The button paints itself"
+    question: |
+      A student writes this. VS Code underlines the last line, and when they
+      load the page anyway, the box turns red at once, long before anybody
+      clicks:
+
+      ```ts
+      function paintIt(): void {
+        colorBox.style.backgroundColor = 'tomato';
+      }
+
+      colorBox.addEventListener('click', paintIt());
+      ```
+
+      Explain what the `()` does here, and write the fixed line.
+    evaluation: |
+      Expected: `paintIt()` calls the function right away and passes its
+      return value to `addEventListener`; the fix is
+      `colorBox.addEventListener('click', paintIt);` without the parentheses.
+      Required: (1) says the `()` calls the function immediately instead of
+      handing it over; (2) gives the fixed line or says to remove the
+      parentheses.
+      Partial: only the fix, with no explanation of what the `()` did.
+      Incorrect: blames the arrow syntax, the event name, or a missing
+      `event` parameter.
+
+  - id: counter-variable-place
+    title: "Where the counter lives"
+    question: |
+      This button always shows `Clicks: 1`, no matter how often it is
+      clicked:
+
+      ```ts
+      counterButton.addEventListener('click', () => {
+        let clickCount = 0;
+        clickCount += 1;
+        counterButton.textContent = `Clicks: ${clickCount}`;
+      });
+      ```
+
+      Why, and what do you change?
+    evaluation: |
+      Expected: the listener runs from the start on every click, so
+      `clickCount` is created again and set to 0 each time; move
+      `let clickCount = 0;` outside the listener, above it, so all calls share
+      the one variable.
+      Required: (1) says the variable is created fresh (reset to 0) on every
+      call; (2) says to declare it outside the listener.
+      Partial: only the fix, with no reason, or the reason with no fix.
+      Incorrect: says `let` must become `const`, or blames the template
+      string.

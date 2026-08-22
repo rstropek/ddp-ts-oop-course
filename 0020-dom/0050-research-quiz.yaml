@@ -1,0 +1,145 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Research is part of the job"
+# (0020-dom/0050-research.qmd).
+# One quiz per chapter, at the end. It asks every question of the chapter's
+# research box (ids prefixed `research-`), so the student finds out during the
+# chapter and gets checked here; those questions get the research feedback
+# rule (point to the source, never the answer). The two remaining questions
+# cover the chapter's own subject: judging a source.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: research-quiz
+name: "Quiz: Research is part of the job"
+
+title: "Check your understanding: research is part of the job"
+description: |
+  Six short questions about the chapter *Research is part of the job*,
+  four of them the research task. Answer in your own words; if you
+  cannot answer a research question yet, look it up and come back. One
+  or two sentences are enough. This quiz is anonymous and is here for
+  you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const input = document.querySelector<HTMLInputElement>('#messageInput');"
+      scope="after the research chapter of the DOM part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "that the browser turns HTML into a tree of element objects (the DOM)"
+        "`document.querySelector<HTMLInputElement>('#name')` with a null check that throws"
+        "`textContent` for reading and writing the text of an element"
+        "`addEventListener('click', ...)` on a button"
+        "`input.value` as the string a user typed"
+        "MDN, a search engine, and an AI as the three sources for looking things up")
+      not_yet=(array
+        "classes, inheritance, or generics beyond `querySelector<T>`"
+        "`querySelectorAll` and collections of elements"
+        "`createElement` and building elements from TypeScript"
+        "the coding buddy, which is set up two chapters later")}}
+
+questions:
+  - id: research-text-vs-html
+    title: "Same string, two pictures"
+    question: |
+      A program puts the string `<b>bold?</b>` into a paragraph, once
+      with `textContent` and once with `innerHTML`. What does the reader
+      see in each of the two paragraphs?
+    evaluation: |
+      Expected: with `textContent` the page shows the characters
+      `<b>bold?</b>` as they are; with `innerHTML` the browser reads the
+      string as HTML, so the reader sees the word `bold?` in bold and no tags.
+      Required: (1) `textContent` shows the tags as plain text; (2) `innerHTML`
+      turns them into real markup, so the text appears bold.
+      Partial: only one of the two described correctly.
+      Incorrect: the two swapped, or both paragraphs described as the same.
+      Naming the source (the MDN page, the search, the AI) counts in the
+      student's favor; leaving it out never lowers the verdict.
+
+  - id: research-innerhtml-danger
+    title: "Why user text and innerHTML do not mix"
+    question: |
+      Your app writes text that a user typed into `innerHTML`. Why is
+      that dangerous, and what is the name of the attack it allows?
+    evaluation: |
+      Expected: the browser reads whatever the user typed as HTML, so a
+      visitor can put markup and running code into your page instead of
+      text. The attack is called cross-site scripting (XSS).
+      Required: (1) the user's text becomes real HTML or running code
+      instead of text; (2) names cross-site scripting or XSS.
+      Partial: the danger described without the name, or the name without
+      the reason.
+      Incorrect: only "it looks wrong" or "it is slower", or a claim that
+      nothing can happen.
+
+  - id: research-which-property
+    title: "Which one for a user's text"
+    question: |
+      You want to show a name that a user typed into an input. Do you use
+      `textContent` or `innerHTML`, and why?
+    evaluation: |
+      Expected: `textContent`, because it puts the string on the page as
+      text, so anything that looks like a tag stays harmless characters.
+      Required: (1) picks `textContent`; (2) gives a reason about user text
+      staying text instead of being read as HTML.
+      Partial: picks `textContent` with no reason or a wrong reason.
+      Incorrect: picks `innerHTML`, or says the choice makes no difference.
+
+  - id: research-ai-vs-mdn
+    title: "What the AI added"
+    question: |
+      You asked an AI the same question you looked up on MDN. Name one
+      thing the AI added that MDN did not say, or one thing the AI got
+      wrong.
+    evaluation: |
+      Expected: one concrete point from the student's own comparison, for
+      example an extra code example, a warning MDN words differently, advice
+      about a framework, an invented property name, or a claim MDN does not
+      make.
+      Required: (1) one specific point, not only "the AI was easier to read";
+      (2) makes clear whether it is something added or something wrong.
+      Partial: a difference in style or length only, with no concrete point.
+      Incorrect: no comparison at all, or "both said exactly the same" with
+      nothing named.
+
+  - id: old-search-result
+    title: "A result from 2014"
+    question: |
+      A search sends you to a page about the DOM written in 2014. What do
+      you check before you use its advice?
+    evaluation: |
+      Expected: the date, and then the advice itself against MDN or another
+      current source, because browsers and the language have changed since
+      and old answers often show a way of working that has been replaced.
+      Required: (1) treats the age as a reason for doubt; (2) names a check
+      against MDN, current documentation, or a newer answer.
+      Partial: only "it is old, so be careful", with no check named.
+      Incorrect: says the date does not matter, or that old means proven.
+
+  - id: ai-contradicts-mdn
+    title: "When two sources disagree"
+    question: |
+      An AI tells you one thing about a DOM property and MDN says
+      something else. Which one do you follow, and why?
+    evaluation: |
+      Expected: MDN, because it is the documentation of the web platform
+      itself and is kept current, while an AI produces an answer that sounds
+      right and can be confidently wrong.
+      Required: (1) picks MDN; (2) gives a reason, either MDN being the
+      official documented source or the AI being able to invent an answer.
+      Partial: picks MDN with no reason.
+      Incorrect: picks the AI, or says it makes no difference which you take.

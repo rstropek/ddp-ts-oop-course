@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the "Creating elements" chapter quiz
+# (0020-dom/0060-creating-elements.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes, not routinely.
+
+id: creating-elements-quiz-eval
+target: ./0060-creating-elements-quiz.yaml
+
+questions:
+  - question: research-classlist-toggle
+    answers:
+      - expect: correct
+        answer: |
+          classList.toggle('done')
+      # Names the right idea but the wrong method.
+      - expect: incorrect
+        answer: |
+          classList.switch('done')
+      - expect: incorrect
+        answer: |
+          you use add and then remove it again with an if
+
+  - question: research-classlist-contains
+    answers:
+      - expect: correct
+        answer: |
+          item.classList.contains('done') gives true or false
+      # German correct answer.
+      - expect: correct
+        answer: |
+          mit contains, das liefert true oder false zurück
+      - expect: incorrect
+        answer: |
+          classList.includes('done')
+
+  - question: research-append-vs-appendchild
+    answers:
+      - expect: correct
+        answer: |
+          append also takes plain text, appendChild only takes a node
+      # Notices only the return value, not what append accepts.
+      - expect: partial
+        answer: |
+          appendChild gives you the node back and append gives nothing back
+      - expect: incorrect
+        answer: |
+          append can take a css selector like '#todos'
+
+  - question: how-many-items
+    answers:
+      - expect: correct
+        answer: |
+          3, the loop runs one time for every name in the array and each run
+          appends one li
+      # The number without any reason.
+      - expect: partial
+        answer: |
+          3
+      - expect: incorrect
+        answer: |
+          1, item is always the same variable so it just gets overwritten
+
+  - question: forgot-append
+    answers:
+      - expect: correct
+        answer: |
+          the li exists but it's not in the page yet, it has no parent. you
+          need list.append(item) after it
+      # Fix without reason.
+      - expect: partial
+        answer: |
+          he forgot list.append(item)
+      - expect: incorrect
+        answer: |
+          createElement didn't work because 'li' has to be written as '<li>'
+
+  - question: text-or-html
+    answers:
+      - expect: correct
+        answer: |
+          because innerHTML would read what the user types as html, so
+          <b>hi</b> would become bold text instead of showing the tags.
+          textContent just shows the characters
+      # Safety word without the mechanism.
+      - expect: partial
+        answer: |
+          textContent is safer, innerHTML is dangerous
+      - expect: incorrect
+        answer: |
+          innerHTML can only hold html, it cannot show normal text at all

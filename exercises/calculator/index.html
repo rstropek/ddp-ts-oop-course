@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+  </head>
+  <body>
+    <h1>Calculator</h1>
+
+    <p>
+      <label for="leftNumber">First number</label>
+      <input id="leftNumber" type="text">
+    </p>
+
+    <p>
+      <label for="operator">Operation</label>
+      <select id="operator">
+        <option value="+">+</option>
+        <option value="-">-</option>
+        <option value="*">*</option>
+        <option value="/">/</option>
+      </select>
+    </p>
+
+    <p>
+      <label for="rightNumber">Second number</label>
+      <input id="rightNumber" type="text">
+    </p>
+
+    <button id="calculateButton" type="button">Calculate</button>
+
+    <p id="result"></p>
+    <p id="error" class="error"></p>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

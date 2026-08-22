@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the events chapter quiz
+# (0020-dom/0020-events.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz. Teacher-only test data;
+# never publish as an activity. Grading runs on the quiz's own small model
+# (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run it after rubric changes, not
+# routinely.
+
+id: events-quiz-eval
+target: ./0020-events-quiz.yaml
+
+questions:
+  - question: research-pointer-enters-leaves
+    answers:
+      - expect: correct
+        answer: |
+          mouseenter when the mouse comes on the element, mouseleave when it
+          goes away again
+      # The other pair. They fire, but also for child elements, so partial.
+      - expect: partial
+        answer: |
+          mouseover and mouseout
+      - expect: incorrect
+        answer: |
+          hover and unhover
+
+  - question: research-key-down-up
+    answers:
+      - expect: correct
+        answer: |
+          keydown and keyup. keydown is first, it happens while you push the
+          key down
+      # German correct answer.
+      - expect: correct
+        answer: |
+          zuerst keydown wenn man die taste drückt, dann keyup wenn man sie
+          wieder loslässt
+      # Both names, no order.
+      - expect: partial
+        answer: |
+          keydown and keyup
+      - expect: incorrect
+        answer: |
+          keypress comes first and then keyup
+
+  - question: research-enter-key
+    answers:
+      - expect: correct
+        answer: |
+          the text "Enter"
+      # Right idea, wrong spelling of the literal value.
+      - expect: partial
+        answer: |
+          the key name as a string, "return"
+      - expect: incorrect
+        answer: |
+          a newline character, so "\n"
+
+  - question: order-of-logs
+    answers:
+      - expect: correct
+        answer: |
+          first ready when the page loads, then after the clicks 1 click and
+          2 click
+      # Counting right, event type ignored, ready in the wrong place.
+      - expect: partial
+        answer: |
+          1 and 2 after the clicks, and ready at the end
+      - expect: incorrect
+        answer: |
+          1 click and ready at the start, because addEventListener runs the
+          function once
+
+  - question: listener-called-at-once
+    answers:
+      - expect: correct
+        answer: |
+          the () calls paintIt immediately and gives the result to
+          addEventListener. it has to be
+          colorBox.addEventListener('click', paintIt);
+      # Fix without any explanation.
+      - expect: partial
+        answer: |
+          remove the brackets
+      - expect: incorrect
+        answer: |
+          paintIt needs an event parameter, otherwise the browser calls it too
+          early
+
+  - question: counter-variable-place
+    answers:
+      - expect: correct
+        answer: |
+          clickCount is made new and set to 0 in every click, so it is always
+          1. put let clickCount = 0 above the addEventListener
+      # Reason right, no fix.
+      - expect: partial
+        answer: |
+          because the variable starts at 0 again every time the function runs
+      - expect: incorrect
+        answer: |
+          let cannot keep a value, you need const clickCount instead

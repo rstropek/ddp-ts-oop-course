@@ -1,0 +1,247 @@
+---
+title: "Types for elements"
+---
+
+Every project so far began with a line you copied without asking what it says:
+
+```ts
+const helloWorldHeader = document.getElementById('helloWorldHeader') as HTMLHeadingElement;
+```
+
+The `as HTMLHeadingElement` at the end came with a promise that the chapter on
+types for elements would explain it. This is that chapter. At the end of it
+that line is gone, replaced by the one this book uses for the rest of the year.
+
+## Ask for an element that is not there {#sec-types-for-elements-missing}
+
+Open one of your projects from the last chapters, or create a fresh app from
+the starter. Replace everything in `src/index.ts` with this. Note that the `as`
+is gone, and that no element on the page has the id `doesNotExist`:
+
+```ts
+const header = document.getElementById('doesNotExist');
+
+header.textContent = 'Hello';
+```
+
+Hover the mouse pointer over `header` in VS Code. The tooltip says:
+
+```
+const header: HTMLElement | null
+```
+
+The second line carries a red squiggle. Run the build in the terminal to read
+the message in full:
+
+```bash
+npm run build
+```
+
+```
+src/index.ts(3,1): error TS18047: 'header' is possibly 'null'.
+```
+
+TypeScript refuses to compile this, because it has no way of knowing which ids
+exist on your page. So it assumes the worst.
+
+## What the `as` was hiding {#sec-types-for-elements-cast}
+
+Now put the cast back, exactly the way the starter had it:
+
+```ts
+const header = document.getElementById('doesNotExist') as HTMLHeadingElement;
+
+header.textContent = 'Hello';
+```
+
+The squiggle is gone and `npm run build` is happy. Start the app with
+`npm start` and open the page. Press F12 to open the browser's developer tools
+and look at the console tab:
+
+```
+Uncaught TypeError: Cannot set properties of null (setting 'textContent')
+```
+
+Firefox words it differently (`can't access property "textContent", header is
+null`), but it is the same crash. The element still does not exist. `as` is a
+sentence you say to the compiler, and the compiler believes you. The browser
+never hears it. Nothing about `as` is checked while your program runs, which is
+why the error moved from your editor, where you could see it, into the console,
+where your user meets it.
+
+## Two things at once: `HTMLElement | null` {#sec-types-for-elements-union}
+
+The type in the tooltip has a `|` in the middle, and that vertical bar means
+"one of these two". A value of type `HTMLElement | null` is either an element
+object or `null`, the value that stands for "nothing here". `getElementById`
+returns that type because a search can fail, and TypeScript makes you deal with
+both outcomes before you touch the result.
+
+Dealing with it takes one `if`:
+
+```ts
+const header = document.getElementById('mainHeader');
+if (header === null) {
+  throw new Error('Element #mainHeader not found');
+}
+
+header.textContent = 'Hello';
+```
+
+`throw` stops your program right there and prints the message in the console.
+That is the honest answer to a missing element: the page is not what the code
+expects, so stop early with a message that names the id instead of crashing ten
+lines later with a message that names nothing. Throwing errors on purpose, and
+catching them, gets a chapter of its own in Part 4.
+
+Look at the last line. After the `if`, TypeScript knows that `header` cannot be
+`null` any more, so the squiggle disappears without a cast. The check also runs
+in the browser, which is the whole difference from `as`: a missing element now
+stops your program at the `throw`, with a message you wrote.
+
+Most programmers write that check shorter, as `if (!header)`, because `!null`
+is `true` and `!` on an element object is `false`. Both spellings mean the
+same, and the chapters after this one use the short form.
+
+## Which kind of element? {#sec-types-for-elements-kinds}
+
+`getElementById` promises an `HTMLElement`, and that is the general kind of
+element. It has what every element has, including `textContent`. Ask an
+`HTMLElement` for the text a user typed and you get a second error:
+
+```ts
+const leftInput = document.getElementById('leftNumber');
+if (leftInput === null) {
+  throw new Error('Element #leftNumber not found');
+}
+
+console.log(leftInput.value);
+```
+
+```
+src/index.ts(6,23): error TS2339: Property 'value' does not exist on type 'HTMLElement'.
+```
+
+TypeScript is right again. Only some elements have a `value`. The browser has a
+more special kind for each of them: `HTMLInputElement` for `<input>` with its
+`value`, `HTMLSelectElement` for `<select>`, `HTMLButtonElement` for `<button>`
+with its `disabled`. Each of these is an `HTMLElement` plus its own extra
+properties, so everything you can do with a general element works on an input
+too. Building special kinds on top of general ones is called **inheritance**,
+and in Part 4 you write your own. For now, one sentence is enough: an
+`HTMLInputElement` is an `HTMLElement` that can do more.
+
+## The course way {#sec-types-for-elements-course-way}
+
+`document.querySelector` finds one element too, and it lets you say which kind
+you expect:
+
+```ts
+const leftInput = document.querySelector<HTMLInputElement>('#leftNumber');
+if (leftInput === null) {
+  throw new Error('Element #leftNumber not found');
+}
+
+leftInput.value = '42';
+```
+
+Two things are new in that first line. The text in quotes is a CSS selector, so
+the `#` is part of it and means "the element whose id is this"; the chapter on
+selectors goes much further with that idea. The name in the angle brackets,
+`<HTMLInputElement>`, tells `querySelector` which kind of element you are
+asking for. Hover over `leftInput` and the tooltip says
+`HTMLInputElement | null`: the kind you asked for, and still an honest `null`
+for the case where nothing matches. Angle brackets like these come back in
+Part 6 under the name generics. Until then, read them as "which kind I expect".
+
+::: {.callout-note}
+## The rule from here on
+
+Every element in this book, from this chapter to the last one, is fetched with
+`document.querySelector<...>('#someId')` and then checked against `null`.
+There is no `as` anywhere from here on. It compiles, and it moves a problem you
+could have fixed in the editor into your user's browser.
+:::
+
+## Text in, numbers out {#sec-types-for-elements-numbers}
+
+An `<input>` gives you its content through `value`, and `value` is always a
+string. Even an `<input type="number">` hands you a string, because the user
+types characters and the browser passes on what they typed.
+
+`Number(someString)` converts. `Number('7.5')` gives you the number `7.5`. Not
+every string survives the trip, and `Number.isNaN(x)` answers whether `x` is
+the special value you get back when the conversion failed. That check is what
+stands between a user typing nonsense and your page showing `NaN` as a result.
+
+::: {.research title="What comes back when the text is not a number?"}
+The calculator you build next has to reject what the user types when it is not
+a number, and it has to read which operation they picked from a `<select>`.
+Both need details this book stops at.
+
+1. `Number('abc')` and `Number('')` do not give you the same result. What does
+   each one return?
+2. What does `parseFloat('12abc')` return, and what does `Number('12abc')`
+   return?
+3. An `HTMLSelectElement` has a property that gives you the value of the option
+   the user picked. What is it called, and where did you find it?
+
+The exam is written without internet and without AI, so question 1 has to stick
+in your head: the empty field is the case students get wrong every year.
+:::
+
+## Exercise: a calculator {#sec-types-for-elements-exercise}
+
+{{< exercise calculator >}}
+
+The page is ready: two text inputs with the ids `leftNumber` and `rightNumber`,
+a `<select>` with the id `operator` holding the four options `+`, `-`, `*`, and
+`/`, a button with the id `calculateButton`, an empty paragraph `result`, and
+an empty paragraph `error` that the stylesheet paints red. The inputs are plain
+text inputs on purpose, so that your check has something to catch.
+
+You write `src/index.ts` from nothing. Delete what the starter put there.
+
+1. Import the stylesheet as the first line: `import './styles.css';`. Run
+   `npm start` and open the page. The labels sit in a column and the fields are
+   in one narrow block, which tells you the CSS arrived.
+2. Fetch all six elements with `document.querySelector<...>('#theId')`, each
+   with the kind of element it is. The result and error paragraphs are
+   `HTMLParagraphElement`.
+3. Check for `null` and `throw` when an element is missing. One `if` with all
+   six conditions joined by `||` is enough, and its message can name the page
+   rather than a single id.
+4. Add a `click` listener to the button. Inside it, read the two input values,
+   convert them with `Number`, and read the chosen operator from the select
+   element. Log all three with `console.log` and check in the browser console
+   that a click gives you what you expect.
+5. Refuse bad input. When a field is empty or holds something that is not a
+   number, write a message such as `Please type a number into both fields.`
+   into the error paragraph. Clear the result paragraph, then leave the
+   function with `return`. Test an empty field and `12abc` before you go on,
+   because they fail for different reasons.
+6. Refuse division by zero. When the operator is `/` and the second number is
+   `0`, write `You cannot divide by zero.` into the error paragraph, clear the
+   result, and `return`.
+7. Compute the result with a `switch` over the operator and show it in the
+   result paragraph as a full line, for example `3.5 + 2 = 5.5`. Clear the
+   error paragraph on the way, so a good calculation after a bad one leaves no
+   red text behind.
+8. Run `npm run check` and fix what Biome reports.
+
+Type `10 / 0`, then `3.5 + 2`. The red message must be gone when the result
+appears. Try `12abc * 2` last, and watch the error come back.
+
+::: {.callout-tip}
+## When you finish early
+
+Add a fifth option to the `<select>` for the remainder operator `%`, and make
+the calculator refuse a remainder by zero the same way it refuses a division by
+zero.
+:::
+
+## Check your understanding {#sec-types-for-elements-quiz}
+
+Six questions, the first three of them the research task above.
+
+{{< quiz types-for-elements title="Types for elements" >}}

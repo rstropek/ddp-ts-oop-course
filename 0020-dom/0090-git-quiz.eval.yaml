@@ -1,0 +1,106 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the git chapter quiz
+# (0020-dom/0090-git.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz. Teacher-only test data;
+# never publish as an activity. Grading runs on the quiz's own small model
+# (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run it after rubric changes, not
+# routinely.
+
+id: git-quiz-eval
+target: ./0090-git-quiz.yaml
+
+questions:
+  - question: research-commit-message
+    answers:
+      - expect: correct
+        answer: |
+          conventional commits and the 50/72 rule. conventional commits wants
+          a type in front, like fix: or feat:, then a short summary. i found
+          it on conventionalcommits.org
+      # Two names, but nothing about what either one asks for.
+      - expect: partial
+        answer: |
+          conventional commits and the seven rules of a great commit message
+      - expect: incorrect
+        answer: |
+          you should always write a message that explains what you did and is
+          not too short
+
+  - question: research-git-log
+    answers:
+      - expect: correct
+        answer: |
+          one line per commit with the short hash and the first line of the
+          message. no author, no date, no long text
+      # German correct answer.
+      - expect: correct
+        answer: |
+          pro commit eine zeile mit dem kurzen hash und der ersten zeile der
+          commit nachricht. autor und datum fehlen
+      # Right idea "shorter", but neither the content nor what is dropped.
+      - expect: partial
+        answer: |
+          it prints the commits but shorter than normal git log
+      - expect: incorrect
+        answer: |
+          it shows every changed line of every commit on one line
+
+  - question: research-untrack
+    answers:
+      - expect: correct
+        answer: |
+          gitignore only works for files git does not track yet. notes.txt is
+          already tracked so it stays. use git rm --cached notes.txt, then the
+          file stays in the folder
+      # Command without the reason.
+      - expect: partial
+        answer: |
+          git rm --cached notes.txt
+      - expect: incorrect
+        answer: |
+          just run git rm notes.txt and commit, then it is gone from git
+
+  - question: status-next-step
+    answers:
+      - expect: correct
+        answer: |
+          only styles.css, because index.ts is not staged. i have to run
+          git add src/index.ts first
+      # Names the file correctly, no fix for the other change.
+      - expect: partial
+        answer: |
+          only src/styles.css goes in
+      - expect: incorrect
+        answer: |
+          both, git commit always takes everything that changed
+
+  - question: no-node-modules
+    answers:
+      - expect: correct
+        answer: |
+          its just downloaded packages, npm install gets them back from
+          package.json. and its like 130 mb, way too big for github
+      # One reason only.
+      - expect: partial
+        answer: |
+          because the folder is so big
+      - expect: incorrect
+        answer: |
+          without node_modules in the repo the project cannot start on another
+          computer
+
+  - question: daily-loop-order
+    answers:
+      - expect: correct
+        answer: |
+          git status, git add ., git commit -m "...", git push. only git push
+          goes to github
+      # Order right, second sub-question unanswered.
+      - expect: partial
+        answer: |
+          status, add, commit, push
+      - expect: incorrect
+        answer: |
+          git status, git commit -m "...", git add ., git push. git commit is
+          the one that uploads to github

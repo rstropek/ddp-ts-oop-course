@@ -1,0 +1,28 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 30rem;
+  margin: 2rem auto;
+}
+
+#todos {
+  list-style: none;
+  padding: 0;
+}
+
+#todos li {
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+#todos li:hover {
+  background-color: #eee;
+}
+
+#todos li.done {
+  text-decoration: line-through;
+  color: gray;
+}
+
+#todos li button {
+  margin-left: 0.5rem;
+}

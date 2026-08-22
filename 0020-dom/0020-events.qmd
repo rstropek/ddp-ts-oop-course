@@ -1,0 +1,254 @@
+---
+title: "Events: the page talks back"
+---
+
+In the previous chapter your button counted clicks through an `onclick` attribute
+glued into the HTML. It worked, and it was a stopgap. Real pages hand the job
+to TypeScript, and by the end of this chapter yours does too.
+
+## Click and watch the console {#sec-events-experiment}
+
+Make a fresh app from the course starter, run `npm install`, and open it in
+VS Code. In `index.html`, add one button below the heading:
+
+```html
+<button id="helloButton" type="button">Say hello</button>
+```
+
+The `type="button"` says that this button submits nothing. Leave it out and
+`npm run check` complains, so make it a habit.
+
+Now delete everything in `src/index.ts` and type these four lines:
+
+```ts
+const helloButton = document.getElementById('helloButton') as HTMLButtonElement;
+
+helloButton.addEventListener('click', (event) => {
+  console.log(event);
+});
+```
+
+Start the app with `npm start`, open the page, and open the developer tools
+with `F12`. Switch to the Console tab and click the button a few times.
+
+Every click prints one line. Chrome writes `PointerEvent {isTrusted: true, ...}`,
+Firefox writes `click { target: button#helloButton, ... }`. Different browsers,
+same idea. Click the small triangle in front of the line and the object folds
+open into a long list of properties.
+
+## The browser calls your function {#sec-events-callback}
+
+Read your four lines again. Nowhere do you call the arrow function. You hand it
+over to `addEventListener`, your program ends, and the browser calls the
+function later, once for every click.
+
+Last year p5.js did the same thing with a rule about names. You wrote
+`function mousePressed()`, and p5 found it because of the name. The browser has
+no magic names. You name the element, the event, and the function yourself, and
+the browser remembers the three of them together.
+
+So a function can travel as a value. Until now you passed numbers, strings, and
+arrays into functions; here the argument *is* a function. Writing
+`(event) => { ... }` right inside the call is the short way, and it is not the
+only way. A function you declared somewhere in the file works just as well, as
+long as you pass its name:
+
+```ts
+function onHelloClick(event: MouseEvent): void {
+  console.log(event.clientX, event.clientY);
+}
+
+helloButton.addEventListener('click', onHelloClick);
+```
+
+::: {.callout-warning}
+## The parentheses that break everything
+
+`addEventListener('click', onHelloClick())` runs your function immediately,
+once, and hands the browser whatever came back. TypeScript catches that one and
+reports that a value of type `void` is not a listener. Drop the parentheses,
+pass the plain name, and the error goes away.
+:::
+
+## What is inside the event {#sec-events-object}
+
+The object the browser passes in describes one thing that happened. Open the
+logged event in the console and look for `type`, which holds the string
+`'click'`, and for `target`, which is the element the event started on. That
+target is the very same object `helloButton` points at, one element with two
+names.
+
+Two more properties are worth knowing by heart. `event.clientX` and
+`event.clientY` hold the position of the mouse pointer in pixels, counted from
+the top left corner of the browser window. Log them, click in different corners
+of the button, and watch the numbers move.
+
+A mouse event carries a couple of dozen more properties, and the book will not
+list them. MDN does that better, on its pages about
+[the Event interface](https://developer.mozilla.org/en-US/docs/Web/API/Event)
+and [the MouseEvent interface](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent).
+
+Buttons are not the only things that fire events. The whole document does. When
+the user presses a key anywhere on the page, `document` gets an event, and that
+event object has a `key` property holding what was pressed.
+
+## Colors straight from TypeScript {#sec-events-style}
+
+Every element object has a `style` property, and through it you set CSS from
+your code:
+
+```ts
+helloButton.style.backgroundColor = 'tomato';
+```
+
+CSS writes that property as `background-color`, with a hyphen in the middle.
+Hyphens are not allowed in TypeScript names, so the DOM spells the same
+property `backgroundColor`. The pattern holds for the rest of CSS too, with
+`fontSize` for `font-size` and `borderRadius` for `border-radius`.
+
+Setting properties one by one from code is the quickest way to see a change,
+and it is not how a real page is styled. A later chapter in this part moves the
+look into a stylesheet and leaves only the changing parts in TypeScript. For
+now, `tomato` on a button is enough of a reward.
+
+## A number that survives the click {#sec-events-counter}
+
+A counter has to remember something between two clicks, so the variable belongs
+outside the listener:
+
+```ts
+let clickCount = 0;
+
+helloButton.addEventListener('click', () => {
+  clickCount += 1;
+  helloButton.textContent = `Clicks: ${clickCount}`;
+});
+```
+
+`src/index.ts` runs once, when the page loads. It creates `clickCount`,
+registers the listener, and finishes. The arrow function stays behind and can
+still see `clickCount`, because it was written next to it, and every call adds
+one to that same variable.
+
+Move `let clickCount = 0;` inside the listener and the counter is built fresh on
+every click, so the button shows `Clicks: 1` forever.
+
+This listener declares no parameter at all, because nothing inside it needs the
+event. Leave out what you do not use. The compiler reports parameters you
+declare and never touch.
+
+::: {.research title="Which event do you need?"}
+The exercise below needs a box that notices the mouse pointer arriving and
+leaving, and a paragraph that shows the key the user just pressed. Picking the
+right event name is the everyday work here, and the book stops explaining at
+this line.
+
+1. Name the two mouse events that fire when the pointer moves onto an element
+   and when it moves off it again.
+2. A key goes down and comes back up. Name the two keyboard events for those
+   two moments, and say which of them fires first.
+3. The user presses the Enter key. What exactly does `event.key` hold then?
+
+Exams run without internet and without an AI, so the names of the events you
+use every week belong in your head.
+:::
+
+## Exercise: a page that reacts {#sec-events-exercise}
+
+One app, three things that answer the user. Work through the steps in order and
+check the result of each one in the browser before you go on.
+
+1. Create a new app from the course starter, run `npm install`, and open the
+   folder in VS Code.
+
+2. In `index.html`, replace the `<h1>` line with this markup. Leave the
+   `<script>` tag underneath exactly as it is.
+
+   ```html
+   <h1>A page that reacts</h1>
+   <button id="counterButton" type="button">Clicks: 0</button>
+   <div id="colorBox">Hover me, click me</div>
+   <p id="keyEcho">Press any key</p>
+   ```
+
+   Run `npm start`. The page shows a button, a line of text, and a second line
+   of text. Without a stylesheet the `div` takes the full width of the window,
+   so its background color will later paint a stripe across the page.
+
+3. Delete the contents of `src/index.ts` and get the three elements:
+
+   ```ts
+   const counterButton = document.getElementById('counterButton') as HTMLButtonElement;
+   const colorBox = document.getElementById('colorBox') as HTMLDivElement;
+   const keyEcho = document.getElementById('keyEcho') as HTMLParagraphElement;
+   ```
+
+   VS Code marks all three as unused. That warning disappears in the next
+   steps.
+
+4. Give `counterButton` a click listener that counts up and writes the count
+   into the button's own text, in the form `Clicks: 3`. Keep the counter
+   variable outside the listener. This is the counting button from the previous
+   chapter again, this time without the `onclick` attribute in the HTML.
+   Clicking now raises the number in the button by one.
+
+5. Above the listeners, declare an array named `colors` with at least four CSS
+   color names, and a `let` variable named `colorIndex` for the position in
+   that array. Add a click listener to `colorBox` that steps to the next
+   color, sets `colorBox.style.backgroundColor`, and starts at the first color
+   again after the last one. Clicking the box now walks through your colors
+   and wraps around.
+
+   ::: {.callout-note}
+   ## TypeScript is careful with array positions
+
+   The compiler cannot prove that your position variable stays inside the
+   array, so it treats `colors[colorIndex]` as a value that might be missing
+   and refuses the direct assignment. Store it in a `const` first and let an
+   `if` prove that it is there:
+
+   ```ts
+   const nextColor = colors[colorIndex];
+   if (nextColor) {
+     colorBox.style.backgroundColor = nextColor;
+   }
+   ```
+
+   The chapter on types for elements comes back to values that might be
+   missing.
+   :::
+
+6. Give `colorBox` two more listeners, so that its text reads `Ready` while the
+   pointer is on the box and `Hover me, click me` again once the pointer has
+   left. Your research task has the two event names. Moving the mouse across
+   the box now swaps the text back and forth, and the background color stays
+   whatever your clicks made it.
+
+7. Add a listener to `document` that writes the key the user just pressed into
+   `keyEcho`, in the form `You pressed: a`. The paragraph must update while the
+   key is still down, not when it comes back up, and your research task says
+   which of the two events that is. Press `a` and the paragraph reads
+   `You pressed: a`. Every key fires the event, the modifier keys included, so
+   try a few and watch what comes out.
+
+8. Add one `if` to that listener: when the user presses the Enter key, write
+   `Press any key` into the paragraph instead. Your research task says what
+   `event.key` holds for that key. After Enter, the paragraph looks like it did
+   when the page loaded.
+
+9. Run `npm run check` and fix what Biome reports.
+
+::: {.callout-tip}
+## Stuck on an event name?
+
+Type the event as a string into `addEventListener` and let VS Code help. The
+editor knows the list and offers it while you type, which is faster than a
+search and works in the exam too.
+:::
+
+## Check your understanding {#sec-events-quiz}
+
+Six short questions: the three from the research task, and three about
+listeners. One or two sentences are enough for each.
+
+{{< quiz events title="Events" >}}

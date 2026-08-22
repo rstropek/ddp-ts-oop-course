@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the research chapter quiz
+# (0020-dom/0050-research.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz. Teacher-only test data;
+# never publish as an activity. Grading runs on the quiz's own small model
+# (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run after rubric changes, not routinely.
+
+id: research-quiz-eval
+target: ./0050-research-quiz.yaml
+
+questions:
+  - question: research-text-vs-html
+    answers:
+      - expect: correct
+        answer: |
+          with textContent you literally read <b>bold?</b> on the page, with
+          innerHTML the browser makes a real b element and you just see bold?
+          in bold
+      # Only the innerHTML half is described.
+      - expect: partial
+        answer: |
+          innerHTML makes it bold
+      - expect: incorrect
+        answer: |
+          textContent shows it bold and innerHTML prints the tags
+
+  - question: research-innerhtml-danger
+    answers:
+      - expect: correct
+        answer: |
+          because everything the user types is treated as html, so somebody can
+          smuggle code into my page. that is called cross site scripting (xss)
+      # German correct answer.
+      - expect: correct
+        answer: |
+          der browser liest die eingabe als html, also kann jemand eigenen code
+          in die seite schmuggeln. der angriff heisst cross-site-scripting, xss
+      # Danger described, name missing.
+      - expect: partial
+        answer: |
+          someone could type html tags and they would really work on my page
+      - expect: incorrect
+        answer: |
+          innerHTML is just slower than textContent, that is the only problem
+
+  - question: research-which-property
+    answers:
+      - expect: correct
+        answer: |
+          textContent, then tags the user types stay normal characters and are
+          not built into the page
+      - expect: partial
+        answer: |
+          textContent
+      - expect: incorrect
+        answer: |
+          innerHTML, because it can show the text nicely formatted
+
+  - question: research-ai-vs-mdn
+    answers:
+      - expect: correct
+        answer: |
+          the ai told me to use a library called DOMPurify for cleaning html,
+          mdn never mentioned that anywhere on the page
+      # Style difference only, no concrete point.
+      - expect: partial
+        answer: |
+          the ai explained it in much easier english than mdn
+      - expect: incorrect
+        answer: |
+          i did not ask an ai
+
+  - question: old-search-result
+    answers:
+      - expect: correct
+        answer: |
+          first the date, and then i check the same thing on mdn because a lot
+          changed in browsers since 2014
+      - expect: partial
+        answer: |
+          it is really old so i would be careful with it
+      - expect: incorrect
+        answer: |
+          nothing, if it has been online that long it must be right
+
+  - question: ai-contradicts-mdn
+    answers:
+      - expect: correct
+        answer: |
+          mdn, it is the official documentation for the web and an ai can just
+          make something up that sounds good
+      - expect: partial
+        answer: |
+          mdn wins
+      - expect: incorrect
+        answer: |
+          the ai, because it knows the newest stuff and mdn is only a wiki

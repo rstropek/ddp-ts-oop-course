@@ -1,0 +1,166 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Creating elements" (0020-dom/0060-creating-elements.qmd).
+# One quiz per chapter, at the end. It asks every question of the chapter's
+# research box (ids prefixed `research-`), so the student finds out during the
+# chapter and gets checked here; those questions get the research feedback rule
+# (point to the source, never the answer). Rubrics list only the expected
+# answer and the aspects the student must state; the shared fragments carry
+# every generic rule.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: creating-elements-quiz
+name: "Quiz: Creating elements"
+
+title: "Check your understanding: creating elements"
+description: |
+  Six short questions about the chapter *Creating elements*, three of them
+  the research task. Answer in your own words. There are no answer options
+  to pick from, and this quiz is anonymous: it's here for you, so you can
+  see what you already understand and what you should read again. One or
+  two sentences are enough for most answers, and answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const item = document.createElement('li');"
+      scope="after the chapter on creating elements"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "`document.querySelector<HTMLUListElement>('#todos')` plus a null check that throws"
+        "`textContent`, and that `innerHTML` reads its text as markup"
+        "`addEventListener('click', ...)` and `element.style.color`"
+        "`document.createElement`, `append`, `prepend`, and `element.remove()`"
+        "a `src/styles.css` imported with `import './styles.css';`, and `classList.add` and `classList.remove`")
+      not_yet=(array
+        "classes, `this`, inheritance, or generics other than `querySelector<T>`"
+        "`querySelectorAll` and collections of elements"
+        "forms, `submit` events, `fetch`, or `localStorage`")}}
+
+questions:
+  - id: research-classlist-toggle
+    title: "Switching a class"
+    question: |
+      An `li` element sometimes carries the class `done` and sometimes does
+      not. Which `classList` method switches the class on when it is off and
+      off when it is on, in a single call?
+    evaluation: |
+      Expected: `classList.toggle('done')`.
+      Required: names `toggle` (with or without the `classList.` prefix and
+      the argument).
+      Incorrect: `add`, `remove`, `replace`, `switch`, or `add` followed by
+      `remove` in an `if`.
+
+  - id: research-classlist-contains
+    title: "Asking about a class"
+    question: |
+      You want to know whether an `li` element already carries the class
+      `done`. Which `classList` method answers that with `true` or `false`?
+    evaluation: |
+      Expected: `classList.contains('done')`.
+      Required: names `contains` (with or without the `classList.` prefix and
+      the argument).
+      Incorrect: `has`, `includes`, `item`, or reading `element.className` and
+      comparing strings.
+
+  - id: research-append-vs-appendchild
+    title: "append and appendChild"
+    question: |
+      `append` and `appendChild` both put an element into a parent element.
+      Name one thing `append` accepts that `appendChild` refuses.
+    evaluation: |
+      Expected: `append` also takes plain strings (they become text), and it
+      takes several arguments in one call; `appendChild` takes exactly one
+      node.
+      Required: one of those two differences, stated clearly.
+      Partial: only says the two behave differently, or names the return
+      value difference (`appendChild` returns the node, `append` returns
+      nothing) without naming what `append` accepts.
+      Incorrect: claims `appendChild` is newer, or that `append` accepts a CSS
+      selector.
+
+  - id: how-many-items
+    title: "Counting what the loop built"
+    question: |
+      The page has `<ul id="nameList"></ul>` and nothing inside it. This code
+      runs:
+
+      ```ts
+      const names = ['Ada', 'Grace', 'Linus'];
+      const list = document.querySelector<HTMLUListElement>('#nameList');
+      if (!list) {
+        throw new Error('No element with the id nameList');
+      }
+
+      for (const name of names) {
+        const item = document.createElement('li');
+        item.textContent = name;
+        list.append(item);
+      }
+      ```
+
+      How many `li` elements does the list hold afterwards, and why that many?
+    evaluation: |
+      Expected: 3. The loop runs once per entry of `names`, and each run
+      creates one `li` and appends it.
+      Required: (1) the number 3; (2) one `li` per array entry, or "as many as
+      the array has entries".
+      Partial: the number 3 without any reason.
+      Incorrect: 1 (thinking the same element is reused), or 0.
+
+  - id: forgot-append
+    title: "The item that never shows up"
+    question: |
+      A student writes this and sees nothing new on the page, and the browser
+      reports no error:
+
+      ```ts
+      const item = document.createElement('li');
+      item.textContent = 'Buy milk';
+      ```
+
+      Explain why nothing appears, and name the one line that is missing.
+    evaluation: |
+      Expected: `createElement` builds an element object that is not yet part
+      of the page (it has no parent in the tree), so the browser draws
+      nothing; the missing line attaches it, for example
+      `list.append(item);`.
+      Required: (1) the element exists but is not attached to the page or the
+      tree; (2) names `append` (or `prepend`, or `appendChild`) as the fix.
+      Partial: only names the missing `append` line, with no reason, or only
+      explains "it is not in the page" without naming the fix.
+      Incorrect: claims `createElement` failed, or that `textContent` is the
+      problem.
+
+  - id: text-or-html
+    title: "Text the user typed"
+    question: |
+      In the to-do list, the text comes from an input field the user types
+      into, and it goes into the new `li` with `textContent`. Give one reason
+      why `textContent` is the right choice here and `innerHTML` is not.
+    evaluation: |
+      Expected: `textContent` puts the characters on the page as text, while
+      `innerHTML` reads them as HTML, so typing `<b>hi</b>` (or a `<script>`
+      tag) would build elements instead of showing the text, and a user could
+      push their own markup into the page.
+      Required: says that `innerHTML` would interpret the typed characters as
+      HTML or build elements from them, while `textContent` shows them as
+      text.
+      Partial: says `textContent` is safer, or that `innerHTML` is dangerous,
+      without saying that the typed characters are read as HTML.
+      Incorrect: claims `innerHTML` cannot show text, or that `textContent` is
+      faster and that is the whole reason.

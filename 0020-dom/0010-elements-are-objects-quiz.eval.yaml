@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the "Elements are objects" chapter quiz
+# (0020-dom/0010-elements-are-objects.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer. Teacher-only test
+# data; never publish as an activity. Grading runs on the quiz's own small
+# model (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run it after rubric changes, not
+# routinely.
+
+id: elements-are-objects-quiz-eval
+target: ./0010-elements-are-objects-quiz.yaml
+
+questions:
+  - question: one-element-two-variables
+    answers:
+      - expect: correct
+        answer: |
+          Bye. both searches found the same h1, so a and b are two names for
+          the same object.
+      # Right value, no reason at all.
+      - expect: partial
+        answer: |
+          Bye
+      - expect: incorrect
+        answer: |
+          Hello, because b was fetched separately and got its own copy of the
+          heading
+
+  - question: read-then-write
+    answers:
+      - expect: correct
+        answer: |
+          console says Draft because it runs before the change, and the
+          paragraph on the page says Final afterwards
+      # German correct answer.
+      - expect: correct
+        answer: |
+          in der konsole steht Draft, auf der seite steht dann Final
+      # Page value right, console value wrong order.
+      - expect: partial
+        answer: |
+          the page shows Final and the console shows Final too
+      - expect: incorrect
+        answer: |
+          the console prints Final and the paragraph still says Draft
+
+  - question: tree-nesting
+    answers:
+      - expect: correct
+        answer: |
+          the li elements are inside the ul, and the ul is inside body
+      # Only the first half.
+      - expect: partial
+        answer: |
+          they sit in the ul with the id drinks
+      - expect: incorrect
+        answer: |
+          both li elements sit directly in body, and the ul sits in document
+
+  - question: devtools-reload
+    answers:
+      - expect: correct
+        answer: |
+          the old text is back. the panel only changed what the browser has in
+          memory, the file on disk never changed, so reloading builds it again
+          from the file
+      # Right outcome, no reason.
+      - expect: partial
+        answer: |
+          the heading shows the old text again
+      - expect: incorrect
+        answer: |
+          my new text is still there, the elements panel saves the change into
+          index.html
+
+  - question: what-is-document
+    answers:
+      - expect: correct
+        answer: |
+          it's the object for the whole page, the root of the tree, every
+          element is somewhere under it
+      # Names the use, never says what it is.
+      - expect: partial
+        answer: |
+          it's the thing you always write in front when you look for an
+          element
+      - expect: incorrect
+        answer: |
+          document is the index.html file on your disk that the browser reads

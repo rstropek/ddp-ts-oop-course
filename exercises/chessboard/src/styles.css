@@ -1,0 +1,18 @@
+body {
+  font-family: system-ui, sans-serif;
+  background-color: #f4f4f4;
+  color: #222222;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+/* Ready for the last step of the exercise: a cell that carries the class
+   `selected` gets a yellow ring drawn inside its own square, so the board
+   layout does not move when the ring appears. */
+.cell.selected {
+  outline: 4px solid #e0b400;
+  outline-offset: -4px;
+}

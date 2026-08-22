@@ -1,0 +1,57 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 32rem;
+  margin: 2rem auto;
+}
+
+#guestForm {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#guestForm input {
+  padding: 0.3rem;
+}
+
+#guestForm button {
+  padding: 0.4rem 0.9rem;
+}
+
+#guestForm button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.error {
+  min-height: 1.4rem;
+  margin: 0.75rem 0;
+  color: #b3261e;
+}
+
+#guests {
+  list-style: none;
+  padding: 0;
+}
+
+#guests li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+#guests .guest-name {
+  font-weight: bold;
+}
+
+#guests li button {
+  margin-left: auto;
+}

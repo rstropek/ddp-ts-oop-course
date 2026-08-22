@@ -1,0 +1,153 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Elements are objects"
+# (0020-dom/0010-elements-are-objects.qmd).
+# The chapter's ideas: one element is one object, two variables can point at
+# it, properties are read and written like variables, elements nest into a
+# tree with `document` at the root, and the developer tools show that tree
+# live. The chapter has no research box, so no `research-*` questions and no
+# research fragment here.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: elements-are-objects-quiz
+name: "Quiz: Elements are objects"
+
+title: "Check your understanding: elements are objects"
+description: |
+  Five short questions about the chapter *Elements are objects*. Answer in
+  your own words. There are no answer options to pick from, and this quiz is
+  anonymous: it's here for you, so you can see what you already understand
+  and what you should read again. One or two sentences are enough for most
+  answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="heading.textContent = 'Hello again';"
+      scope="after the first chapter of the DOM part"
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "value types and reference types: two variables can point at one array"
+        "HTML tags, attributes, and elements sitting inside other elements"
+        "that the browser builds one object per element, with `document` as the root of that tree"
+        "`document.getElementById('x') as HTMLHeadingElement`, and the properties `textContent` and `id`"
+        "the developer tools: the Console tab and the Elements panel")
+      not_yet=(array
+        "events and `addEventListener`"
+        "`querySelector` and `querySelectorAll`"
+        "creating or removing elements from TypeScript"
+        "CSS, classes, and inheritance")}}
+
+questions:
+  - id: one-element-two-variables
+    title: "Two names, one heading"
+    question: |
+      A page contains exactly one heading:
+
+      ```html
+      <h1 id="title">Hello</h1>
+      ```
+
+      A program runs these lines in this order:
+
+      ```ts
+      const a = document.getElementById('title') as HTMLHeadingElement;
+      const b = document.getElementById('title') as HTMLHeadingElement;
+      a.textContent = 'Bye';
+      console.log(b.textContent);
+      ```
+
+      What does the console print, and why?
+    evaluation: |
+      Expected: `Bye`. Both calls searched for the same `id` and found the
+      same element, so `a` and `b` point at one object.
+      Required: (1) the value Bye; (2) both variables refer to the same
+      element ("same object", "same heading", "b is only a second name for
+      it" all count).
+      Partial: Bye with no reason, or the same-object reason with a wrong or
+      missing value.
+      Incorrect: `Hello`, or says the second call made a copy of the heading.
+
+  - id: read-then-write
+    title: "Read first, write second"
+    question: |
+      The page contains `<p id="note">Draft</p>`, and the program runs:
+
+      ```ts
+      const note = document.getElementById('note') as HTMLParagraphElement;
+      console.log(note.textContent);
+      note.textContent = 'Final';
+      ```
+
+      What does the console print, and what does the paragraph on the page
+      show after these lines?
+    evaluation: |
+      Expected: the console prints `Draft`, because the read happens before
+      the change; the paragraph then shows `Final`.
+      Required: both literal values, each on the right side (console Draft,
+      page Final).
+      Partial: exactly one of the two values right.
+      Incorrect: says the console prints Final.
+
+  - id: tree-nesting
+    title: "Who sits inside whom"
+    question: |
+      ```html
+      <body>
+        <ul id="drinks">
+          <li>Water</li>
+          <li>Juice</li>
+        </ul>
+      </body>
+      ```
+
+      Name the element the two `<li>` elements sit inside, and name the
+      element that this `<ul>` sits inside.
+    evaluation: |
+      Expected: the `li` elements sit inside the `ul` (the one with the id
+      `drinks`); the `ul` sits inside `body`.
+      Required: both answers, ul for the li elements and body for the ul.
+      Partial: exactly one of the two right.
+      Incorrect: says the `li` elements sit inside `body` or inside
+      `document`.
+
+  - id: devtools-reload
+    title: "Editing in the elements panel"
+    question: |
+      In the developer tools you open the Elements panel and type a new text
+      into a heading. The page shows your new text at once. Then you press
+      F5 to reload the page. What do you see now, and why?
+    evaluation: |
+      Expected: the old text is back. The panel changed the objects the
+      browser holds in memory, not the HTML file, and a reload builds those
+      objects from the file again.
+      Required: (1) the old text returns; (2) the edit never reached the
+      file ("only in the browser", "nur im Speicher" count).
+      Partial: says the old text is back with no reason given.
+      Incorrect: says the new text stays, or that the panel saved the HTML
+      file.
+
+  - id: what-is-document
+    title: "Where a search starts"
+    question: |
+      Every element search in this chapter starts with `document`, as in
+      `document.getElementById('title')`. What is `document`?
+    evaluation: |
+      Expected: the object that stands for the whole page, the root of the
+      tree of element objects, so every element hangs somewhere below it.
+      Required: names it as the object for the whole page or the root of the
+      tree ("the page itself", "das ganze Dokument" count).
+      Partial: says only that it is where you search for elements, without
+      saying what it is.
+      Incorrect: says it is the `index.html` file on disk, or a variable you
+      declare yourself.

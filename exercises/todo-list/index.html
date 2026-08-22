@@ -7,12 +7,11 @@
   </head>
   <body>
     <h1>To-do list</h1>
-    <form id="newTodo">
-      <label for="todoText">New item</label>
-      <input id="todoText" type="text" required>
-      <button type="submit">Add</button>
-    </form>
+    <label for="todoText">New item</label>
+    <input id="todoText" type="text">
+    <button id="addTodo" type="button">Add</button>
     <ul id="todos"></ul>
+    <p id="openCount"></p>
     <script src="./src/index.ts" type="module"></script>
   </body>
 </html>

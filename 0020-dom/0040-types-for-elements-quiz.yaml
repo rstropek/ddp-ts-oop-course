@@ -1,0 +1,165 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Types for elements" (0020-dom/0040-types-for-elements.qmd).
+# The first three questions are the chapter's research box (ids `research-*`),
+# so they get the research feedback rule: point to the source, never hand over
+# the answer. Rubrics list only the expected answer and the aspects the student
+# must state; the shared fragments carry every generic grading rule.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: types-for-elements-quiz
+name: "Quiz: Types for elements"
+
+title: "Check your understanding: types for elements"
+description: |
+  Six short questions about this chapter, the first three of them the
+  research task. Answer in your own words. One or two sentences are enough,
+  and if you cannot answer a research question yet, look it up and come
+  back. This quiz is anonymous and is here for you. Answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const input = document.querySelector<HTMLInputElement>('#leftNumber');"
+      scope="after the chapter on types for elements in the DOM part"
+      reveal=false
+      knows=(array
+        "variables, conditions, `switch`, loops, arrays, and functions in TypeScript from year one"
+        "that the browser turns HTML into a tree of element objects (the DOM)"
+        "`document.querySelector<HTMLInputElement>('#someId')` followed by a check against `null`"
+        "that `throw new Error('...')` stops the program with a message"
+        "`textContent`, `addEventListener('click', ...)`, and that `input.value` is a string"
+        "`Number(...)` for converting a string, and `Number.isNaN(...)` for checking the result")
+      not_yet=(array
+        "classes, inheritance, or generics of their own"
+        "`try` and `catch` (only `throw` has been named so far)"
+        "`querySelectorAll` and looping over a collection of elements"
+        "what `Number('')` returns and which property a `<select>` uses (that is what they are researching right now)")}}
+
+questions:
+  - id: research-number-conversion
+    title: "Two strings, two results"
+    question: |
+      `Number('abc')` and `Number('')` do not give you the same result.
+      What does each one return?
+    evaluation: |
+      Expected: `Number('abc')` returns `NaN`; `Number('')` returns `0`.
+      Required: (1) `NaN` (or "not a number") for `'abc'`; (2) `0` for the
+      empty string.
+      Partial: only one of the two values is right.
+      Incorrect: says both return `NaN`, or that the empty string returns
+      `undefined`.
+
+  - id: research-parsefloat-vs-number
+    title: "A number with junk after it"
+    question: |
+      What does `parseFloat('12abc')` return, and what does
+      `Number('12abc')` return?
+    evaluation: |
+      Expected: `parseFloat('12abc')` returns `12`; `Number('12abc')`
+      returns `NaN`.
+      Required: (1) `12` for `parseFloat`; (2) `NaN` for `Number`.
+      Partial: only one of the two values is right, or says `parseFloat`
+      "reads the number at the start" without giving `12`.
+      Incorrect: says both return `12`, or both return `NaN`.
+
+  - id: research-select-value
+    title: "Which option did the user pick?"
+    question: |
+      An `HTMLSelectElement` has a property that gives you the value of the
+      option the user picked. What is it called, and where did you find it?
+    evaluation: |
+      Expected: the `value` property (`selectElement.value`), found on the
+      MDN page for `HTMLSelectElement`.
+      Required: (1) names `value`; (2) names a source (MDN page, docs,
+      search, AI tutor); any source counts, and the exact page title does
+      not matter.
+      Partial: names `value` but no source at all.
+      Incorrect: names `selectedIndex`, `textContent`, or `innerText` as the
+      property that gives the value.
+
+  - id: possibly-null-error
+    title: "Possibly null"
+    question: |
+      TypeScript underlines the last line of this code and reports
+      `'statusParagraph' is possibly 'null'`.
+
+      ```ts
+      const statusParagraph = document.querySelector<HTMLParagraphElement>('#statusText');
+
+      statusParagraph.textContent = 'ready';
+      ```
+
+      What is TypeScript warning you about?
+    evaluation: |
+      Expected: `querySelector` returns `null` when no element matches
+      `#statusText`, so `statusParagraph` may hold `null`; setting
+      `textContent` on `null` crashes at runtime, so TypeScript wants the
+      value checked first.
+      Required: (1) the element may not be found, so the value can be
+      `null`; (2) it has to be checked (or: using it would crash).
+      Partial: says the value can be `null` but says nothing about checking
+      it or about the crash.
+      Incorrect: says the element is definitely missing, or that the id is
+      spelled wrong, or that `querySelector` is the wrong function.
+
+  - id: value-is-a-string
+    title: "What the input hands you"
+    question: |
+      The page has `<input id="amount" type="text">` and the user typed
+      `3.5` into it.
+
+      ```ts
+      const amountInput = document.querySelector<HTMLInputElement>('#amount');
+      if (amountInput === null) {
+        throw new Error('Element #amount not found');
+      }
+
+      const amount = Number(amountInput.value);
+      ```
+
+      What does `amountInput.value` hold, and what does `amount` hold?
+    evaluation: |
+      Expected: `amountInput.value` holds the string `'3.5'` (text);
+      `amount` holds the number `3.5`.
+      Required: (1) `value` is the text `3.5` and is a string; (2) `amount`
+      is the number `3.5`.
+      Partial: gives `3.5` for both but never says that `value` is a string
+      or text.
+      Incorrect: says `amount` is `NaN`, or says `value` is empty because
+      the input has no `value` attribute.
+
+  - id: replace-the-cast
+    title: "Retire the cast"
+    question: |
+      This line comes from an older project:
+
+      ```ts
+      const nameInput = document.getElementById('nameInput') as HTMLInputElement;
+      ```
+
+      Rewrite it the way this course writes it from now on. Three or four
+      lines of code are enough.
+    evaluation: |
+      Expected:
+      `const nameInput = document.querySelector<HTMLInputElement>('#nameInput');`
+      followed by `if (nameInput === null) { throw new Error('...'); }`.
+      Required: (1) `querySelector` with `<HTMLInputElement>` in angle
+      brackets and `'#nameInput'` (with the `#`) as the selector; (2) a
+      check against `null` that stops with `throw`.
+      Partial: the `querySelector` line is right but the null check is
+      missing, or the check is there but `as` was kept.
+      Incorrect: keeps `as`, or uses `!` instead of a check.

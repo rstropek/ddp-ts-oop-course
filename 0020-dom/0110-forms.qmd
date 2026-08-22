@@ -1,0 +1,275 @@
+---
+title: "Forms and validation"
+---
+
+Everything you have built so far reacts to a click. Real pages ask for
+something first: a name, a number, a color. HTML has a wrapper for exactly
+that, and the wrapper comes with a surprise built in. Meet it first.
+
+## The page that throws your input away {#sec-forms-reload}
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template, call the folder `form-experiment`, and run `npm install` and
+   `npm start`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Sign up</h1>
+   <form id="signupForm">
+     <label for="visitorName">Your name</label>
+     <input id="visitorName" name="visitorName" type="text">
+     <button id="sendButton" type="submit">Send</button>
+   </form>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Delete both lines in `src/index.ts`. The heading they talked to is gone,
+   so the file stays empty for a moment.
+4. Type your name into the field in the browser and click **Send**.
+
+The page blinks and comes back with the field empty. Your name is not lost, it
+moved: look at the address bar, which now reads
+`http://localhost:5173/?visitorName=Lena`. Click into the field, type again,
+and this time press Enter instead of clicking. Same blink, same address.
+
+## Take the submit over {#sec-forms-preventdefault}
+
+Now put this into `src/index.ts`:
+
+```ts
+const signupForm = document.querySelector<HTMLFormElement>('#signupForm');
+const visitorName = document.querySelector<HTMLInputElement>('#visitorName');
+
+if (!signupForm || !visitorName) {
+  throw new Error('The sign-up page is missing an element');
+}
+
+signupForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  console.log(`Hello ${visitorName.value}`);
+});
+```
+
+Open the browser console with F12, type a name, and press Enter. The page stays
+where it is and your greeting shows up in the console. One line changed the
+whole behavior.
+
+## One event for the whole form {#sec-forms-submit}
+
+A `<form>` is a box around the inputs that belong together. Its payoff is the
+`submit` event: the browser fires it on the form when someone clicks a button
+with `type="submit"` inside the form, and it fires the same event when someone
+presses Enter in a text field. One listener on the form covers the mouse and
+the keyboard, instead of a `click` listener on the button plus a `keydown`
+listener on every input.
+
+Every event comes with a default action, the thing the browser does on its own
+unless your code objects. For `submit`, that default action is to send the
+values to a web server and show the answer as a new page. Your form names no
+server, so the browser sends the values back to the same page and loads it
+again. That is the blink. The `name` attribute of each input is what turns
+into `?visitorName=Lena` in the address.
+
+`event.preventDefault()` cancels the default action. The event still happens
+and your listener still runs, but the reload does not. From that line on, the
+values are your code's business, and no input needs a `name` any more, because
+you read `visitorName.value` yourself.
+
+::: {.callout-warning}
+## A page that blinks is a missing preventDefault
+
+When your error message appears for a fraction of a second and then the page
+looks new and empty, you forgot `event.preventDefault()`. Make it the first
+line of every `submit` handler you write.
+:::
+
+## Labels are not decoration {#sec-forms-labels}
+
+The line `<label for="visitorName">Your name</label>` points at the input whose
+`id` is `visitorName`. Click the words in the browser and watch the cursor jump
+into the field, because the label belongs to it now.
+
+That connection is worth more than the bigger click target. A screen reader
+announces "Your name" when the cursor enters the field, so a person who cannot
+see the layout knows what to type. The browser tests you write in Part 8 look
+inputs up by their label text, so a field without a label is a field the test
+cannot find.
+
+So: every input gets a `<label>`, and the label's `for` carries the input's
+`id`.
+
+## The rules an input can carry {#sec-forms-attributes}
+
+An input can describe its own rules as attributes. `required` marks a field
+that must not be empty. On `<input type="number">`, `min` and `max` describe
+the range that makes sense. The browser reads those attributes and acts on
+them, and the research box below sends you after the details.
+
+Your code still has to check. No attribute knows that Lena is already on the
+list, and none can compare one field with another. The form in the exercise
+therefore carries `novalidate`, which tells the browser to stay out of the
+checking and fire `submit` whatever the fields hold, so the only messages the
+user reads are yours.
+
+## Where the error goes {#sec-forms-errors}
+
+An error nobody can see is not a message. Give the page one paragraph for it,
+right below the form, and write into it with `textContent`. Add this line under
+the `</form>` in `index.html`:
+
+```html
+<p id="signupError"></p>
+```
+
+Then look up that paragraph next to the other two elements and grow the
+handler:
+
+```ts
+const signupError = document.querySelector<HTMLParagraphElement>('#signupError');
+
+signupForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const name = visitorName.value.trim();
+  if (name === '') {
+    signupError.textContent = 'Please enter your name.';
+    visitorName.focus();
+    return;
+  }
+
+  signupError.textContent = '';
+  console.log(`Hello ${name}`);
+  signupForm.reset();
+});
+```
+
+Add `signupError` to the `if (!signupForm || !visitorName)` check as well, or
+TypeScript reminds you that it can be `null`.
+
+Read the shape of that handler, because every validating handler in this book
+has it. Each rule gets its own `if`, which writes a message and then `return`s.
+The good case lives at the bottom, where it can trust everything above it, and
+its first move is to clear the message so yesterday's complaint does not sit
+next to today's success.
+
+Two small methods do the rest. `visitorName.focus()` puts the cursor back into
+the field with the problem. `signupForm.reset()` puts every field back to the
+value written in the HTML, which for an empty field means empty again.
+
+## Two events while typing {#sec-forms-input-change}
+
+The `submit` event is not the only way a form talks to you. The `input` event
+fires on every single keystroke, so it is the one for feedback that should
+follow along while the user types. The `change` event fires once the field is
+finished, when the user leaves it or picks a value in a color or date picker.
+
+`disabled` is an attribute in HTML and a property in TypeScript, and setting it
+dims a button and stops it from firing clicks. Look the **Send** button up the
+way you looked the other elements up, then keep it in step with the field:
+
+```ts
+visitorName.addEventListener('input', () => {
+  sendButton.disabled = visitorName.value.trim() === '';
+});
+```
+
+A disabled button is friendlier than an error message, because the user never
+runs into the rule at all. It does not replace the check in the handler though.
+Anyone can switch that attribute off in the browser's developer tools, so a
+rule that lives only in the HTML is a rule you cannot count on.
+
+::: {.research title="What can an input be?"}
+The exercise below reads an age from a number field and refuses anything
+outside 0 to 120. The chart you build in the next part goes further and asks
+for a color, a position, and a size.
+
+1. The `type` attribute of `<input>` has many possible values. Name three
+   besides `text` and describe what the browser shows for each. Make sure
+   `number`, `color`, and `range` are among the ones you can describe, because
+   the next part's chart needs exactly those.
+2. A number input has a `value` and a `valueAsNumber`. What does
+   `valueAsNumber` give you that `value` does not, and what do you get from it
+   while the field is empty?
+3. What do `min`, `max`, and `step` do on `<input type="number">`? And can the
+   field still end up holding a number outside `min` and `max`?
+
+Questions 2 and 3 are exam material: you write validation code with no internet
+and no AI next to you.
+:::
+
+## Exercise: the guest list {#sec-forms-exercise}
+
+A party needs a guest list, and a guest list needs rules. No empty names, no
+name twice, and no age of 700.
+
+{{< exercise guest-list >}}
+
+::: {.callout-tip}
+## Helper functions and the null check
+
+Write every helper of your own as `const showError = (message: string) => {
+... };`. TypeScript keeps the null check from the top of the file alive inside
+an arrow function stored in a `const`. Write the same helper as
+`function showError(...) { ... }` and your elements are `possibly 'null'`
+again, because such a function could also run before the check did.
+:::
+
+1. Open `index.html` and read it: a form with two labeled inputs, and below
+   it an empty error paragraph, an empty `<ul>`, and an empty counter
+   paragraph. Run `npm start` and click **Add guest**. The page reloads,
+   exactly like the experiment at the start of this chapter.
+2. In `src/index.ts`, import the stylesheet with `import './styles.css';`.
+   Then look up the seven elements you need with `querySelector<...>`:
+   `#guestForm`, `#guestName`, `#guestAge`, `#guestError`, `#guests`,
+   `#guestCount`, and `#addGuest`. One `if` that throws covers all seven. The
+   steps below call them `guestForm`, `nameInput`, `ageInput`, `errorText`,
+   `guestList`, `countText`, and `addButton`.
+3. Listen for `submit` on the form, call `event.preventDefault()` as the first
+   line, and `console.log` the name for now. Expected result: clicking **Add
+   guest** no longer reloads the page, and the name shows up in the console.
+4. Refuse an empty name. Read `value`, cut the spaces off with `trim()`, and
+   when nothing is left, write `Please enter a name.` into the error paragraph,
+   focus the name field, and `return`.
+5. Refuse a name that is already on the list, ignoring upper and lower case,
+   so `lena` does not get in while `Lena` is there. Two ways work: keep an
+   array of the names you added, or loop over the entries already in the list
+   and compare their text. Pick whichever you find clearer.
+6. Refuse an impossible age. Read the number with `valueAsNumber`, catch the
+   empty field with `Number.isNaN`, and refuse anything below 0 or above 120.
+   One message such as `Please enter an age between 0 and 120.` covers all
+   three cases.
+7. Now the good case. Clear the error paragraph, then build the entry: an `li`
+   that holds a `span` with the class `guest-name` for the name, a second
+   `span` with the age in parentheses, and a **Remove** button whose click
+   listener removes the `li`. Append the `li` to `guestList`. Expected result:
+   a line reading `Lena (17) Remove`, with the name in bold. If you chose to
+   loop over the list in step 5, the class `guest-name` is what your loop looks
+   for.
+8. Keep the counter honest. Write a helper that puts the number of entries and
+   the word `guests` into `countText`, such as `3 guests`, and call it when the
+   page loads, after adding an entry, and after removing one. Expected result:
+   the page says `0 guests` before you add anything.
+9. Finish the good case with `reset()` on the form and `focus()` on the name
+   field, so the next guest can be typed without touching the mouse.
+10. Bonus: keep **Add guest** disabled while the name field is empty. Listen
+    for `input` on the name field and set `addButton.disabled` from
+    `nameInput.value.trim() === ''`. Do not forget the moment the page loads
+    and the moment after a successful add.
+11. Run `npm run check` and fix what Biome complains about.
+
+The stylesheet keeps a line of height free for the error paragraph, so the
+list does not jump while you test. Try every rule once: an empty name, a
+duplicate, an empty age, an age of 700, and a good guest.
+
+That form is the shape of the one waiting in the next part, where the fields
+pick a color, a position, and a size, and what grows below them is a chart
+instead of a list.
+
+## Check your understanding {#sec-forms-quiz}
+
+Six short questions, and the first three are the research questions from
+above.
+
+{{< quiz forms title="Forms and validation" >}}

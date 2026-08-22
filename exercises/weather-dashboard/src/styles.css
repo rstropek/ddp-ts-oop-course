@@ -1,0 +1,27 @@
+body {
+  font-family: system-ui, sans-serif;
+  background-color: #eef3f8;
+  color: #1f2933;
+  margin: 0;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.75rem;
+}
+
+#nextConditionButton {
+  display: block;
+  margin: 0 auto 2rem auto;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #1f2933;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+/* Everything below the button is yours: the row of cards, the card look,
+   one color rule per condition class, and the hover lift. */

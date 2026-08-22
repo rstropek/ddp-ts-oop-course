@@ -21,10 +21,22 @@ book:
   date: 2026-08-22
   chapters:
     - index.qmd
-    - part: "The DOM"
+    - part: "Welcome back"
       chapters:
-        - 0020-dom/0010-dummy.qmd
+        - 0010-welcome/0010-from-canvas-to-page.qmd
+    - part: "The DOM: a page full of objects"
+      chapters:
+        - 0020-dom/0010-elements-are-objects.qmd
+        - 0020-dom/0020-events.qmd
+        - 0020-dom/0030-starter-project.qmd
+        - 0020-dom/0040-types-for-elements.qmd
+        - 0020-dom/0050-research.qmd
+        - 0020-dom/0060-creating-elements.qmd
         - 0020-dom/0070-coding-buddy.qmd
+        - 0020-dom/0080-selectors.qmd
+        - 0020-dom/0090-git.qmd
+        - 0020-dom/0100-layout.qmd
+        - 0020-dom/0110-forms.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

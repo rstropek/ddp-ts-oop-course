@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class blog</title>
+  </head>
+  <body>
+    <header>
+      <h1>Class blog</h1>
+      <p>Three short posts from our web development lessons.</p>
+    </header>
+
+    <section id="controls">
+      <button id="countButton" type="button">Count highlights</button>
+      <button id="toggleButton" type="button">Toggle highlights</button>
+      <button id="shoutButton" type="button">Shout</button>
+      <button id="tagsButton" type="button">List tags</button>
+      <p id="status">Nothing counted yet.</p>
+    </section>
+
+    <article>
+      <h2>Our first web page</h2>
+      <div class="post">
+        <p>We wrote our first page today. It had one heading and one button.</p>
+        <p class="highlight">The browser reloads the page by itself every time a file is saved.</p>
+        <p>Half the class forgot a closing tag at least once.</p>
+      </div>
+      <ul class="tags">
+        <li>html</li>
+        <li>vite</li>
+        <li>starter</li>
+      </ul>
+      <p class="meta">
+        Posted by Lena. Sources: <a href="https://developer.mozilla.org/en-US/docs/Web/HTML">the HTML pages on MDN</a> and
+        <a href="/notes/lesson-1.html">our lesson notes</a>.
+      </p>
+    </article>
+
+    <article>
+      <h2>Colors are harder than they look</h2>
+      <div class="post">
+        <p>We spent a whole lesson picking colors for the school page.</p>
+        <p>Everybody wanted a different green.</p>
+        <p class="highlight">In the end we wrote the six colors into the stylesheet and stopped arguing.</p>
+      </div>
+      <ul class="tags">
+        <li>css</li>
+        <li>colors</li>
+        <li>teamwork</li>
+      </ul>
+      <p class="meta">
+        Posted by Jonas. Sources: <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value">the color page on MDN</a> and
+        <a href="/notes/lesson-2.html">our lesson notes</a>.
+      </p>
+    </article>
+
+    <article>
+      <h2>What we broke this week</h2>
+      <div class="post">
+        <p class="highlight">A missing quote in an attribute swallowed half the page.</p>
+        <p>The browser showed less of the page and said nothing about it.</p>
+        <p>We found it by reading the elements panel in the developer tools.</p>
+      </div>
+      <ul class="tags">
+        <li>debugging</li>
+        <li>devtools</li>
+        <li>html</li>
+      </ul>
+      <p class="meta">
+        Posted by Amina. Sources: <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development">the learning area on MDN</a> and
+        <a href="/notes/lesson-3.html">our lesson notes</a>.
+      </p>
+    </article>
+
+    <footer>
+      <p>Written by class 2B. <a href="/imprint.html">Imprint</a></p>
+    </footer>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

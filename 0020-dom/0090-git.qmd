@@ -1,0 +1,308 @@
+---
+title: "Git and your course repository"
+---
+
+A handful of projects sit on your disk by now, from the hello page to the blog
+page of the last chapter. Each exists in exactly one version. Overwrite
+`src/index.ts` with something worse and yesterday's work is gone. This chapter
+gives your projects a memory, and then a home on the internet.
+
+## Give your to-do list a memory {#sec-git-init}
+
+Open a terminal in your to-do list project and run:
+
+```bash
+git init
+```
+
+Git answers with one line:
+
+```
+Initialized empty Git repository in .../todo-list/.git/
+```
+
+If git also printed a long hint about `master`, run `git branch -m main` now.
+The rest of this chapter assumes your branch is called `main`.
+
+Now ask git what it sees:
+
+```bash
+git status
+```
+
+Every file that came with the starter is in the answer, plus whatever you
+added yourself:
+
+```
+On branch main
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.agents/
+	.claude
+	.gitignore
+	.vscode/
+	assets/
+	biome.json
+	index.html
+	package-lock.json
+	package.json
+	skills-lock.json
+	src/
+	tsconfig.json
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+Most terminals print that list in red. The heading **Untracked files** means
+git can see them and is not looking after them yet.
+
+One folder is missing. `node_modules` sits right there in the project, and git
+does not mention it at all. Work out why before you read on.
+
+## The file that keeps node_modules out {#sec-git-gitignore}
+
+Open `.gitignore` in the project root. The starter ships it, and its first
+lines are:
+
+```
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+```
+
+Every line is a pattern for files and folders git pretends not to see.
+`node_modules/` is on the list because it is not your work. `package.json`
+already writes down which packages the project needs, and `npm install`
+fetches them again on any computer in about a minute. The folder is also huge:
+around 130 MB in a fresh starter, against a few kilobytes for everything you
+wrote. `dist/` is out for the same reason, because `npm run build` recreates
+it. Copy this `.gitignore` into every project and `node_modules` never lands
+in a repository.
+
+## Tell git who you are {#sec-git-identity}
+
+Every saved version records who made it, so set that once per computer:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.address@example.com"
+git config --global init.defaultBranch main
+```
+
+The third line makes every future `git init` start on a branch called `main`,
+which is what GitHub expects. Skip the first two and git refuses to commit
+with "Please tell me who you are".
+
+## Your first commit {#sec-git-commit}
+
+Two commands turn the red list into a saved version:
+
+```bash
+git add .
+git commit -m "Add the to-do list with add, done, and delete"
+```
+
+The commit prints a summary of what it stored:
+
+```
+[main (root-commit) e5f982c] Add the to-do list with add, done, and delete
+ 14 files changed, 1705 insertions(+)
+```
+
+Run `git status` once more and the red list is gone:
+
+```
+On branch main
+nothing to commit, working tree clean
+```
+
+Clean means the files on your disk and the last saved version are identical.
+
+## Repositories and commits {#sec-git-repository}
+
+A **repository** is a folder plus its history. `git init` created a hidden
+`.git` folder next to your files, and that folder holds every version you ever
+save. Delete `.git` and you have a plain folder again, history gone.
+
+One saved version is a **commit**: a snapshot of every tracked file at one
+moment, with your name, the time, and your message attached. All of it lives
+on your disk so far. Nothing has been uploaded anywhere.
+
+The word `add` is misleading. `git add` marks which changes belong in the next
+commit, and `git commit` is what stores them. So you can fix three files,
+commit two of them, and keep working on the third.
+
+## Reading git status {#sec-git-status}
+
+`git status` is the command you run most, so learn its three headings. Here is
+a project showing two of them at once:
+
+```
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   src/styles.css
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+	modified:   src/index.ts
+```
+
+* **Untracked files** are files git has never stored. New files start here.
+* **Changes not staged for commit** are tracked files you edited since the
+  last commit.
+* **Changes to be committed** are the changes `git add` picked. The next
+  `git commit` stores these and nothing else.
+
+So `src/styles.css` goes into the next commit and the edit in `src/index.ts`
+does not, until you `git add src/index.ts` too.
+
+## The daily loop {#sec-git-loop}
+
+Four commands, always in this order:
+
+1. `git status` to see what changed.
+2. `git add .` to pick the changes.
+3. `git commit -m "..."` to save them with a message.
+4. `git push` to send them to GitHub.
+
+Commit often, whenever a small piece works. Ten small commits with clear
+messages are worth far more than one commit called "homework" at midnight.
+
+## Putting it on GitHub {#sec-git-github}
+
+The commits live on your laptop, which is fine until the laptop dies. GitHub
+keeps a copy and gives your teacher a link to read. If you have no account
+yet, create one now at [github.com](https://github.com), then make an empty
+repository:
+
+1. Click the **+** in the top right, then **New repository**.
+2. Name it, for example `creative-coding-2`.
+3. Leave every box under "Initialize this repository" unticked, so the
+   repository arrives with no README and no `.gitignore`.
+4. Click **Create repository**.
+
+GitHub now shows a page with a web address ending in `.git`. Connect your
+local repository to it and send everything up:
+
+```bash
+git remote add origin https://github.com/<your-name>/creative-coding-2.git
+git push -u origin main
+```
+
+`origin` is the name your repository uses for "the copy on GitHub". The `-u`
+tells git to remember the connection, so every later push is a bare
+`git push`. The push ends with:
+
+```
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+```
+
+Reload the GitHub page and your files are there.
+
+::: {.callout-tip}
+## Git with buttons in VS Code
+
+VS Code's **Source Control** view is git with a user interface. It lists your
+changed files. The **+** next to a file runs `git add`, the message box with
+the check mark runs `git commit`, and the sync arrows run `git push`. Use
+whichever you like, and learn the commands anyway: they work in every terminal
+on every computer, including the ones in the exam room.
+:::
+
+## One repository for the whole year {#sec-git-course-repo}
+
+You get one repository for this course, not one per project, and it has a
+fixed layout:
+
+```
+creative-coding-2/
+├── .gitignore
+├── coursework/
+│   ├── 2026-09-15-hello-again/
+│   └── 2026-09-22-click-counter/
+├── homework/
+│   └── 2026-09-22-simple-calculator/
+└── projects/
+    └── pixel-art-editor/
+```
+
+`coursework/` holds what you build together in class, `homework/` holds your
+homework solutions, and `projects/` is for anything you make on your own.
+Inside the first two, a folder name starts with the date of the lesson,
+`YYYY-MM-DD`, followed by a short name in lowercase with hyphens. Dates
+written that way sort themselves, so the newest work sits at the bottom.
+
+Keep it tidy. Your teacher reads this repository, and a clean repository is
+part of your grade: the layout above, folder names that say what a project is,
+and commit messages someone else can understand.
+
+::: {.research title="How do you write a commit message?"}
+In the exercise below you write one commit message per project, and messages
+like "stuff" and "asdf" will not do. Programmers have argued about this for
+years and written the results down.
+
+1. Find two named conventions for commit messages. What does each one ask you
+   to write, and where did you find it?
+2. `git log` prints the history. What does `git log --oneline` show instead,
+   and what does it leave out?
+3. You committed a file by mistake and afterwards added it to `.gitignore`,
+   but git keeps reporting changes to it. Why does `.gitignore` not help here,
+   and which command stops git tracking the file without deleting it from your
+   disk?
+
+For the exam, keep the convention you picked in your head. You will write
+commit messages without a browser tab open.
+:::
+
+## Exercise: your course repository {#sec-git-exercise}
+
+Build the repository you will use for the whole year, and move everything you
+have written so far into it.
+
+1. On GitHub, create the empty repository as described above, named
+   `creative-coding-2`. Expected result: a page showing a web address that
+   ends in `.git`.
+2. Create a folder `creative-coding-2` next to your project folders, open a
+   terminal in it, run `git init`, then
+   `git remote add origin <the address from step 1>`.
+3. Copy the `.gitignore` from one of your starter projects into the root of
+   `creative-coding-2`. Expected result: `git status` lists `.gitignore` as
+   untracked.
+4. Create the folders `coursework`, `homework`, and `projects`. Git says
+   nothing about empty folders, so `git status` does not change yet.
+5. Move each project you have built so far into
+   `coursework/YYYY-MM-DD-short-name/`, using the date of the lesson it
+   belongs to. Anything you did as homework goes under `homework/` instead.
+6. Delete the `node_modules` folder in every moved project. You are deleting
+   downloads, not work: `npm install` brings it back whenever you want to run
+   that project again. Expected result: your course folder shrinks by a few
+   hundred megabytes.
+7. Delete the hidden `.git` folder inside your to-do list project. A
+   repository inside a repository confuses git.
+8. Commit one project at a time, so the history reads like a list of your
+   work: `git add coursework/2026-09-15-hello-again`, then `git commit -m "..."`
+   with a message in the convention you picked in the research task. Expected
+   result after the last one: `git status` prints "nothing to commit, working
+   tree clean".
+9. Send everything up with `git push -u origin main`.
+10. Open the repository page and click into one of the project folders. Check
+    that `src/index.ts` and `index.html` are there and `node_modules` is not.
+    If `node_modules` did make it in, the `.gitignore` was missing when you
+    committed, and your third research answer tells you how to undo that.
+11. Your teacher hands out a form for the repository link. Fill it in.
+
+From now on, every exercise starts inside `coursework/` or `homework/`, and
+every lesson ends with a commit and a push.
+
+## Check your understanding {#sec-git-quiz}
+
+Six short questions, three of them from the research task.
+
+{{< quiz git title="Git and your course repository" >}}

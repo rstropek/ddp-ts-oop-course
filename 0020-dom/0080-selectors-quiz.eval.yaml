@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the selectors chapter quiz
+# (0020-dom/0080-selectors.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz. Teacher-only test data;
+# never publish as an activity. Grading runs on the quiz's own small model
+# (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run it after rubric changes.
+
+id: selectors-quiz-eval
+target: ./0080-selectors-quiz.yaml
+
+questions:
+  - question: research-return-type
+    answers:
+      - expect: correct
+        answer: |
+          a NodeList
+      # Idea without the name.
+      - expect: partial
+        answer: |
+          a list of all the p elements, but it's not a real array
+      - expect: incorrect
+        answer: |
+          an array of HTMLParagraphElement
+
+  - question: research-loop
+    answers:
+      - expect: correct
+        answer: |
+          for (const item of items) { ... } or items.forEach((item) => ...)
+      # German correct answer.
+      - expect: correct
+        answer: |
+          mit for...of und mit einer normalen for-schleife über items.length
+      # Only one working way.
+      - expect: partial
+        answer: |
+          items.forEach
+      - expect: incorrect
+        answer: |
+          items.map((item) => ...) and items.filter((item) => ...)
+
+  - question: research-live-or-static
+    answers:
+      - expect: correct
+        answer: |
+          no. it's static, so it's just a snapshot from the moment you called
+          it and the new p is not in there.
+      # Right answer, missing the static/snapshot aspect.
+      - expect: partial
+        answer: |
+          no, it stays the same
+      - expect: incorrect
+        answer: |
+          yes, the list is live and always shows all p elements
+
+  - question: research-to-array
+    answers:
+      - expect: correct
+        answer: |
+          Array.from(result), then map and filter work
+      # Right idea, no method named.
+      - expect: partial
+        answer: |
+          you have to convert it into a normal array first
+      - expect: incorrect
+        answer: |
+          you don't have to, map already works on it
+
+  - question: selector-match
+    answers:
+      - expect: correct
+        answer: |
+          A and C, so length is 2
+      # Elements right, count missing.
+      - expect: partial
+        answer: |
+          the paragraphs A and C
+      # D is outside the article.
+      - expect: incorrect
+        answer: |
+          A, C and D, length 3
+
+  - question: null-or-empty
+    answers:
+      - expect: correct
+        answer: |
+          querySelector gives null if nothing matches, querySelectorAll gives
+          an empty list with length 0
+      # Only the querySelector half.
+      - expect: partial
+        answer: |
+          because querySelector can be null when the element isn't there
+      - expect: incorrect
+        answer: |
+          both of them return null, but querySelectorAll checks it for you

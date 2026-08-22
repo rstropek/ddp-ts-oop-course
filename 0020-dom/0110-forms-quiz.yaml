@@ -1,0 +1,183 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Forms and validation" (0020-dom/0110-forms.qmd).
+# The first three questions are the chapter's research-box questions.
+
+id: forms-quiz
+name: "Quiz: Forms and validation"
+title: "Check your understanding: forms and validation"
+description: |
+  Six short questions about the chapter *Forms and validation*. Answer in
+  your own words. There are no answer options to pick from, and this quiz is
+  anonymous: it's here for you, so you can see what you already understand
+  and what you should read again. One or two sentences are enough for most
+  answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml" # repo root, resolves on GitHub and locally
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="event.preventDefault();"
+      scope="after the last chapter of the DOM part"
+      reveal=false
+      knows=(array
+        "HTML elements, attributes, and ids, and the DOM as a tree of objects"
+        "`document.querySelector<HTMLInputElement>('#name')` with an `if (!element) { throw ... }` null check"
+        "reading and writing `textContent`, and `classList` for CSS classes"
+        "`createElement`, `append`, and `remove`"
+        "`querySelectorAll` and looping over the result with `for...of`"
+        "`addEventListener` with `click`, `keydown`, `input`, and `submit`"
+        "`input.value` as a string, `Number()`, and `Number.isNaN`"
+        "`event.preventDefault()` on a form's submit event"
+        "`<label for>`, `required`, and `disabled`"
+        "CSS selectors and the basics of Flexbox and Grid"
+        "arrays, loops, `if`, and functions from year one")
+      not_yet=(array
+        "classes, `this`, and inheritance"
+        "SVG"
+        "automated tests with Vitest or Playwright"
+        "generics other than `querySelector<T>`"
+        "`fetch`, `async`, and `localStorage`")}}
+
+questions:
+  - id: research-input-types
+    title: "Three input types"
+    question: |
+      An `<input>` element has a `type` attribute. Name three values for it
+      besides `text`, and say for each one what the browser puts on the page.
+    evaluation: |
+      Expected: three valid type values with a short description each, for
+      example `number` (a field for digits, usually with small up and down
+      arrows), `color` (a swatch that opens a color picker), `range` (a
+      slider), `checkbox`, `radio`, `date`, `email`, `password`, `file`.
+      Required: three real type values AND what each one shows.
+      Partial: three values named with no or only one description, or two
+      values described well.
+      Incorrect: fewer than two real values, or invented types such as
+      `type="slider"` or `type="name"`.
+
+  - id: research-value-as-number
+    title: "value and valueAsNumber"
+    question: |
+      A number input can be read with `value` and with `valueAsNumber`. What
+      does `valueAsNumber` give you that `value` does not, and what do you get
+      from it while the field is empty?
+    evaluation: |
+      Expected: `value` is always a string, `valueAsNumber` hands back the same
+      content already converted to a number, so no `Number()` call is needed.
+      While the field is empty (or holds something that is not a number),
+      `valueAsNumber` is `NaN`.
+      Required: 1) string versus number; 2) `NaN` for the empty field ("not a
+      number" in words counts).
+      Partial: the string-versus-number difference without the empty case, or
+      with a wrong claim about it.
+      Incorrect: says both give a number, or that the empty field gives 0,
+      `null`, or an empty string.
+
+  - id: research-min-max-step
+    title: "min, max, and step"
+    question: |
+      What do `min`, `max`, and `step` do on an `<input type="number">`? And
+      can the field still end up holding a number outside `min` and `max`?
+    evaluation: |
+      Expected: `min` and `max` are the lowest and highest value the field is
+      meant to hold, `step` is the size of one jump of the up and down arrows
+      and which values count as valid. Yes, the field can still hold a value
+      outside the range, because the user can type one in; the attributes do
+      not cut the typed value down to the range.
+      Required: 1) what `min` and `max` say; 2) what `step` does; 3) that a
+      typed value can still be outside the range.
+      Partial: all three attributes described correctly, but the second
+      question missing or answered with "no".
+      Incorrect: the attributes described wrongly, for example `step` as the
+      number of decimal places.
+
+  - id: no-prevent-default
+    title: "The page that reloads"
+    question: |
+      A page contains this form:
+
+      ```html
+      <form id="signupForm">
+        <label for="visitorName">Your name</label>
+        <input id="visitorName" name="visitorName" type="text">
+        <button type="submit">Send</button>
+      </form>
+      ```
+
+      and this code:
+
+      ```typescript
+      signupForm.addEventListener('submit', () => {
+        console.log('Hello');
+      });
+      ```
+
+      You type `Lena` into the field and press Enter. What does the browser do,
+      and which line is missing?
+    evaluation: |
+      Expected: the browser runs its default action for submit and loads the
+      page again, so the field is empty afterwards and the address gets
+      `?visitorName=Lena`. The missing line is `event.preventDefault();` as the
+      first line of the handler (which also needs `(event)` as the parameter).
+      Required: 1) the page reloads or navigates; 2) `preventDefault` is
+      missing.
+      Partial: only one of the two, for example naming `preventDefault`
+      without saying what happens now.
+      Incorrect: says nothing happens, or that Enter does not submit a form.
+
+  - id: label-for
+    title: "Why the label"
+    question: |
+      Why does every input in this book get a `<label>` whose `for` matches the
+      input's `id`? Name two reasons.
+    evaluation: |
+      Expected: clicking the label puts the cursor into the field, which is an
+      easier target than the field itself; a screen reader announces the label
+      text, so somebody who cannot see the page knows what to type; browser
+      tests later in the book look inputs up by their label text.
+      Required: two of those three reasons, in the student's own words.
+      Partial: exactly one of them.
+      Incorrect: only "it looks nicer" or "the label is the text next to the
+      field", with no reason.
+
+  - id: missing-return
+    title: "The guest that gets in anyway"
+    question: |
+      This handler should refuse an empty name, but an empty name still lands
+      on the list. `addGuest` puts a new entry on the page.
+
+      ```typescript
+      guestForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        if (nameInput.value === '') {
+          errorText.textContent = 'Please enter a name.';
+        }
+
+        addGuest(nameInput.value);
+      });
+      ```
+
+      What happens when the field is empty, and what is the smallest fix?
+    evaluation: |
+      Expected: the message is written, and then the handler carries straight
+      on and calls `addGuest` with an empty name, so the user sees the error
+      and an empty entry. Smallest fix: `return;` as the last line inside the
+      `if` (moving the `addGuest` call into an `else` is equally right).
+      Required: 1) `addGuest` still runs and an empty entry appears; 2) the fix
+      is `return` inside the `if`, or an `else`.
+      Partial: only one of the two, for example "it needs a return" with no
+      account of what goes wrong.
+      Incorrect: says the code is fine, blames `preventDefault`, or suggests
+      only changing the message.
