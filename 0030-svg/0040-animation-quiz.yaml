@@ -108,7 +108,9 @@ questions:
       Partial: names the center of rotation correctly but gets the default
       wrong or leaves it out.
       Incorrect: says the two numbers are a size, a shift, or a second angle,
-      or claims the shape turns around its own middle by default.
+      or claims the shape turns around its own middle by default. "How far it
+      moves in x and y" is a shift, so that answer is incorrect even though it
+      mentions x and y.
 
   - id: research-keyframes-steps
     title: "The smallest @keyframes rule"

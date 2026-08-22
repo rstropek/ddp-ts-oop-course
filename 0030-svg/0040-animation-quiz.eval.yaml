@@ -18,7 +18,12 @@ questions:
           it is the time since the page was loaded, in milliseconds. that
           clock never stops, so it also runs on while my animation is paused.
       # Knows it is a time, thinks it is the frame duration.
+      # First half right, second half missing.
       - expect: partial
+        answer: |
+          the time since the page was loaded, in milliseconds
+      # Confuses the timestamp with the frame length.
+      - expect: incorrect
         answer: |
           it is a time value, i think it tells you how long the last frame
           took

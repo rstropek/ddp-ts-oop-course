@@ -67,6 +67,8 @@ questions:
       `dominant-baseline` named without a usable value.
       Incorrect: `middle` or `start` given for the first half, or CSS
       `text-align` and `vertical-align` offered instead of the SVG attributes.
+      `text-anchor="middle"` plus `text-align: center` is incorrect: the value
+      is wrong and the CSS property is not the attribute asked for.
 
   - id: research-shape-title
     title: "A title inside a shape"

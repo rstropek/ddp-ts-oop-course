@@ -58,8 +58,12 @@ questions:
       - expect: correct
         answer: |
           20 of 80 is a quarter, a quarter of 300 is 75, 330 - 75 = 255
-      # Stops at the bar height instead of the y coordinate.
+      # Right number, no working shown.
       - expect: partial
+        answer: |
+          255
+      # Stops at the bar height instead of the y coordinate.
+      - expect: incorrect
         answer: |
           75
       - expect: incorrect
