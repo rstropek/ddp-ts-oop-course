@@ -141,6 +141,8 @@ questions:
       `list.append(item);`.
       Required: (1) the element exists but is not attached to the page or the
       tree; (2) names `append` (or `prepend`, or `appendChild`) as the fix.
+      A short answer with both parts ("it has no parent yet, add
+      `list.append(item)`") is correct.
       Partial: only names the missing `append` line, with no reason, or only
       explains "it is not in the page" without naming the fix.
       Incorrect: claims `createElement` failed, or that `textContent` is the

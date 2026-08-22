@@ -1,0 +1,47 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 40rem;
+  margin: 2rem auto;
+}
+
+#bubbleForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#bubbleForm input {
+  padding: 0.2rem;
+}
+
+#bubbleForm button {
+  padding: 0.4rem 0.9rem;
+}
+
+.error {
+  min-height: 1.4rem;
+  margin: 0.75rem 0;
+  color: #b3261e;
+}
+
+#chart {
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.axis {
+  stroke: #333;
+  stroke-width: 1;
+  fill: none;
+}
+
+#bubbles circle {
+  opacity: 0.7;
+}

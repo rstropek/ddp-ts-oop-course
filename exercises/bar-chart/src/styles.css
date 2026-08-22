@@ -1,0 +1,40 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 44rem;
+  margin: 2rem auto;
+}
+
+#chart {
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.bar {
+  fill: seagreen;
+}
+
+.bar.over {
+  fill: tomato;
+}
+
+.axis {
+  stroke: #333;
+  stroke-width: 1;
+  fill: none;
+}
+
+.threshold {
+  stroke: crimson;
+  stroke-width: 2;
+}
+
+.label {
+  font-family: sans-serif;
+  font-size: 12px;
+  fill: #333;
+  stroke: none;
+}
+
+#legend {
+  font-size: 1.1rem;
+}

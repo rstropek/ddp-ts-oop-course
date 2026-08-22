@@ -1,0 +1,46 @@
+body {
+  font-family: system-ui, sans-serif;
+  background-color: #f4f4f4;
+  color: #222222;
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+/* The clock face and the 12 marks around it. They never move. */
+.face {
+  fill: #fdfdfd;
+  stroke: #4a4a4a;
+  stroke-width: 3;
+}
+
+.tick {
+  stroke: #4a4a4a;
+  stroke-width: 3;
+}
+
+/* All three hands are drawn straight up, pointing at 12. Your TypeScript
+   turns each of them around the center of the face. */
+.hand {
+  stroke: #222222;
+  stroke-linecap: round;
+}
+
+.hour {
+  stroke-width: 7;
+}
+
+.minute {
+  stroke-width: 5;
+}
+
+.second {
+  stroke: tomato;
+  stroke-width: 2;
+}
+
+.pivot {
+  fill: #222222;
+}

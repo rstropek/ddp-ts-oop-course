@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble chart</title>
+  </head>
+  <body>
+    <h1>Bubble chart</h1>
+    <form id="bubbleForm" novalidate>
+      <div class="field">
+        <label for="bubbleColor">Color</label>
+        <input id="bubbleColor" type="color" value="#3178c6">
+      </div>
+      <div class="field">
+        <label for="bubbleX">X (0 to 100)</label>
+        <input id="bubbleX" type="number" min="0" max="100" step="1">
+      </div>
+      <div class="field">
+        <label for="bubbleY">Y (0 to 100)</label>
+        <input id="bubbleY" type="number" min="0" max="100" step="1">
+      </div>
+      <div class="field">
+        <label for="bubbleSize">Size: <span id="sizeValue">20</span></label>
+        <input id="bubbleSize" type="range" min="5" max="50" value="20">
+      </div>
+      <button id="addBubble" type="submit">Add bubble</button>
+      <button id="clearBubbles" type="button">Clear</button>
+    </form>
+    <p id="bubbleError" class="error"></p>
+    <!-- The chart area runs from (50, 50) to (450, 450) in SVG pixels. -->
+    <!-- The data range is 0 to 100 on both axes, with a tick every 10. -->
+    <svg id="chart" viewBox="0 0 500 500" width="500" height="500">
+      <title>Bubble chart with an x axis and a y axis from 0 to 100</title>
+      <g class="axis">
+        <rect x="50" y="50" width="400" height="400"></rect>
+        <line x1="90" y1="450" x2="90" y2="456"></line>
+        <line x1="130" y1="450" x2="130" y2="456"></line>
+        <line x1="170" y1="450" x2="170" y2="456"></line>
+        <line x1="210" y1="450" x2="210" y2="456"></line>
+        <line x1="250" y1="450" x2="250" y2="456"></line>
+        <line x1="290" y1="450" x2="290" y2="456"></line>
+        <line x1="330" y1="450" x2="330" y2="456"></line>
+        <line x1="370" y1="450" x2="370" y2="456"></line>
+        <line x1="410" y1="450" x2="410" y2="456"></line>
+        <line x1="44" y1="90" x2="50" y2="90"></line>
+        <line x1="44" y1="130" x2="50" y2="130"></line>
+        <line x1="44" y1="170" x2="50" y2="170"></line>
+        <line x1="44" y1="210" x2="50" y2="210"></line>
+        <line x1="44" y1="250" x2="50" y2="250"></line>
+        <line x1="44" y1="290" x2="50" y2="290"></line>
+        <line x1="44" y1="330" x2="50" y2="330"></line>
+        <line x1="44" y1="370" x2="50" y2="370"></line>
+        <line x1="44" y1="410" x2="50" y2="410"></line>
+      </g>
+      <g id="bubbles"></g>
+    </svg>
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

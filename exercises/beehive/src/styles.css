@@ -1,0 +1,87 @@
+body {
+  font-family: system-ui, sans-serif;
+  color: #222222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+/* One cell of the hive. The fill and the stroke land on the polygon inside
+   the symbol, because both properties are inherited. */
+.cell {
+  fill: #f7d774;
+  stroke: #8a6d1a;
+  stroke-width: 2;
+}
+
+.cell:hover {
+  fill: #ffe9a3;
+}
+
+/* A cell that holds a honey pot. Same shape, different color. */
+.honey {
+  fill: orange;
+  stroke: #8a6d1a;
+  stroke-width: 2;
+}
+
+.bee {
+  font-size: 26px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+#status {
+  font-weight: bold;
+}
+
+/* The control pad: three columns, three rows, and every button placed by
+   hand so the arrows point the way they move. */
+#pad {
+  display: grid;
+  grid-template-columns: repeat(3, 3rem);
+  grid-template-rows: repeat(3, 3rem);
+  gap: 0.4rem;
+}
+
+#pad button {
+  font-size: 1.4rem;
+  cursor: pointer;
+  border: 1px solid #8a6d1a;
+  border-radius: 0.5rem;
+  background-color: #fdf3d0;
+}
+
+#pad button:hover {
+  background-color: #f7d774;
+}
+
+#up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+#left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+#drop {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+#right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+#down {
+  grid-column: 2;
+  grid-row: 3;
+}

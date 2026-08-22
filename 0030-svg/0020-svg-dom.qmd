@@ -1,0 +1,275 @@
+---
+title: "SVG elements are DOM objects too"
+---
+
+Every shape in your drawings so far was typed by hand into `index.html`. A
+chart with twelve bars, or a canvas that fills up while the user clicks,
+cannot work that way. The program has to build the shapes, the same way your
+code built list items in Part 2: create an element, set what it needs, append
+it. The first of those three steps has a trap in it, so walk into the trap
+once and you will recognize it forever.
+
+## A circle that stays invisible {#sec-svg-dom-experiment}
+
+1. Create a new app from the
+   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
+   template inside `coursework/` of your course repository, run `npm install`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Shapes from code</h1>
+   <svg id="canvas" viewBox="0 0 400 300" width="400" role="img" aria-label="Drawing area"></svg>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+   The `role` and `aria-label` give the drawing a name for a screen reader.
+   Biome's accessibility rule asks every `<svg>` for such a name, so put the
+   pair on every drawing you make.
+
+3. Replace everything in `src/index.ts` with this:
+
+   ```ts
+   const canvas = document.querySelector<SVGSVGElement>('#canvas');
+   if (!canvas) {
+     throw new Error('No element with the id canvas');
+   }
+
+   const circle = document.createElement('circle');
+   circle.setAttribute('cx', '100');
+   circle.setAttribute('cy', '80');
+   circle.setAttribute('r', '40');
+   circle.setAttribute('fill', 'crimson');
+   canvas.append(circle);
+
+   console.log(circle.constructor.name);
+   ```
+
+4. Run `npm start`.
+
+The page shows the heading and nothing else. No red circle, no error message,
+no warning. Press F12 and look in the **Elements** tab: the line
+`<circle cx="100" cy="80" r="40" fill="crimson"></circle>` sits inside the
+`<svg>`, spelled exactly as you meant it. In the **Console** tab your log line
+reads `HTMLUnknownElement`.
+
+That name is the whole story. Now put this line above the `createElement` call
+and change `createElement` to `createElementNS`:
+
+```ts
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const circle = document.createElementNS(SVG_NS, 'circle');
+```
+
+Save. The circle appears, and the console now says `SVGCircleElement`.
+
+## Two dictionaries, one page {#sec-svg-dom-namespace}
+
+HTML and SVG were invented by different groups, and their tag names overlap.
+Both have an `a` and both have a `title`, and the two `title` tags mean
+different things. So every tag name belongs to a **namespace**, which
+is the dictionary its name is looked up in. The SVG dictionary is named by the
+address in `SVG_NS`, and that address is a name, not a page your browser
+downloads.
+
+When the browser parses your `index.html` and reaches `<svg>`, it switches
+dictionaries for everything inside, which is why the shapes you wrote by hand
+in the previous chapter simply worked. `document.createElement` never switches.
+It always looks the name up in the HTML dictionary, and HTML has no `circle`,
+so the browser hands back an object of the type `HTMLUnknownElement`. That is a
+real element which keeps its attributes and sits in the tree, and which the
+browser never draws.
+
+`document.createElementNS` takes the dictionary as its first argument. Put
+`const SVG_NS = 'http://www.w3.org/2000/svg';` at the top of every file that
+builds SVG, and use it for every shape you create.
+
+::: {.callout-warning}
+## Shapes in DevTools all look right
+
+A wrong-namespace `circle` and a correct one are printed the same way in the
+Elements tab. When shapes refuse to appear, `createElement` instead of
+`createElementNS` is the first suspect, and `console.log(shape.constructor.name)`
+settles it in one reload.
+:::
+
+## Attributes, always as strings {#sec-svg-dom-attributes}
+
+Everything about a shape is an attribute: `cx`, `cy`, and `r` on a circle,
+`x`, `y`, `width`, and `height` on a rectangle, plus `fill`, `stroke`, and
+`stroke-width` on both. You set all of them with `setAttribute`, and its second
+argument is a string, so a number goes through `String()` on the way in:
+
+```ts
+const radius = 40;
+circle.setAttribute('r', String(radius));
+```
+
+Forget the `String()` and TypeScript stops you with
+`Argument of type 'number' is not assignable to parameter of type 'string'`.
+
+Do not go looking for a shortcut through properties. `circle.cx = 100` does not
+compile, because `cx` is a read-only property holding an object that describes
+the length together with its animated value. Attributes are the simple road,
+and this book stays on it.
+
+## The type family grows {#sec-svg-dom-types}
+
+You already meet a new element type in every chapter: `HTMLButtonElement` for a
+button, `HTMLInputElement` for an input, `HTMLParagraphElement` for a paragraph.
+SVG continues the family with `SVGCircleElement`, `SVGRectElement`,
+`SVGLineElement`, and one type for all of them together, `SVGElement`. The
+`<svg>` tag itself is an `SVGSVGElement`, and the doubled SVG is not a typo:
+it is the SVG element of the SVG family.
+
+TypeScript knows the tag names, so `createElementNS(SVG_NS, 'rect')` hands back
+an `SVGRectElement` without any help from you. Hover the variable in VS Code
+and read what it says. For the element that is already in your HTML you name
+the type yourself, exactly as you have done since Part 2:
+
+```ts
+const canvas = document.querySelector<SVGSVGElement>('#canvas');
+```
+
+## CSS reaches shapes too {#sec-svg-dom-css}
+
+A shape carries classes like any other element, and `classList.add`,
+`classList.remove`, and `classList.toggle` work on it unchanged. What changes
+are the properties worth setting. `color` and `background-color` do nothing to
+a circle, because SVG paints the inside with `fill` and the outline with
+`stroke`:
+
+```css
+.shape:hover {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.selected {
+  stroke: black;
+  stroke-width: 4;
+}
+```
+
+One rule about the two ways to set a color. A `fill` you set with
+`setAttribute` loses against a `fill` in the stylesheet, always, no matter how
+plain the selector is. Decide per property where it lives: the color a user
+picks belongs on the element, and the look of a state such as `selected`
+belongs in the stylesheet.
+
+## Clicks land on the shape {#sec-svg-dom-clicks}
+
+A shape is an event target like a button, so there is nothing new to learn:
+
+```ts
+circle.addEventListener('click', () => {
+  circle.classList.toggle('selected');
+});
+```
+
+A click on the circle also reaches a listener on the `<svg>` around it. Inside
+either listener, `event.target` is the object the click actually landed on, so
+`event.target === canvas` is how you ask whether the user hit empty space
+rather than a shape.
+
+## From the mouse to the drawing {#sec-svg-dom-mouse}
+
+A `click` event carries `event.clientX` and `event.clientY`, which count from
+the top left corner of the browser's content area, not from your drawing.
+`canvas.getBoundingClientRect()` measures where the `<svg>` currently sits in
+that same counting, and the difference between the two is the position inside
+the drawing:
+
+```ts
+canvas.addEventListener('click', (event) => {
+  const box = canvas.getBoundingClientRect();
+  const x = event.clientX - box.left;
+  const y = event.clientY - box.top;
+  console.log(`${x} / ${y}`);
+});
+```
+
+Those two numbers are pixels on the screen, and the coordinates you feed into
+`cx` and `cy` are viewBox units. They are the same numbers only while the
+`<svg>` is as wide on screen as its `viewBox` says, which is why every drawing
+in this chapter uses `width="400"` next to `viewBox="0 0 400 300"`. Keep that
+pairing and the subtraction above is all the math you need.
+
+::: {.research title="What is in that rectangle?"}
+The exercise below picks random sizes for its shapes, and its bonus step turns
+a click into a position inside the drawing. Both need something the chapter
+did not spell out.
+
+1. `getBoundingClientRect()` gives back one object full of numbers. Name four
+   of its properties and say what each one measures.
+2. Clicking a shape in the exercise removes it with `remove()`. What happens to
+   the click listener that was attached to that element, and can the element
+   come back into the page afterwards?
+3. You need a whole random number between two bounds, for example a radius
+   from 10 to 50 with both ends possible. Write the expression using
+   `Math.random()` and `Math.floor()`, and say which part of it lets 50 come
+   out.
+
+Question 3 is exam material: random numbers in a range show up in almost every
+drawing task, and the exam has no internet and no AI.
+:::
+
+## Exercise: shape generator {#sec-svg-dom-exercise}
+
+A toolbar picks a kind of shape and a color, a button drops one onto the
+canvas at a random spot, and clicking a shape takes it away again.
+
+{{< exercise shape-generator >}}
+
+1. Open `index.html` and read it: a toolbar with a `<select id="shapeKind">`,
+   an `<input type="color" id="shapeColor">`, an **Add shape** button, a
+   **Clear all** button, then the `<svg id="canvas">` with a `viewBox` of
+   `0 0 600 400`, and a paragraph `<p id="shapeStatus">` under it.
+2. In `src/index.ts`, import the stylesheet with `import './styles.css';` and
+   put `const SVG_NS = 'http://www.w3.org/2000/svg';` under it. Look up the six
+   elements with `querySelector<...>` and cover them with one `if` that throws.
+   The steps below call them `canvas`, `shapeKind`, `shapeColor`, `addButton`,
+   `clearButton`, and `shapeStatus`.
+3. Write a helper `const randomBetween = (min: number, max: number) => { ... };`
+   that returns a whole number from `min` to `max`, both included. The research
+   box above has the expression.
+4. Write a helper that adds one shape. When `shapeKind.value` is `'circle'`,
+   create a `circle` with `createElementNS` and set `cx`, `cy`, and a random
+   `r` between 10 and 50. Otherwise create a `rect` and set `x`, `y`, a random
+   `width` between 20 and 100, and a random `height` between 20 and 80. Set
+   `fill` to `shapeColor.value` in both cases. Remember `String()` around every
+   number.
+5. Give every new shape the class `shape` with `classList.add`, then append it
+   to `canvas`. Expected result: nothing on screen yet, because no button calls
+   your helper.
+6. Listen for a click on `addButton` and call the helper with a random position
+   inside the canvas, such as an `x` between 60 and 540 and a `y` between 60
+   and 340. Expected result: every click drops a new shape of the chosen kind
+   and color somewhere in the drawing.
+7. Give each shape its own click listener that calls `remove()` on it. Expected
+   result: clicking a shape takes it off the canvas, and the shapes around it
+   stay where they are.
+8. Listen for a click on `clearButton` and empty the drawing with
+   `canvas.replaceChildren()`, which throws out every child of the `<svg>` in
+   one call.
+9. Keep the status line honest. Write a helper that reads
+   `canvas.querySelectorAll('.shape').length` and writes a line such as
+   `4 shapes on the canvas` into `shapeStatus`. Call it after adding, after
+   removing, after clearing, and once at the end of the file so the page starts
+   with `0 shapes on the canvas`.
+10. Run `npm run check` and fix what Biome reports.
+11. Bonus: make a click on empty canvas space add a shape right there. Put a
+    click listener on `canvas`, leave the handler at once when
+    `event.target !== canvas`, and otherwise turn `event.clientX` and
+    `event.clientY` into a position with the subtraction from this chapter.
+    Expected result: shapes appear under the mouse pointer, and clicking an
+    existing shape still only removes it.
+
+Test the whole thing once with both kinds and two colors, then clear the
+canvas and watch the status line go back to zero.
+
+## Check your understanding {#sec-svg-dom-quiz}
+
+Six short questions, and the first three are the research questions from above.
+
+{{< quiz svg-dom title="SVG from TypeScript" >}}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape generator</title>
+  </head>
+  <body>
+    <h1>Shape generator</h1>
+    <div class="toolbar">
+      <div class="field">
+        <label for="shapeKind">Shape</label>
+        <select id="shapeKind">
+          <option value="circle">Circle</option>
+          <option value="rect">Rectangle</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="shapeColor">Color</label>
+        <input id="shapeColor" type="color" value="#4f8cff">
+      </div>
+      <button id="addShape" type="button">Add shape</button>
+      <button id="clearAll" type="button">Clear all</button>
+    </div>
+    <svg id="canvas" viewBox="0 0 600 400" width="600" role="img" aria-label="Drawing area for the generated shapes"></svg>
+    <p id="shapeStatus"></p>
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

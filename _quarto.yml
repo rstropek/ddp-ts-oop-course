@@ -38,6 +38,14 @@ book:
         - 0020-dom/0090-git.qmd
         - 0020-dom/0100-layout.qmd
         - 0020-dom/0110-forms.qmd
+    - part: "SVG: drawing by describing"
+      chapters:
+        - 0030-svg/0010-svg-by-hand.qmd
+        - 0030-svg/0020-svg-dom.qmd
+        - 0030-svg/0030-charts.qmd
+        - 0030-svg/0040-animation.qmd
+        - 0030-svg/0050-beehive.qmd
+        - 0030-svg/0060-toolchain-assets.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

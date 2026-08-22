@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock</title>
+  </head>
+  <body>
+    <h1>Clock</h1>
+
+    <svg id="clock" width="200" height="200" viewBox="0 0 200 200">
+      <title>An analog clock with an hour, a minute, and a second hand</title>
+
+      <circle class="face" cx="100" cy="100" r="94" />
+
+      <line class="tick" x1="100" y1="22" x2="100" y2="12" />
+      <line class="tick" x1="139" y1="32.5" x2="144" y2="23.8" />
+      <line class="tick" x1="167.5" y1="61" x2="176.2" y2="56" />
+      <line class="tick" x1="178" y1="100" x2="188" y2="100" />
+      <line class="tick" x1="167.5" y1="139" x2="176.2" y2="144" />
+      <line class="tick" x1="139" y1="167.5" x2="144" y2="176.2" />
+      <line class="tick" x1="100" y1="178" x2="100" y2="188" />
+      <line class="tick" x1="61" y1="167.5" x2="56" y2="176.2" />
+      <line class="tick" x1="32.5" y1="139" x2="23.8" y2="144" />
+      <line class="tick" x1="22" y1="100" x2="12" y2="100" />
+      <line class="tick" x1="32.5" y1="61" x2="23.8" y2="56" />
+      <line class="tick" x1="61" y1="32.5" x2="56" y2="23.8" />
+
+      <line id="hourHand" class="hand hour" x1="100" y1="100" x2="100" y2="55" />
+      <line id="minuteHand" class="hand minute" x1="100" y1="100" x2="100" y2="30" />
+      <line id="secondHand" class="hand second" x1="100" y1="112" x2="100" y2="26" />
+
+      <circle class="pivot" cx="100" cy="100" r="4" />
+    </svg>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

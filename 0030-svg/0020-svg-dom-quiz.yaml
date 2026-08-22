@@ -1,0 +1,193 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "SVG elements are DOM objects too"
+# (0030-svg/0020-svg-dom.qmd). The first three questions are the chapter's
+# research-box questions.
+
+id: svg-dom-quiz
+name: "Quiz: SVG elements are DOM objects too"
+title: "Check your understanding: SVG from TypeScript"
+description: |
+  Six short questions about the chapter *SVG elements are DOM objects too*.
+  Answer in your own words. There are no answer options to pick from, and this
+  quiz is anonymous: it's here for you, so you can see what you already
+  understand and what you should read again. One or two sentences are enough
+  for most answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml" # repo root, resolves on GitHub and locally
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="circle.setAttribute('cx', String(x));"
+      scope="after the chapter on building SVG from TypeScript"
+      reveal=false
+      knows=(array
+        "hand-written SVG inside index.html: `viewBox`, `circle`, `rect`, `line`, `polygon`, `path`, `text`, `g`, `fill`, `stroke`"
+        "`document.querySelector<SVGSVGElement>('#canvas')` with an `if (!element) { throw ... }` null check"
+        "`document.createElementNS(SVG_NS, 'circle')` and `setAttribute` with `String()` around numbers"
+        "`createElement`, `append`, `remove`, and `replaceChildren`"
+        "`classList` and CSS with `fill`, `stroke`, and `:hover`"
+        "`addEventListener` with `click`, `input`, `change`, and `submit`, and `event.target`"
+        "`querySelectorAll` and looping with `for...of`"
+        "`Math.random` and `Math.floor` from year one"
+        "arrays, loops, `if`, `switch`, and functions from year one")
+      not_yet=(array
+        "classes, `this`, and inheritance"
+        "`requestAnimationFrame` and animation"
+        "automated tests with Vitest or Playwright"
+        "generics other than `querySelector<T>`"
+        "`fetch`, `async`, and `localStorage`")}}
+
+questions:
+  - id: research-bounding-rect
+    title: "The rectangle of an element"
+    question: |
+      `element.getBoundingClientRect()` gives back one object full of numbers.
+      Name four of its properties and say what each one measures.
+    evaluation: |
+      Expected: four real properties with a short description each, from
+      `left`, `top`, `right`, `bottom`, `x`, `y`, `width`, `height`. The edge
+      values are distances from the top left corner of the browser's visible
+      content area, `width` and `height` are the size of the element on
+      screen.
+      Required: four real property names AND what each one measures (that the
+      edges are measured from the corner of the visible area must show up at
+      least once).
+      Partial: four names with no or only one description, or three names
+      described well.
+      Incorrect: fewer than three real names, or invented ones such as
+      `size`, `position`, or `center`.
+
+  - id: research-remove-listener
+    title: "Removing a shape with a listener on it"
+    question: |
+      A shape has a click listener attached to it, and the listener calls
+      `remove()` on that shape. What happens to the listener, and can the
+      element come back into the page afterwards?
+    evaluation: |
+      Expected: `remove()` only takes the element out of the tree. The element
+      object and its listener still exist as long as a variable holds it, and
+      nothing leaks once nothing points at it any more, because the browser
+      throws both away together. Appending the same element again puts it back
+      on the page with its listener still working.
+      Required: 1) the listener is not something you must detach by hand, it
+      goes away with the element; 2) the element can be appended again and
+      still reacts.
+      Partial: only one of the two, for example "the listener disappears"
+      without the second half.
+      Incorrect: says the listener keeps firing on the removed element in the
+      page, or that the element is gone forever and cannot be appended again.
+
+  - id: research-random-int
+    title: "A whole number in a range"
+    question: |
+      Write the expression that gives a whole random number from 10 to 50,
+      with both 10 and 50 possible, using `Math.random()` and `Math.floor()`.
+      Which part of it lets 50 come out?
+    evaluation: |
+      Expected: `Math.floor(Math.random() * 41) + 10`, usually written as
+      `Math.floor(Math.random() * (50 - 10 + 1)) + 10`. The `+ 1` inside the
+      multiplication makes the span 41 wide instead of 40, which is what lets
+      `Math.floor` land on 50.
+      Required: 1) a correct expression for 10 to 50 inclusive; 2) that the
+      `+ 1` (span of 41) is what makes the upper bound possible.
+      Partial: the classic off-by-one version `Math.floor(Math.random() * 40)
+      + 10`, which never returns 50, or a correct expression with no account
+      of the `+ 1`.
+      Incorrect: no `Math.floor`, so the result is not a whole number, or a
+      range that is plainly wrong such as `Math.floor(Math.random() * 50) + 10`,
+      which runs up to 59.
+
+  - id: unknown-element
+    title: "The rectangle that never appears"
+    question: |
+      This code runs without an error, and the drawing stays empty. In the
+      browser's Elements tab the `<rect>` line sits inside the `<svg>` and
+      looks correct.
+
+      ```typescript
+      const rect = document.createElement('rect');
+      rect.setAttribute('x', '20');
+      rect.setAttribute('y', '20');
+      rect.setAttribute('width', '80');
+      rect.setAttribute('height', '40');
+      canvas.append(rect);
+      ```
+
+      Why is nothing drawn, and what is the fix?
+    evaluation: |
+      Expected: `document.createElement` builds the element in the HTML
+      namespace, and HTML has no `rect`, so the browser makes an
+      `HTMLUnknownElement`, which it keeps in the tree and never draws. Fix:
+      `document.createElementNS('http://www.w3.org/2000/svg', 'rect')`, with
+      the address usually kept in a constant such as `SVG_NS`.
+      Required: 1) the wrong namespace, or "it is an HTML element and not an
+      SVG element"; 2) `createElementNS` with the SVG namespace as the fix.
+      Partial: only one of the two, for example naming `createElementNS`
+      without saying why the current line fails.
+      Incorrect: blames a missing `fill`, a missing `append`, a wrong
+      `viewBox`, or the attribute values.
+
+  - id: setattribute-string
+    title: "The number TypeScript refuses"
+    question: |
+      TypeScript underlines the last line of this code and says
+      `Argument of type 'number' is not assignable to parameter of type
+      'string'`.
+
+      ```typescript
+      const radius = 20;
+      const circle = document.createElementNS(SVG_NS, 'circle');
+      circle.setAttribute('r', radius);
+      ```
+
+      What is wrong, and how do you fix the line?
+    evaluation: |
+      Expected: `setAttribute` takes its value as a string, and `radius` is a
+      number. Fix: `circle.setAttribute('r', String(radius));` (a template
+      string such as `` `${radius}` `` or `radius.toString()` is equally
+      right).
+      Required: 1) the value must be a string; 2) a working conversion.
+      Partial: only one of the two, for example a correct fix with no reason,
+      or "attributes are strings" with no fix.
+      Incorrect: suggests `circle.r = radius`, changing `radius` to `'20'` in
+      a way that breaks the calculation, or turning the type check off.
+
+  - id: event-target-shape
+    title: "What the click landed on"
+    question: |
+      A canvas holds several circles, and this listener sits on the `<svg>`:
+
+      ```typescript
+      canvas.addEventListener('click', (event) => {
+        if (event.target !== canvas) {
+          return;
+        }
+        console.log('empty space');
+      });
+      ```
+
+      What is `event.target` when the user clicks one of the circles, and what
+      does the `if` achieve?
+    evaluation: |
+      Expected: `event.target` is the circle that was clicked, because the
+      click landed on that element and then also reached the listener on the
+      `<svg>` around it. The `if` leaves the handler in that case, so the code
+      below only runs for a click on empty canvas space.
+      Required: 1) `event.target` is the clicked circle (the shape), not the
+      `<svg>`; 2) the `if` filters out clicks on shapes and keeps only clicks
+      on empty space.
+      Partial: only one of the two, for example naming the circle without
+      saying what the `if` is for.
+      Incorrect: says `event.target` is always the `<svg>` because the
+      listener sits there, or that clicks on shapes never reach this listener.

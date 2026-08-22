@@ -93,7 +93,8 @@ questions:
       taken at the moment of the call.
       Required: (1) says no; (2) uses or explains "static" (snapshot or
       "Momentaufnahme" count).
-      Partial: says no without the word or the snapshot idea.
+      Partial: says no without the word or the snapshot idea, for example
+      "no, it stays the same" (right answer, missing the required term).
       Incorrect: says yes, or calls the result live.
 
   - id: research-to-array

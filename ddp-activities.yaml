@@ -69,3 +69,21 @@ activities:
     forms:
       file: 0020-dom/0110-forms-quiz.yaml
       note: "Creative Coding 2 book: Forms and validation (0110) — GitHub-hosted"
+    svg-by-hand:
+      file: 0030-svg/0010-svg-by-hand-quiz.yaml
+      note: "Creative Coding 2 book: A picture made of text (0010) — GitHub-hosted"
+    svg-dom:
+      file: 0030-svg/0020-svg-dom-quiz.yaml
+      note: "Creative Coding 2 book: SVG elements are DOM objects too (0020) — GitHub-hosted"
+    charts:
+      file: 0030-svg/0030-charts-quiz.yaml
+      note: "Creative Coding 2 book: Charts: scaling data to pixels (0030) — GitHub-hosted"
+    animation:
+      file: 0030-svg/0040-animation-quiz.yaml
+      note: "Creative Coding 2 book: Animation with requestAnimationFrame (0040) — GitHub-hosted"
+    beehive:
+      file: 0030-svg/0050-beehive-quiz.yaml
+      note: "Creative Coding 2 book: Grids, hexagons, and a small game (0050) — GitHub-hosted"
+    toolchain-assets:
+      file: 0030-svg/0060-toolchain-assets-quiz.yaml
+      note: "Creative Coding 2 book: Toolchain step: scripts and assets (0060) — GitHub-hosted"

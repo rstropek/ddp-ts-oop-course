@@ -52,9 +52,12 @@ fragments:
         understands. When the verdict is not `correct`, state the correct
         answer, unless a research rule below says otherwise. When `partial`,
         name what is right and then what is missing.
-      - Never mention scores, grades, marks, or the grading criteria.
-      - In feedback, write string literals with single quotes inside inline
-        code (`'lightblue'`).
+      - Never mention scores, grades, marks, or the grading criteria, and
+        never write the verdict or a label such as `Verdict:` into the
+        feedback; start with the content.
+      - In feedback, write TypeScript string literals with single quotes
+        inside inline code (`'lightblue'`). HTML attribute values keep their
+        double quotes (`type="module"`).
       - Course rule: code ends statements with semicolons. When the question
         asks for code, code that is right except for missing semicolons is
         `partial`; when it does not ask for code, semicolons never matter.
