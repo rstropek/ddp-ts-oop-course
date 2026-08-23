@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the verify and CI chapter quiz
+# (0050-testing/0030-verify-and-ci.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: verify-ci-quiz-eval
+target: ./0030-verify-and-ci-quiz.yaml
+
+questions:
+  - question: research-ubuntu-latest
+    answers:
+      - expect: correct
+        answer: |
+          right now ubuntu-latest is ubuntu 24.04. git and node are already on
+          it, you don't have to install them. i found it in the github docs
+          about github-hosted runners.
+      # Version and tools right, no source named.
+      - expect: partial
+        answer: |
+          it is ubuntu 24.04 and it already has node and docker on it
+      - expect: incorrect
+        answer: |
+          it is the same ubuntu that is installed on the computer you push
+          from, so it has exactly your programs
+
+  - question: research-npm-ci
+    answers:
+      - expect: correct
+        answer: |
+          it needs the package-lock.json. if there is a node_modules folder it
+          throws it away first and installs everything new from the lock file.
+          npm docs page for npm ci says that.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          es braucht die package-lock.json. ein vorhandenes node_modules wird
+          zuerst gelöscht und alles neu installiert. steht in der npm doku zu
+          npm ci.
+      # Right file, wrong about node_modules.
+      - expect: partial
+        answer: |
+          package-lock.json muss da sein. node_modules bleibt wie es ist und
+          npm ci ergänzt nur was fehlt.
+      - expect: incorrect
+        answer: |
+          it just needs package.json like every other npm command, and it adds
+          the missing packages to node_modules
+
+  - question: research-actions-log
+    answers:
+      - expect: correct
+        answer: |
+          go to the repo, click the actions tab, click the run that has the red
+          cross, then click the job on the left and open the step that failed,
+          then you see its output
+      # Stops at the run, no job or step.
+      - expect: partial
+        answer: |
+          you click on actions and then on the failed run
+      - expect: incorrect
+        answer: |
+          github only sends the log by mail, on the website you just see red or
+          green
+
+  - question: verify-chain-order
+    answers:
+      - expect: correct
+        answer: |
+          you only see the biome complaint. biome is before vitest and it
+          fails, and && only starts the next command if the one before worked,
+          so vitest never runs.
+      # Right command, no reason.
+      - expect: partial
+        answer: |
+          it shows the biome problem
+      - expect: incorrect
+        answer: |
+          both come out, npm run verify runs all three commands and collects
+          everything that is wrong
+
+  - question: why-ci
+    answers:
+      - expect: correct
+        answer: |
+          github starts a clean machine and only has the files you really
+          pushed, so it notices when i forgot to commit something. and it runs
+          by itself every time, i can't forget it when i'm in a hurry.
+      # Only one reason, said twice.
+      - expect: partial
+        answer: |
+          because it runs automatically after every push, so it happens without
+          me starting it
+      - expect: incorrect
+        answer: |
+          so you don't have to run verify on your own computer any more, github
+          does it instead and the code gets faster

@@ -1,0 +1,183 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Vitest: tests that read like sentences"
+# (0050-testing/0020-vitest.qmd).
+# One quiz per chapter, at the end. The four research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point to the Vitest docs, never the answer). The
+# last two cover the chapter's own points: `toBe` against `toEqual` on an
+# array, and the arrow function that `toThrow` needs.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: vitest-quiz
+name: "Quiz: Vitest"
+
+title: "Check your understanding: Vitest"
+description: |
+  Six short questions about the chapter *Vitest: tests that read like
+  sentences*, four of them the research task. Answer in your own words; if
+  you cannot answer a research question yet, look it up on vitest.dev and
+  come back. One or two sentences are enough. This quiz is anonymous and is
+  here for you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="expect(() => bracelet.addLetter('B')).toThrow(RuleError);"
+      scope="after the Vitest chapter of the testing part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, `unknown` in a catch, `instanceof`, and own error classes such as `RuleError`"
+        "the tests template with `npm test` and `npm run test:watch`"
+        "`describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, and `beforeEach`"
+        "arrange, act, assert, one behavior per `it`, and the rule that logic worth testing never touches the page")
+      not_yet=(array
+        "which matcher checks `undefined`, which one checks a length, which one compares two numbers that are close, and what `it.todo` does (those are the research tasks right now)"
+        "a `verify` script that runs the tests, and continuous integration with GitHub Actions"
+        "mocks, spies, coverage, snapshots, and `test.each`"
+        "Playwright and end-to-end tests"
+        "generics of their own, data structures, `async`, and `fetch`")}}
+
+questions:
+  - id: research-undefined-matcher
+    title: "Checking for undefined"
+    question: |
+      `addSpacer` gives back a warning text the first time colors get mixed,
+      and `undefined` every time after that. Name the Vitest matcher that
+      checks that a value is `undefined`, and name the matcher that checks
+      the opposite. Say where you read it.
+    evaluation: |
+      Expected: `expect(value).toBeUndefined()` checks that the value is
+      `undefined`; `expect(value).toBeDefined()` checks that it is anything
+      else. Source is the `expect` page of the Vitest documentation
+      (vitest.dev).
+      Required: (1) `toBeUndefined`; (2) `toBeDefined` as the opposite;
+      (3) names the source (Vitest docs, vitest.dev, the `expect` API page).
+      Partial: names `toBeUndefined` only, or names both matchers but no
+      source.
+      Incorrect: names `toBeNull`, `toBeFalsy`, or `toBe(undefined)` as the
+      matcher that Vitest offers for this.
+
+  - id: research-length-matcher
+    title: "Counting without .length"
+    question: |
+      Your bracelet tests keep asking how many items a bracelet holds.
+      Which Vitest matcher checks that number in one call, without you
+      reading `.length` yourself, and what other kind of value can you use
+      it on?
+    evaluation: |
+      Expected: `expect(array).toHaveLength(2)`. It works on anything that
+      has a `length` property, so a string counts too, for example
+      `expect('abc').toHaveLength(3)`.
+      Required: (1) `toHaveLength`; (2) it also works on strings (or: on any
+      value with a `length` property).
+      Partial: names `toHaveLength` but the second part is missing or wrong.
+      Incorrect: names `toContain`, `toHaveProperty`, or writes
+      `expect(items.length).toBe(2)` as the answer, which is exactly what the
+      question asks to replace.
+
+  - id: research-close-numbers
+    title: "Money that is almost right"
+    question: |
+      A walk of 3 km pays `3 * 0.38`, and JavaScript computes
+      `1.1400000000000001` for that, so a check with `toBe(1.14)` fails.
+      Which matcher compares two numbers that are close enough, and what
+      does its second argument decide?
+    evaluation: |
+      Expected: `expect(walk.reimbursement()).toBeCloseTo(1.14, 2)`. The
+      second argument is the number of decimal places that have to match
+      (its default is 2).
+      Required: (1) `toBeCloseTo`; (2) the second argument says how many
+      decimal places (how precise the comparison is).
+      Partial: names `toBeCloseTo` without saying what the second argument
+      does, or describes precision without naming the matcher.
+      Incorrect: says the fix is `toEqual`, or rounding with `toFixed(2)`
+      before comparing, or that the second argument is a tolerance in euro.
+
+  - id: research-it-todo
+    title: "A test you have not written yet"
+    question: |
+      You want a test that a negative distance is refused, but the classes
+      cannot do that yet. What does `it.todo('refuses a negative distance')`
+      do when the tests run, and how does the summary line count it?
+    evaluation: |
+      Expected: `it.todo` registers the name as a reminder without running
+      any code, and Vitest lists it separately in the summary as `todo`, for
+      example `Tests  10 passed | 1 todo (11)`. It never turns the run red.
+      Required: (1) it marks a planned test and runs nothing; (2) it appears
+      as `todo` in the summary and does not count as passed or failed.
+      Partial: says it is a placeholder but claims it counts as passed, or
+      says it shows up as skipped without naming todo.
+      Incorrect: says the test fails, or that `it.todo` runs the test body
+      anyway.
+
+  - id: tobe-vs-toequal-array
+    title: "Two empty arrays"
+    question: |
+      The `items` getter of `Bracelet` hands back a copy of its array. One
+      of these two lines fails on a fresh bracelet:
+
+      ```ts
+      expect(bracelet.items).toBe([]);
+      expect(bracelet.items).toEqual([]);
+      ```
+
+      Which one fails, and why?
+    evaluation: |
+      Expected: the `toBe` line fails. `toBe` compares like `===`, which asks
+      whether it is the same object, and the copy the getter hands out is a
+      different array than the `[]` in the test even though both are empty.
+      `toEqual` compares the contents, so it passes.
+      Required: (1) names the `toBe` line as the failing one; (2) says `toBe`
+      compares identity (same object, `===`) while `toEqual` compares the
+      contents.
+      Partial: names the right line with no usable reason, or explains the
+      identity difference but picks the wrong line.
+      Incorrect: says both pass, says `toEqual` is the failing one, or claims
+      `toBe` cannot be used on arrays at all.
+
+  - id: tothrow-needs-arrow
+    title: "The refusal that never reaches expect"
+    question: |
+      `addLetter` really does throw a `RuleError` here, and the test still
+      fails:
+
+      ```ts
+      it('rejects a second letter in a row', () => {
+        const bracelet = new Bracelet();
+        bracelet.addLetter('A');
+
+        expect(bracelet.addLetter('B')).toThrow(RuleError);
+      });
+      ```
+
+      Explain why it fails, and write the line that makes it pass.
+    evaluation: |
+      Expected: the argument of `expect` is computed first, so
+      `bracelet.addLetter('B')` runs and throws before `expect` is called at
+      all; the error leaves the test and Vitest reports it as failed. The fix
+      is `expect(() => bracelet.addLetter('B')).toThrow(RuleError);`, where
+      `toThrow` calls the arrow function itself and catches what comes out.
+      Required: (1) the call runs (and throws) before `expect` gets it;
+      (2) the fixed line wraps the call in an arrow function.
+      Partial: gives the arrow-function line without the reason, or the
+      reason without a correct fixed line.
+      Incorrect: blames `RuleError` (says `toThrow` cannot take an error
+      class), or proposes `try`/`catch` inside the `it` as the way Vitest
+      wants it, or adds `await`.

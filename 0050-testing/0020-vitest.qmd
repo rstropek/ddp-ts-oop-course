@@ -1,0 +1,353 @@
+---
+title: "Vitest: tests that read like sentences"
+---
+
+Your bracelet project has two green tests in `src/bracelet.test.ts`. Two tests
+say very little about a model whose whole job is refusing the wrong move, so
+this chapter grows that file into one test per rule. It starts with a test that
+goes red for a reason that has nothing to do with the bracelet.
+
+## A test that fails before it checks anything {#sec-vitest-experiment}
+
+Open `homework/bracelet-tests` and start the watcher:
+
+```bash
+npm run test:watch
+```
+
+Vitest runs the file once, prints the same summary as `npm test`, and then
+stays open:
+
+```
+ PASS  Waiting for file changes...
+       press h to show help, press q to quit
+```
+
+Leave it running. Add one line to the imports at the top of
+`src/bracelet.test.ts`:
+
+```ts
+import { RuleError } from './rule-error';
+```
+
+Then add a third test inside the `describe`, and save:
+
+```ts
+  it('rejects a second letter in a row', () => {
+    const bracelet = new Bracelet();
+    bracelet.addLetter('A');
+
+    expect(bracelet.addLetter('B')).toThrow(RuleError);
+  });
+```
+
+The watcher notices the save, runs the file again, and turns red:
+
+```
+ FAIL  src/bracelet.test.ts > Bracelet > rejects a second letter in a row
+RuleError: You need to add a spacer bead next!
+ ❯ Bracelet.addLetter src/bracelet.ts:16:13
+ ❯ src/bracelet.test.ts:23:21
+```
+
+The bracelet did exactly what you wanted. It refused the second letter and threw
+a `RuleError`, and the test still failed. TypeScript had nothing to complain
+about either, so the red run is the only place this shows up.
+
+## Why toThrow needs an arrow function {#sec-vitest-tothrow}
+
+`expect(bracelet.addLetter('B'))` is an ordinary function call with an argument,
+so the argument is computed first. `addLetter` throws while the argument is
+being computed, the exception walks out of your `it` block, and `expect` never
+runs at all. Vitest catches the exception and reports the test as failed,
+because a test that throws is a test that failed.
+
+Hand `expect` a function instead of a value:
+
+```ts
+    expect(() => bracelet.addLetter('B')).toThrow(RuleError);
+```
+
+Now the call sits inside an arrow function, and nothing has run yet when
+`expect` gets it. `toThrow(RuleError)` calls that arrow function itself, catches
+what comes out, and checks that it is a `RuleError`. Save, and the watcher goes
+green:
+
+```
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+```
+
+The value goes into `expect` when you check a result, and the call goes into an
+arrow function when you check a refusal.
+
+## toBe compares, toEqual looks inside {#sec-vitest-matchers}
+
+`toBe` compares the way `===` does, which is what you want for a number, a
+string, or a boolean. Try it on the items of a fresh bracelet:
+
+```ts
+    expect(bracelet.items).toBe([]);
+```
+
+```
+AssertionError: expected [] to be [] // Object.is equality
+
+If it should pass with deep equality, replace "toBe" with "toStrictEqual"
+
+Expected: []
+Received: serializes to the same string
+```
+
+Two empty arrays print the same and are still two different objects, and `===`
+compares objects by identity, not by content. The `items` getter makes that
+certain: it hands out a copy of the array, so it can never give you the same
+array you typed into the test.
+
+`toEqual` walks into the array and compares what is in it:
+
+```ts
+    expect(bracelet.items).toEqual([]);
+```
+
+That passes. Take `toBe` for a number, a string, or a boolean, and `toEqual` for
+an array or an object. `toStrictEqual` is a stricter relative you will not need
+this year.
+
+## A fresh bracelet for every test {#sec-vitest-beforeeach}
+
+Every test so far starts with `const bracelet = new Bracelet();`. Eight tests
+would repeat that line eight times, and one shared bracelet instead would make
+the tests eat each other: test three finds whatever test two pushed onto it, and
+passes or fails depending on the order the tests run in.
+
+`beforeEach` runs a piece of setup before every single `it` in its `describe`:
+
+```ts
+describe('Bracelet', () => {
+  let bracelet: Bracelet;
+
+  beforeEach(() => {
+    bracelet = new Bracelet();
+  });
+
+  it('starts with no items', () => {
+    expect(bracelet.items).toEqual([]);
+  });
+});
+```
+
+`let bracelet: Bracelet;` without a value is the one place this course writes a
+`let` like that. The value cannot be given here, because a new one is needed for
+every test, and `beforeEach` fills it in before any `it` body starts. Add
+`beforeEach` to the names you import from `'vitest'`, and let
+`npm run check:fix` sort that list for you.
+
+## Arrange, act, assert {#sec-vitest-aaa}
+
+A test reads best in three blocks with a blank line between them: build the
+situation, do the one thing you are testing, then check the result.
+
+```ts
+  it('warns when a spacer of another color joins', () => {
+    bracelet.addLetter('A');
+    bracelet.addSpacer('#f4a0a0');
+    bracelet.addLetter('B');
+
+    const warning = bracelet.addSpacer('#a0d4a0');
+
+    expect(warning).toBe('You are mixing spacer colors!');
+  });
+```
+
+Arrange builds a bracelet that already carries one bead. Act adds a bead in a
+second color. Assert names the exact text that comes back. Keep one behavior per `it`: a
+test with three unrelated checks in it tells you that something is wrong and
+makes you guess which of the three.
+
+The name after `it` is a sentence that starts with the word "it", written in
+lowercase. `it('rejects a second letter in a row', ...)` reads as "it rejects a
+second letter in a row", and that sentence is what Vitest prints when the test
+fails.
+
+## Reading a failure {#sec-vitest-failure}
+
+A test that expects `'You are mixing spacer colors'`, without the exclamation
+mark at the end, fails like this:
+
+```
+ FAIL  src/bracelet.test.ts > Bracelet > warns when a spacer of another color joins
+AssertionError: expected 'You are mixing spacer colors!' to be 'You are mixing spacer colors' // Object.is equality
+
+Expected: "You are mixing spacer colors"
+Received: "You are mixing spacer colors!"
+
+ ❯ src/bracelet.test.ts:40:21
+     38|     const warning = bracelet.addSpacer('#a0d4a0');
+     39|
+     40|     expect(warning).toBe('You are mixing spacer colors');
+       |                     ^
+     41|   });
+     42|
+```
+
+Four things are worth finding in there. The `FAIL` line names the file, then the
+`describe`, then the `it`, separated by `>`. The `AssertionError` line says what
+came back and what you asked for, in that order. `Expected` is your text and
+`Received` is the model's, so here the bug sits in the test, not in the
+bracelet. The `❯` line is the address: file, line number, column number, with
+the source underneath and a caret under the matcher that failed. Ctrl-click that
+address in the VS Code terminal to jump to the line, and expect your own numbers
+to differ from the ones above.
+
+## Run once, or keep running {#sec-vitest-run-watch}
+
+`npm test` runs every test file once and exits, and its exit code says whether
+everything passed. That is the form a build server needs, and the next chapter
+uses it.
+
+`npm run test:watch` is the one to keep open in a second terminal while you
+write tests. It reruns on every save, works on the files your change affects,
+and quits when you press `q`.
+
+::: {.callout-note}
+## Tests inside VS Code
+
+VS Code has a Vitest extension that puts a run button next to every `it`.
+Install it if you like it. This course stays in the terminal, because `npm test`
+works on every machine, including the school computer you sit at during an
+exam.
+:::
+
+::: {.research title="Four things this chapter leaves to you"}
+The two exercises below check a value that is `undefined`, count the items on a
+bracelet, compare two euro amounts that do not match to the last digit, and park
+one test you have not written yet. All four live on the `expect` page of the
+[Vitest documentation](https://vitest.dev/api/expect), and vitest.dev is the
+site to search here, not MDN.
+
+1. `addSpacer` returns `undefined` when it has nothing to warn about. Which
+   matcher checks exactly that, and which matcher checks the opposite?
+2. Which matcher checks how many items an array holds, without reading
+   `.length` yourself, and what other kind of value can you use it on?
+3. A walk of 3 km pays `3 * 0.38`, and JavaScript computes
+   `1.1400000000000001` for that, so `toBe(1.14)` fails. Which matcher compares
+   two numbers that are close enough, and what does its second argument decide?
+4. You know a behavior you want to test but you have not written the test yet.
+   What does `it.todo('refuses a negative distance')` do when the tests run, and
+   how does the summary line count it?
+
+For the exam, the matcher for `undefined` and the matcher for a length have to
+be in your head. Almost every test file you write by hand needs both.
+:::
+
+## Exercise A: every rule of the bracelet {#sec-vitest-exercise-bracelet}
+
+1. In `homework/bracelet-tests`, rewrite `src/bracelet.test.ts`. It holds one
+   `describe('Bracelet', ...)`, a `let bracelet: Bracelet;` with a `beforeEach`
+   that gives it a new bracelet, and eight `it` blocks written as arrange, act,
+   assert. Use two different color strings where you need them, for example
+   `'#f4a0a0'` and `'#a0d4a0'`.
+
+2. Write one test for each of these behaviors:
+
+   * a new bracelet has no items
+   * a letter cube and then a spacer bead leave two items on the bracelet
+   * a second letter right after the first throws a `RuleError`
+   * a spacer bead on an empty bracelet throws a `RuleError`
+   * a spacer bead in a second color gives back
+     `'You are mixing spacer colors!'`
+   * one more spacer bead in another color after that gives back nothing,
+     because the warning comes only once
+   * `removeLast()` on an empty bracelet leaves it empty
+   * `removeLast()` after a letter cube and a spacer bead leaves one item
+
+3. Where a test counts items, use the matcher from the research task instead of
+   reading `.length` yourself. Its message prints the array and both lengths
+   when the test goes red, which `toBe` on a number cannot do.
+
+4. Write the tests one at a time with the watcher running, and know why each one
+   is red or green before you start the next.
+
+5. Run `npm test`. Expected result:
+
+   ```
+    Test Files  1 passed (1)
+         Tests  8 passed (8)
+   ```
+
+6. Break one rule in `src/bracelet.ts` on purpose, for example by letting
+   `addLetter` push without asking, and run `npm test` again. Read which test
+   names turn up under `Failed Tests`, then put the rule back.
+
+7. Run `npm run verify`, fix what it reports, and commit.
+
+## Exercise B: what the trip is worth {#sec-vitest-exercise-travel}
+
+The travel classes from the polymorphism chapter do arithmetic on a distance and
+hand back numbers and strings, and not one of them touches the page, which makes
+them easy to test.
+
+{{< exercise travel-costs tests=true >}}
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `travel-tests`.
+
+2. Copy `travel.ts`, `car.ts`, `motorcycle.ts`, `bicycle.ts`, `walk.ts`, and
+   `index.ts` from your travel project of the polymorphism chapter into `src/`.
+   Delete `src/math.ts` and `src/math.test.ts`.
+
+3. Run `npm start`, type a distance, and click Car once. The line and the total
+   appear as before, which tells you the copy is complete.
+
+4. Create `src/travel.test.ts` with one `describe` per class: `Car`,
+   `Motorcycle`, `Bicycle`, and `Walk`. Each class gets its objects built inside
+   the tests, so no `beforeEach` is needed here.
+
+5. Write one test per row of this table. Each one builds the travel with that
+   distance and checks what `reimbursement()` gives back.
+
+   | Travel | Distance in km | Reimbursement in euro |
+   | --- | ---: | ---: |
+   | Car, nobody along | 10 | 5 |
+   | Car, 1 passenger | 10 | 5.15 |
+   | Car, 2 passengers | 10 | 5.3 |
+   | Motorcycle | 10 | 2.5 |
+   | Bicycle | 10 | 2.5 |
+   | Walk | 10 | 3.8 |
+   | Bicycle | 1 | 0 |
+   | Walk | 1 | 0 |
+   | Walk | 3 | 1.14 |
+
+6. One row of that table refuses to pass with `toBe`, and the research task
+   names the matcher that gets it green. Two decimal places are enough.
+
+7. Add one more test for `summary()`: a car over 10 km with nobody along gives
+   back the string `'Car, 10.00 km: 5.00 €'`.
+
+8. Add `it.todo('refuses a negative distance')` at the end of the `Walk` block.
+   Nobody has written that rule yet, and the reminder belongs next to the tests
+   rather than in your head.
+
+9. Run `npm test`. Expected result:
+
+   ```
+    Test Files  1 passed (1)
+         Tests  10 passed | 1 todo (11)
+   ```
+
+10. Run `npm run verify`, fix what it reports, and commit.
+
+::: {.callout-tip}
+## When you finish early
+
+Give `Travel` a check that refuses a distance below zero, throwing an error of
+its own the way the bracelet does. Then turn your `it.todo` into a real test
+with `toThrow`, and watch the count in the summary move from todo to passed.
+:::
+
+## Check your understanding {#sec-vitest-quiz}
+
+Six questions, the first four of them the research task.
+
+{{< quiz vitest title="Vitest" >}}

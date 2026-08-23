@@ -66,15 +66,28 @@ instructions: |
 
   New in Part 5, use it freely:
 
-  - Splitting an app into a pure logic module (`bracelet.ts`) and a DOM module
-    (`index.ts`) that only renders and wires events.
-  - Vitest: a `*.test.ts` file next to the module it tests, `describe`, `it`,
-    `expect`, `beforeEach`, the matchers `toBe`, `toEqual`, `toThrow`,
-    `toHaveLength`, `toBeNull`, Arrange-Act-Assert, one behavior per test.
-  - `npm test` runs the tests once, `npm run test:watch` keeps them running;
-    reading a failing test's output and finding the line it points at.
-  - A `verify` script that chains `tsc --noEmit`, `biome check .`, and
-    `vitest run`, and a small GitHub Actions workflow that runs it on push.
+  - Splitting an app into pure logic modules (`bracelet.ts`, plain data
+    classes such as `LetterCube` with `readonly` fields, a union type
+    `BraceletItem = LetterCube | SpacerBead` in place of a base class with no
+    members) and a DOM module (`index.ts`) that renders from the model with
+    `replaceChildren()` and `instanceof`, and wires events. A getter that
+    returns `this.items.slice()` hands out a copy of an array.
+  - Vitest 4: a `*.test.ts` file in `src/` next to the module it tests,
+    `describe`, `it`, `it.todo`, `expect`, `beforeEach`, the matchers `toBe`,
+    `toEqual`, `toThrow`, `toHaveLength`, `toBeUndefined`, `toBeDefined`,
+    `toBeCloseTo`; Arrange-Act-Assert, one behavior per test, imports from
+    `'vitest'` sorted by `npm run check:fix`.
+  - `npm test` runs the tests once, `npm run test:watch` keeps them running
+    (`q` quits); reading a failing test's output (`FAIL`, `AssertionError`,
+    Expected/Received, the `❯ file:line:column` address).
+  - A `verify` script `tsc --noEmit && biome check . && vitest run` (never
+    `playwright test`), and a GitHub Actions workflow
+    `.github/workflows/verify.yml` in the repository root with `on: [push]`,
+    one job per project using `defaults.run.working-directory`,
+    `actions/checkout@v7`, `actions/setup-node@v7` with `cache: npm` and
+    `cache-dependency-path`, `npm ci`, `npm run verify`. `AGENTS.md` in every
+    project says to run `npm run verify` before reporting done; do that, and
+    paste its output.
 
   Not yet, these come in later parts:
 

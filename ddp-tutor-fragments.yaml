@@ -237,8 +237,12 @@ fragments:
       Unit tests:
       - Vitest: one `describe` per unit, one behavior per `it`, the name reads
         as a sentence (`it('refuses two letters in a row', ...)`),
-        Arrange-Act-Assert, the matchers `toBe`, `toEqual`, `toHaveLength`,
-        `toThrow`, `toBeNull`. No unit test touches `document`.
+        Arrange-Act-Assert as three blank-line-separated blocks, a
+        `let x: T;` above `beforeEach` as the only uninitialized `let`, the
+        matchers `toBe`, `toEqual`, `toHaveLength`, `toThrow(ErrorClass)` with
+        an arrow-function wrapper, `toBeUndefined`/`toBeDefined`,
+        `toBeCloseTo`, and `it.todo` for a test not written yet. No unit test
+        touches `document`, and no test imports `index.ts`.
       - Never change a test to make it pass. When a given test fails, the code is
         wrong, and you say so.
 

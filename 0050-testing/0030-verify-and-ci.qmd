@@ -1,0 +1,269 @@
+---
+title: "Verify before you commit, and let GitHub verify too"
+---
+
+Your bracelet project has tests now, and `npm run verify` still knows nothing
+about them. This chapter puts the test run into that one command, and then
+hands the command to a computer at GitHub that runs it after every push and
+marks the commit green or red.
+
+## Three checks in one command {#sec-verify-ci-experiment}
+
+Open `homework/bracelet-tests` and find the `verify` line in `package.json`.
+You have added it to every project since the chapter on scripts and assets:
+
+```json
+"verify": "tsc --noEmit && biome check ."
+```
+
+Put the test run at the end of it:
+
+```json
+"verify": "tsc --noEmit && biome check . && vitest run"
+```
+
+Run it:
+
+```bash
+npm run verify
+```
+
+```
+> startercode@1.0.0 verify
+> tsc --noEmit && biome check . && vitest run
+
+Checked 18 files in 5ms. No fixes applied.
+
+ RUN  v4.1.11 .../homework/bracelet-tests
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+```
+
+Your project prints its own file count and test count. The line calls
+`vitest run` and not `npm test`, because `npm test` would only start another
+npm script that runs the same thing.
+
+Now break something. Open `src/bracelet.test.ts`, pick a test that counts
+items, and change the expected number to a wrong one. Run `npm run verify`
+again:
+
+```
+Checked 18 files in 5ms. No fixes applied.
+
+ ❯ src/bracelet.test.ts (8 tests | 1 failed) 9ms
+     × holds two items after a letter and a spacer 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/bracelet.test.ts > Bracelet > holds two items after a letter and a spacer
+AssertionError: expected [ LetterCube{ letter: 'A' }, …(1) ] to have a length of 3 but got 2
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+```
+
+Your own test name stands in the `FAIL` line, and under it Vitest prints the
+same failure report you read in the Vitest chapter, shortened here. The type
+check and Biome both ran and said nothing, and the run stopped red on the
+tests.
+
+Break it harder. In the same test file, write `bracelet.addLetter(1);` inside
+one of the tests, with a number where a letter belongs. Run `npm run verify`
+once more:
+
+```
+> startercode@1.0.0 verify
+> tsc --noEmit && biome check . && vitest run
+
+src/bracelet.test.ts(17,24): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+```
+
+That is the whole output. Biome and Vitest never ran, so the wrong number in
+the test is still waiting for you: `&&` starts the next command only when the
+one before it succeeded. Undo both changes and run `npm run verify` until it is
+green again.
+
+## What the chain is for {#sec-verify-ci-chain}
+
+One command answers one question: is this project in a state you can hand in?
+The type check comes first because its errors make the other two pointless: a
+test that does not compile proves nothing. The tests come last because they
+are the slowest, and a run that stops earlier saves you the wait. Green before
+every commit stays the rule.
+
+## A computer that is not yours {#sec-verify-ci-what}
+
+Running `verify` yourself has one hole in it: it checks the files on your disk,
+and what your teacher reads is the repository on GitHub. A file you forgot to
+commit is on your disk and not in the repository, and a package you installed
+by hand months ago is not in `package.json` either. Both make your laptop say
+green and everybody else's computer say red.
+
+**Continuous integration** closes that hole. Every time you push, GitHub starts
+a fresh computer, downloads what is in your repository, installs the packages
+the project asks for, and runs your `verify`. The commit gets a yellow dot
+while the run is going, then a green check mark or a red cross. People shorten
+continuous integration to CI, and you will see the two letters everywhere.
+Nobody has to remember to start it, which is what makes the file below worth
+writing once.
+
+## The workflow file {#sec-verify-ci-workflow}
+
+GitHub reads its instructions from a file in your repository, and the file is
+written in YAML. YAML is another way to write the kind of data you know from
+`package.json`, with indentation in place of the curly braces and a `-` in
+front of every item of a list. Indentation carries meaning here, so spaces
+matter and tabs are forbidden.
+
+This is the whole file. It goes into the **root of your `creative-coding-2`
+repository**, in `.github/workflows/verify.yml`, not into the project folder:
+
+```yaml
+name: Verify
+on: [push]
+
+jobs:
+  bracelet-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: homework/bracelet-tests
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: homework/bracelet-tests/package-lock.json
+      - run: npm ci
+      - run: npm run verify
+```
+
+`name: Verify` is the title of the workflow in the Actions tab, and it is yours
+to choose. `on: [push]` lists the events that start it, and GitHub's
+documentation lists the other events you could put in that list.
+
+`jobs:` opens the list of jobs, and `bracelet-tests:` is the name of the single
+job here. A job is one machine working through one sequence of steps.
+
+`runs-on: ubuntu-latest` picks that machine. GitHub hands you a fresh Linux
+computer and throws it away when the run ends, so nothing from one run can leak
+into the next.
+
+`defaults: run: working-directory:` says where every `run:` step starts.
+Without it `npm ci` would start in the repository root, where there is no
+project at all.
+
+`steps:` is the sequence, top to bottom. A step with `uses:` runs a ready-made
+action that somebody else published, named `owner/name@version`. A step with
+`run:` runs a shell command, the same one you type in your own terminal.
+
+`actions/checkout@v7` downloads your repository onto the machine, which is
+empty without it. `actions/setup-node@v7` installs Node, and its three settings
+pick the version and keep the downloaded packages of that one project between
+runs, so later runs start faster.
+
+`npm ci` installs the packages. It is the install command made for machines
+like this one: it installs the exact versions your project recorded instead of
+looking for newer ones, so a run today and a run in March test the same code
+with the same packages.
+
+`npm run verify` is your own command, the one you just extended. Everything
+above exists to get to this line, and two of those lines name your project
+folder. Yours probably starts with the lesson date, the way the git chapter
+set up your repository, so write your own folder name in both places.
+
+::: {.research title="What is actually running your tests?"}
+The exercise below pushes this file and reads a red run, and three pieces of
+that are not explained above. GitHub's pages about GitHub-hosted runners and
+about workflow runs answer two, and the npm documentation for `npm ci` answers
+the third.
+
+1. `ubuntu-latest` is a machine GitHub starts for you. Which Ubuntu version
+   does that name point to right now, and name two tools that are already
+   installed on it before your first step runs. Say where you read it.
+2. `npm ci` needs one file in the repository that `npm install` can live
+   without. Which file is it, and what does `npm ci` do with a `node_modules`
+   folder that is already there? Say where you read it.
+3. A run went red. Describe the way from your repository page to the text
+   output of the step that failed, and say what you click on the way.
+
+For the exam, remember what `npm ci` needs. A project you hand in without that
+file does not build anywhere but on your own laptop.
+:::
+
+## The rule your buddy follows {#sec-verify-ci-agents}
+
+Your coding buddy can run commands, and `AGENTS.md` is where you tell it which
+ones matter. Open `AGENTS.md` in `homework/bracelet-tests` and make sure this
+line is in it, in your own words:
+
+> Run `npm run verify` before you report that you are done, and fix everything
+> it finds.
+
+The sentence carries more weight than it did in the SVG part, because `verify`
+now runs the tests. An agent that reports success tells you nothing you can check. One that
+pastes the counts from its own `verify` run hands you the evidence with the
+code.
+
+Agents skip rules sometimes. When yours reports it is done without a `verify`
+run, name the rule, and it runs the command.
+
+## Exercise: CI for the bracelet project {#sec-verify-ci-exercise}
+
+Your repository gets its first workflow, and you make it go red on purpose,
+because a check you have never seen fail is a check you do not trust yet.
+
+1. In the root of your `creative-coding-2` repository, put the workflow file
+   from this chapter into `.github/workflows/verify.yml`, creating both folders
+   on the way. Check that the two paths inside the file match your bracelet
+   project's folder.
+
+2. Make sure `homework/bracelet-tests/package.json` carries the extended
+   `verify` line and that `npm run verify` is green in your terminal.
+
+3. Commit both files and push. Expected result: a yellow dot next to your
+   commit message on the repository page, and a green check mark a minute or
+   two later.
+
+4. Open the **Actions** tab, click the run, then the job, and find the output
+   of `npm run verify`. Expected result: the same lines your own terminal
+   printed, tests included. If the run stops at `npm ci` instead, your second
+   research answer names the file that is missing from the repository, so add
+   it and push again.
+
+5. Break a test on purpose, exactly as you did in the experiment, then commit
+   and push. Expected result: a red cross next to the commit. GitHub also sends
+   you an email about a failed run of your own, unless you switched those
+   emails off.
+
+6. Open the red run and find the name of the failing test in the log, the way
+   your third research answer describes. Then fix the test, push, and watch the
+   commit turn green.
+
+7. Add the `verify` rule to `AGENTS.md` if it is not there yet, then start `pi`
+   in the project and ask it: *Add a test that removeLast twice on a bracelet
+   with two items leaves it empty.* Read the test the agent wrote and
+   decide whether it checks what you asked for. Expected result: the agent runs
+   `npm run verify` on its own and reports what it printed. If it does not,
+   tell it to.
+
+8. Commit the new test and push. Expected result: green again, with one test
+   more in the log than in step 4.
+
+::: {.callout-tip}
+## When you finish early: a second project
+
+One job checks one project. Copy the whole `bracelet-tests:` block, name the
+copy `travel-tests:`, and point its two paths at your travel costs project. The
+two jobs run side by side on two machines, and the Actions tab shows two lines
+per push. Push a broken travel project and watch one line go red while the
+other stays green.
+:::
+
+## Check your understanding {#sec-verify-ci-quiz}
+
+Five short questions, three of them from the research task.
+
+{{< quiz verify-ci title="Verify and CI" >}}

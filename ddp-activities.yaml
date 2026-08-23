@@ -131,3 +131,12 @@ activities:
     bracelet:
       file: 0040-classes/0080-bracelet-quiz.yaml
       note: "Creative Coding 2 book: Rules, state, and undo: the bracelet (0080) — GitHub-hosted"
+    why-test:
+      file: 0050-testing/0010-why-test-quiz.yaml
+      note: "Creative Coding 2 book: Why test, and what can be tested (0010) — GitHub-hosted"
+    vitest:
+      file: 0050-testing/0020-vitest-quiz.yaml
+      note: "Creative Coding 2 book: Vitest: tests that read like sentences (0020) — GitHub-hosted"
+    verify-ci:
+      file: 0050-testing/0030-verify-and-ci-quiz.yaml
+      note: "Creative Coding 2 book: Verify before you commit, and let GitHub verify too (0030) — GitHub-hosted"

@@ -57,6 +57,11 @@ book:
         - 0040-classes/0060-exceptions.qmd
         - 0040-classes/0070-callbacks-maps.qmd
         - 0040-classes/0080-bracelet.qmd
+    - part: "Testing your logic"
+      chapters:
+        - 0050-testing/0010-why-test.qmd
+        - 0050-testing/0020-vitest.qmd
+        - 0050-testing/0030-verify-and-ci.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

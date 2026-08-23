@@ -1,0 +1,146 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Verify before you commit, and let GitHub verify
+# too" (0050-testing/0030-verify-and-ci.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point to the source, never the answer). The last two
+# cover the chapter's own points: the order of the commands in the `verify`
+# chain, and why the same command runs again on GitHub.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: verify-ci-quiz
+name: "Quiz: Verify and CI"
+
+title: "Check your understanding: verify and CI"
+description: |
+  Five short questions about the chapter *Verify before you commit, and let
+  GitHub verify too*, three of them the research task. Answer in your own
+  words; if you cannot answer a research question yet, look it up and come
+  back. One or two sentences are enough. This quiz is anonymous and is here
+  for you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="- run: npm run verify"
+      scope="after the verify and CI chapter of the testing part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "`document.querySelector<HTMLButtonElement>('#id')` with a null check that throws, `textContent`, `createElement`, `append`, `replaceChildren`, and events such as `click` and `submit`"
+        "own classes with fields, methods, `private`, `readonly`, getters, `extends`, `super`, `abstract` classes, and polymorphism"
+        "ES modules with one class per file, `export` and `import`"
+        "`throw`, `try`/`catch`, own error classes, `instanceof`, `Map`, `Set`, and callback types"
+        "npm scripts, `npm run build`, `npm run preview`, and `npm run verify`, which now runs `tsc --noEmit && biome check . && vitest run`"
+        "git with `git add`, `git commit`, and `git push` into a GitHub repository called `creative-coding-2` with `coursework/` and `homework/` folders"
+        "Vitest: `describe`, `it`, `expect` with `toBe`, `toEqual`, `toThrow` and `toHaveLength`, `beforeEach`, `npm test`, and `npm run test:watch`"
+        "a GitHub Actions workflow file in `.github/workflows/` with `name`, `on`, `jobs`, `runs-on`, `defaults`, `steps`, `uses`, and `run`")
+      not_yet=(array
+        "which Ubuntu version `ubuntu-latest` points at, which file `npm ci` needs, and where the log of a failed step lives (those are the research tasks right now)"
+        "Playwright and end-to-end tests"
+        "mocks, spies, and test coverage"
+        "generics of their own, data structures beyond arrays, `async`, and `fetch`")}}
+
+questions:
+  - id: research-ubuntu-latest
+    title: "The machine behind ubuntu-latest"
+    question: |
+      Your workflow says `runs-on: ubuntu-latest`. Which Ubuntu version does
+      that name point to right now, and name two tools that are already
+      installed on that machine before your first step runs. Say where you
+      read it.
+    evaluation: |
+      Expected: GitHub's runner-images documentation names one concrete
+      version for `ubuntu-latest` (Ubuntu 24.04 at the moment; a newer LTS
+      version is fine when the student names the page). Preinstalled tools
+      include git, Node.js and npm, Python, Docker, curl, and the GitHub CLI.
+      Required: (1) a concrete Ubuntu version, not just "the newest one";
+      (2) two tools that are really on the image; (3) names a source (GitHub
+      Docs, the runner-images repository).
+      Partial: version and tools right but no source, or a version with only
+      one tool.
+      Incorrect: says the runner has whatever is installed on your own laptop,
+      or that you have to install Ubuntu yourself.
+
+  - id: research-npm-ci
+    title: "What npm ci insists on"
+    question: |
+      `npm ci` needs one file in the repository that `npm install` can live
+      without. Which file is it, and what does `npm ci` do with a
+      `node_modules` folder that is already there? Say where you read it.
+    evaluation: |
+      Expected: `npm ci` needs `package-lock.json`. It deletes an existing
+      `node_modules` folder and installs everything again from the lock file.
+      Source is the npm documentation page for `npm ci`.
+      Required: (1) `package-lock.json`; (2) the existing `node_modules` is
+      removed and installed fresh; (3) names a source (npm docs).
+      Partial: the file right, the `node_modules` answer missing or wrong.
+      Incorrect: names `package.json`, or says `npm ci` adds to the existing
+      `node_modules` folder.
+
+  - id: research-actions-log
+    title: "Finding the red step"
+    question: |
+      A push turned red. Describe the way from your repository page to the
+      text output of the step that failed, and say what you click on the way.
+    evaluation: |
+      Expected: repository page, then the Actions tab, then the failed
+      workflow run in the list, then the job (in the list on the left), then
+      the failed step, which opens its log. Clicking the red cross next to the
+      commit is a shortcut into the same run.
+      Required: (1) names the Actions tab or the mark next to the commit as
+      the way in; (2) names run and job and step, so the answer ends at the
+      output of one step.
+      Partial: gets to the run but stops there, without job or step.
+      Incorrect: says the log arrives by email only, or that you have to run
+      the workflow again locally to see it.
+
+  - id: verify-chain-order
+    title: "One run, two problems"
+    question: |
+      Your script is `"verify": "tsc --noEmit && biome check . && vitest run"`.
+      You edited one file and left two problems in it: something Biome
+      complains about, and a test that now fails. You run `npm run verify`
+      once. Which of the two problems does the output show you, and why?
+    evaluation: |
+      Expected: only Biome's complaint. Biome runs before Vitest and ends with
+      a failure, and `&&` starts the next command only when the one before it
+      succeeded, so `vitest run` never starts. The failing test shows up on
+      the next run, after Biome is happy.
+      Required: (1) the Biome problem is the one reported; (2) `&&` stops the
+      chain at the first command that fails, so the test run does not happen.
+      Partial: names Biome without the reason, or explains `&&` correctly but
+      picks the wrong command.
+      Incorrect: says both problems are reported, or that the failing test is
+      the one you see.
+
+  - id: why-ci
+    title: "Verify twice"
+    question: |
+      You already run `npm run verify` yourself before every commit. Give two
+      reasons the same command runs again on GitHub after every push.
+    evaluation: |
+      Expected: two of these. GitHub starts a fresh machine and uses only what
+      is in the repository, so a file you forgot to commit or a package that
+      only exists on your laptop makes the run red. It starts on its own, so
+      a commit you made in a hurry is checked too. The result is a mark on the
+      commit that your teacher and everybody else can see without downloading
+      your code.
+      Required: two clearly different reasons from that list, in the student's
+      own words.
+      Partial: one reason, or two wordings of the same reason.
+      Incorrect: says CI replaces running `verify` yourself, or claims it makes
+      the program faster.

@@ -1,0 +1,328 @@
+---
+title: "Why test, and what can be tested"
+---
+
+Every app you built this year you checked by hand: start it, click, look. That
+works while the app is small and you still remember what it is supposed to do.
+The bracelet editor from the last chapter already carries four rules, and
+walking through all of them after every change costs a minute of clicking. A
+test is that minute, written down once and run by a program in under a second.
+
+::: {.callout-note}
+## New part, new buddy code
+
+Part 5 has its own coding buddy, and this one knows tests. Your teacher hands
+out the code for it, and you put it into `~/.pi/agent/auth.json` in place of the
+Part 4 code. The setup chapter in Part 1 shows that file.
+:::
+
+## A test that fails on purpose {#sec-why-test-experiment}
+
+From this part on your apps come from a second template: the starter you
+already know with a test runner added.
+
+1. Create a new app from the
+   [vite-ts-starter-tests](https://github.com/Teaching-HTL-Leonding/vite-ts-starter-tests)
+   template. Download the ZIP, unpack it into `coursework/` as `first-test`,
+   open the folder in VS Code, and run `npm install`. Every later chapter says
+   "create a new app from our tests template" and means this one.
+
+2. Run `npm test`. The terminal answers like this (your path and the times
+   differ):
+
+   ```text
+    RUN  v4.1.11 /home/you/creative-coding-2/coursework/first-test
+
+
+    Test Files  1 passed (1)
+         Tests  1 passed (1)
+      Start at  20:12:39
+      Duration  156ms
+   ```
+
+Green, and you clicked nothing. Find out what ran. Open `src/math.ts`:
+
+```ts
+export function add(firstNumber: number, secondNumber: number): number {
+  return firstNumber + secondNumber;
+}
+```
+
+Next to it sits `src/math.test.ts`, which is the file `npm test` picked up:
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { add } from './math.ts';
+
+describe('add', () => {
+  it('adds two numbers', () => {
+    expect(add(2, 3)).toBe(5);
+  });
+});
+```
+
+Read the middle line the way it is written: it adds two numbers, and you expect
+`add(2, 3)` to be `5`.
+
+3. Now break `add`. Change `firstNumber + secondNumber` to
+   `firstNumber - secondNumber`, save, and run `npm test` again:
+
+   ```text
+    ❯ src/math.test.ts (1 test | 1 failed) 6ms
+        × adds two numbers 5ms
+
+    FAIL  src/math.test.ts > add > adds two numbers
+   AssertionError: expected -1 to be 5 // Object.is equality
+
+   - Expected
+   + Received
+
+   - 5
+   + -1
+
+    ❯ src/math.test.ts:6:23
+         4| describe('add', () => {
+         5|   it('adds two numbers', () => {
+         6|     expect(add(2, 3)).toBe(5);
+          |                       ^
+         7|   });
+         8| });
+
+
+    Test Files  1 failed (1)
+         Tests  1 failed (1)
+   ```
+
+   `AssertionError: expected -1 to be 5` is the whole story. Your `add` handed
+   back `-1` where the test wanted `5`. The block underneath shows the exact
+   line of the test file, with a caret under the call that disagreed.
+
+4. Put the `+` back and run `npm test` once more. Green again, and you never
+   opened the browser.
+
+## What those three names do {#sec-why-test-names}
+
+`expect(add(2, 3)).toBe(5)` is the comparison. `expect` takes the value your
+code produced, and `toBe` is one of many ways to check it. This one compares
+with `===`, the same operator you write in an `if`.
+
+`it('adds two numbers', ...)` is one test. The string is its name, and it turns
+up again in the `FAIL` line when the test goes red, which is why a name that
+reads like a sentence is worth the two seconds it takes to write.
+
+`describe('add', ...)` groups the tests that are about the same thing and puts
+that group name in front of every failure. `add > adds two numbers` in the
+output above is the group and the test.
+
+A **unit test** is a small program that calls one piece of your code and
+compares the answer with what you expected. The unit is that piece: one
+function or one method, sometimes a whole class. Vitest is the program that
+finds the test files and runs them. What it prints at the end is the score.
+
+## Regressions and edge cases {#sec-why-test-why}
+
+**A regression is working code that stops working because you changed something
+somewhere else.** The bracelet's "Remove last" button and its mixed-color
+warning have nothing to do with each other, right up to the day you edit the
+array that both of them read. A suite of tests that runs in one second finds
+that on the spot. Clicking finds it three weeks later, in a lesson about
+something else.
+
+**An edge case is the input at the border.** The empty bracelet, the first item,
+the last item, zero, a negative number. Those are the cases hand testing skips,
+because clicking your way back to an empty bracelet is boring and you are fairly
+sure it works. Written down once as tests, they run again on every save for the
+rest of the project.
+
+## Node has no document {#sec-why-test-node}
+
+Vitest runs your code in Node, not in a browser. Node has no page: no
+`document`, no `<div>`, nothing to click. Point a test at code that touches the
+page and Vitest answers with one line.
+
+```text
+ReferenceError: document is not defined
+```
+
+That message decides the shape of every project in this part. Your logic goes
+into files that never mention `document`, and `src/index.ts` is the only file
+that looks up elements and listens for events. It does all the drawing too.
+Test files import the logic and never import `index.ts`.
+
+Your bracelet from the last chapter breaks that rule twice over. `Bracelet`
+takes the container element in its constructor, so a test cannot even create
+one, and its private `render()` builds the `<div>`s. `LetterCube` and
+`SpacerBead` have the same problem in miniature. The exercise below splits the
+project: the classes keep the items and the rules, `index.ts` takes over all the
+drawing, and only then is there something a test can reach.
+
+## What the tests template adds {#sec-why-test-template}
+
+`package.json` gains two development dependencies, `vitest` and
+`@playwright/test`, plus three scripts:
+
+```json
+"test": "vitest run",
+"test:watch": "vitest",
+"test:e2e": "playwright test"
+```
+
+`npm test` runs every test once and exits, and that is the command of this part.
+`npm run test:watch` stays open and runs the tests again after every save; the
+next chapter puts it to work. `npm run test:e2e` starts Playwright, a second
+test tool that drives a real browser, and Part 8 is where you meet it. Until
+then `playwright.config.ts` and the `e2e/` folder stay as they are. The one
+Playwright test in there checks the template's own page, so it goes red once you
+write your own `index.html`, and nothing in this part runs it.
+
+In `src/` you find the two files you just read, `math.ts` and `math.test.ts`. A
+Vitest test file is named `*.test.ts` and lives next to the module it tests.
+Playwright's files are named `e2e/*.e2e.ts`, so neither runner ever picks up the
+other one's files.
+
+Two smaller differences: `biome.json` also skips the `playwright-report` and
+`test-results` folders, and `.gitignore` keeps both of them out of git.
+
+One line in the template deserves a comment. Its test file imports with the file
+extension:
+
+```ts
+import { add } from './math.ts';
+```
+
+Both spellings compile in these projects. This book writes imports without the
+extension, the way Part 4 does it, and so does every file you write from here
+on. The template's `src/index.ts` still carries the year-one
+`getElementById(...) as ...` line, and you replace that file in every project
+anyway. Everything else is the starter you toured in Part 2.
+
+## Exercise: split the bracelet {#sec-why-test-exercise}
+
+The bracelet editor keeps every rule it has and gains a `Bracelet` class you can
+test.
+
+{{< exercise bracelet tests=true >}}
+
+1. Create a new app from our tests template inside `homework/`, in a folder
+   called `bracelet-tests`.
+
+2. Copy six files from your `homework/bracelet` project into the new `src/`:
+   `bracelet-item.ts`, `letter-cube.ts`, `spacer-bead.ts`, `rule-error.ts`,
+   `bracelet.ts`, and `index.ts`. Leave `rule-error.ts` exactly as it is; every
+   other file changes in the steps below.
+
+3. Open `src/bracelet-item.ts` and replace the abstract class with a type:
+
+   ```ts
+   import type { LetterCube } from './letter-cube';
+   import type { SpacerBead } from './spacer-bead';
+
+   export type BraceletItem = LetterCube | SpacerBead;
+   ```
+
+   The abstract class existed to promise one thing, `render()`, and that promise
+   is moving out of the model. With no shared behavior left, a base class has
+   nothing to hold, and a union type says "a letter cube or a spacer bead"
+   just as well. `instanceof` still narrows it, which the next steps need.
+
+4. Shrink `src/letter-cube.ts` to a class that only holds data:
+
+   ```ts
+   export class LetterCube {
+     readonly letter: string;
+
+     constructor(letter: string) {
+       this.letter = letter;
+     }
+   }
+   ```
+
+   The `extends` clause and the whole `render()` method are gone, and the field
+   is `readonly` and public, because `index.ts` has to read it to draw the cube.
+   Do the same to `src/spacer-bead.ts` with `readonly color: string`.
+
+5. Open `src/bracelet.ts`. Delete the container field, the constructor, and the
+   private `render()` method, and delete every `this.render()` call inside
+   `addLetter`, `addSpacer`, and `removeLast`. Rename the private array field to
+   `itemList`, so that the name `items` is free for this getter:
+
+   ```ts
+   get items(): BraceletItem[] {
+     return this.itemList.slice();
+   }
+   ```
+
+   Called without arguments, `slice()` gives you a copy of the array, so
+   whoever reads `bracelet.items` cannot push into the bracelet behind its
+   back. Everything else in the class stays: both adding methods with their
+   `RuleError`, `removeLast`, and the two private helpers.
+
+6. Open `src/index.ts`. The bracelet no longer takes an argument, so create it
+   with `new Bracelet()`, and add a drawing helper next to `showMessage`:
+
+   ```ts
+   const render = (): void => {
+     braceletBox.replaceChildren();
+     for (const item of bracelet.items) {
+       const element = document.createElement('div');
+       if (item instanceof LetterCube) {
+         element.classList.add('cube');
+         element.textContent = item.letter;
+       } else {
+         element.classList.add('bead');
+         element.style.backgroundColor = item.color;
+       }
+       braceletBox.append(element);
+     }
+   };
+   ```
+
+   That needs `import { LetterCube } from './letter-cube';` at the top. Now call
+   `render()` in every listener right after the model call, and once at the very
+   end of the file so the empty bracelet is drawn when the page loads.
+
+7. Delete `src/math.ts` and `src/math.test.ts`. The `index.html` you copied in
+   has already replaced the template's page, so nothing looks for `add` any
+   more.
+
+8. Run `npm start` and try the editor. Expected results, the same as in the last
+   chapter: a letter cube appears; a second letter right after it changes
+   nothing and shows "You need to add a spacer bead next!"; a spacer bead on the
+   empty bracelet shows "You need to add a letter cube next!"; a bead in a
+   second color is added and shows "You are mixing spacer colors!" once and
+   never again; "Remove last" takes items off one at a time.
+
+9. Write your first test file, `src/bracelet.test.ts`, in the shape you read at
+   the start of this chapter:
+
+   ```ts
+   import { describe, expect, it } from 'vitest';
+   import { Bracelet } from './bracelet';
+
+   describe('Bracelet', () => {
+     it('starts with no items', () => {
+       const bracelet = new Bracelet();
+       expect(bracelet.items.length).toBe(0);
+     });
+   });
+   ```
+
+   Add a second `it` below the first one, named
+   `'holds one item after the first letter'`. It creates a bracelet, calls
+   `bracelet.addLetter('A')`, and expects `bracelet.items.length` to be `1`.
+
+10. Run `npm test`. Expected output:
+
+    ```text
+     Test Files  1 passed (1)
+          Tests  2 passed (2)
+    ```
+
+11. Add `"verify": "tsc --noEmit && biome check ."` to the `scripts` list in
+    `package.json`, run `npm run verify`, fix what it reports, and commit.
+
+## Check your understanding {#sec-why-test-quiz}
+
+Five short questions about tests and about where logic has to live.
+
+{{< quiz why-test title="Why test" >}}

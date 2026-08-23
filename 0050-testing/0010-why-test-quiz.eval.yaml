@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the "Why test" chapter quiz
+# (0050-testing/0010-why-test.qmd). One correct, one partial, one incorrect
+# per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: why-test-quiz-eval
+target: ./0010-why-test-quiz.yaml
+
+questions:
+  - question: read-a-failure
+    answers:
+      - expect: correct
+        answer: |
+          my code gave back 11, the test wanted 12. vitest shows
+          src/price.test.ts line 6, so that is where i look first.
+      # Value right, no file and no line.
+      - expect: partial
+        answer: |
+          the function returned 11 instead of 12
+      - expect: incorrect
+        answer: |
+          the code returned 12 and the test expected 11, the error is in
+          src/price.ts on line 6
+
+  - question: describe-and-it
+    answers:
+      - expect: correct
+        answer: |
+          'Bracelet' is the group name, all tests about the bracelet are in
+          there and the name is printed before a failure. 'starts with no
+          items' is the name of that one test and you see it again in the FAIL
+          line.
+      # Only the it() half.
+      - expect: partial
+        answer: |
+          the second string is the name of the test so you can see which one
+          broke
+      - expect: incorrect
+        answer: |
+          both strings are the names of the functions that get called, so
+          describe calls Bracelet and it calls starts with no items
+
+  - question: no-document
+    answers:
+      - expect: correct
+        answer: |
+          vitest runs in node and node has no browser page, so there is no
+          document at all. i have to move the ball logic into its own file
+          without any document in it and let index.ts do the drawing.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          die tests laufen in node, dort gibt es kein document, weil es keine
+          seite gibt. deswegen kommt die logik in eine eigene datei ohne dom
+          und index.ts zeichnet.
+      # Cause right, no fix.
+      - expect: partial
+        answer: |
+          because the tests dont run in a browser, there is no document in node
+      - expect: incorrect
+        answer: |
+          the div with that id is missing in index.html, so document cannot find
+          it. add the element and the test passes.
+
+  - question: regression-and-tests
+    answers:
+      - expect: correct
+        answer: |
+          a regression is when something that worked before is broken by a
+          change somewhere else. the tests all run again after every change and
+          take a second, so you see it right away instead of weeks later.
+      # Definition right, nothing about when it is noticed.
+      - expect: partial
+        answer: |
+          it means old code that worked stops working after you changed
+          something
+      - expect: incorrect
+        answer: |
+          a regression is any bug in the program, and tests find it faster
+          because they only check a small part of the app
+
+  - question: edge-case
+    answers:
+      - expect: correct
+        answer: |
+          an edge case is a value at the border, like an empty list, the first
+          or last item, or zero. it needs a test because nobody clicks on the
+          empty bracelet by hand, and a later change to the array could break it
+          without anyone seeing.
+      # Definition right, no reason for the test.
+      - expect: partial
+        answer: |
+          edge cases are the borders, empty array, first element, last element,
+          zero
+      - expect: incorrect
+        answer: |
+          an edge case is a rare bug that only happens sometimes, and you dont
+          need a test for the empty bracelet because that obviously works

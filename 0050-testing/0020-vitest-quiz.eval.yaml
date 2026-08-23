@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the Vitest chapter quiz
+# (0050-testing/0020-vitest.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: vitest-quiz-eval
+target: ./0020-vitest-quiz.yaml
+
+questions:
+  - question: research-undefined-matcher
+    answers:
+      - expect: correct
+        answer: |
+          toBeUndefined() checks it is undefined, toBeDefined() is the other
+          way round. found both on the expect page on vitest.dev
+      # Both matchers, but no word on where they come from.
+      - expect: partial
+        answer: |
+          you write expect(warning).toBeUndefined() and the opposite one is
+          toBeDefined
+      - expect: incorrect
+        answer: |
+          you take toBeNull() for that, and toBeTruthy() is the opposite
+
+  - question: research-length-matcher
+    answers:
+      - expect: correct
+        answer: |
+          toHaveLength(2). it also works on a string, like
+          expect('abc').toHaveLength(3)
+      # Matcher right, second half missing.
+      - expect: partial
+        answer: |
+          expect(bracelet.items).toHaveLength(2)
+      - expect: incorrect
+        answer: |
+          toContain, you give it the number of items you want
+
+  - question: research-close-numbers
+    answers:
+      - expect: correct
+        answer: |
+          toBeCloseTo(1.14, 2). the 2 says how many digits after the comma
+          have to be the same
+      # German correct answer.
+      - expect: correct
+        answer: |
+          man nimmt toBeCloseTo, also toBeCloseTo(1.14, 2). die zweite zahl
+          sagt wie viele nachkommastellen stimmen muessen.
+      # Matcher named, precision argument not explained.
+      - expect: partial
+        answer: |
+          use toBeCloseTo instead of toBe
+      - expect: incorrect
+        answer: |
+          round it first with toFixed(2) and then compare with toBe, there is
+          no matcher for that
+
+  - question: research-it-todo
+    answers:
+      - expect: correct
+        answer: |
+          it.todo just writes down the name, no code runs. in the summary it
+          is counted extra as todo, so the run stays green.
+      # Placeholder idea right, the counting wrong.
+      - expect: partial
+        answer: |
+          it is a reminder for later, and it counts as one of the passed tests
+      - expect: incorrect
+        answer: |
+          the test runs and fails, that is how you see that you still have to
+          write it
+
+  - question: tobe-vs-toequal-array
+    answers:
+      - expect: correct
+        answer: |
+          the toBe one fails. toBe is like === so it wants the exact same
+          array object, and items gives you a new copy every time. toEqual
+          only looks at what is inside, so that one is fine.
+      # Right line, reason not usable.
+      - expect: partial
+        answer: |
+          the first line fails because toBe does not work with arrays here
+      - expect: incorrect
+        answer: |
+          toEqual fails, because two arrays are never equal. toBe is the one
+          you have to use for arrays.
+
+  - question: tothrow-needs-arrow
+    answers:
+      - expect: correct
+        answer: |
+          addLetter('B') is the argument so it runs first and throws before
+          expect even starts, and then the whole test crashes. you have to
+          write expect(() => bracelet.addLetter('B')).toThrow(RuleError);
+      # The fixed line, no explanation.
+      - expect: partial
+        answer: |
+          you need an arrow function:
+          expect(() => bracelet.addLetter('B')).toThrow(RuleError);
+      - expect: incorrect
+        answer: |
+          toThrow cannot take a class you wrote yourself, put the message
+          string in there instead

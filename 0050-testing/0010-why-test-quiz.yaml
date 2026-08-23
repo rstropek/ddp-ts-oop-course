@@ -1,0 +1,158 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Why test, and what can be tested"
+# (0050-testing/0010-why-test.qmd).
+# The chapter has no research box, so there are no `research-` questions and
+# no research fragment here. The five questions cover reading a Vitest
+# failure, what `describe` and `it` name, why code that touches the page
+# cannot be unit tested, and the two words the chapter introduces
+# (regression, edge case).
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: why-test-quiz
+name: "Quiz: Why test"
+
+title: "Check your understanding: why test, and what can be tested"
+description: |
+  Five short questions about the chapter *Why test, and what can be tested*.
+  Answer in your own words. One or two sentences are enough. This quiz is
+  anonymous and is here for you, so you can see what you already understand
+  and what you should read again. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="expect(add(2, 3)).toBe(5);"
+      scope="after the first chapter of the part on testing"
+      knows=(array
+        "the tests template with `npm test`, which runs Vitest once and exits"
+        "`describe`, `it`, and `expect(...).toBe(...)`, and reading a red `FAIL` block"
+        "the words unit test, regression, and edge case"
+        "the rule that Vitest runs in Node, so code that touches `document` cannot be unit tested, and logic therefore lives in files that `index.ts` imports"
+        "classes with fields, constructors, methods, `private`, `readonly`, getters, `extends`, `abstract`, and polymorphism"
+        "ES modules: one class per file with `export` and `import`, and an `index.ts` that only wires the UI"
+        "`throw`, `try`/`catch`, `instanceof`, and error classes of their own"
+        "the DOM: `document.querySelector<T>('#id')` with a null check that throws, `createElement`, `append`, `replaceChildren()`, `classList`, `textContent`, and `element.style`"
+        "events, CSS with Flexbox and Grid, SVG, `npm run verify`, git, and the `pi` coding buddy")
+      not_yet=(array
+        "`toEqual`, `toThrow`, `beforeEach`, Arrange-Act-Assert, and `npm run test:watch` (the next chapter)"
+        "continuous integration and GitHub Actions (the chapter after that)"
+        "Playwright and end-to-end tests (Part 8)"
+        "mocks, spies, coverage, snapshots, and `test.each`"
+        "generics of their own, named data structures, `async`, `fetch`, and `localStorage`")}}
+
+questions:
+  - id: read-a-failure
+    title: "Reading a red test"
+    question: |
+      You run `npm test` and Vitest prints this:
+
+      ```text
+       FAIL  src/price.test.ts > price > adds the tip
+      AssertionError: expected 11 to be 12 // Object.is equality
+       ❯ src/price.test.ts:6:26
+      ```
+
+      Which value did your code hand back, and which file and line does Vitest
+      point you at?
+    evaluation: |
+      Expected: the code produced `11` while the test expected `12`. Vitest
+      points at `src/price.test.ts`, line 6 (column 26).
+      Required: (1) the value the code returned is 11 (the expected value 12 may
+      also be named); (2) the file `src/price.test.ts` and line 6.
+      Partial: only one of the two, for example the right value with no file or
+      line, or the file with the numbers swapped around.
+      Incorrect: says the code returned 12 and the test wanted 11, or names
+      `src/price.ts` line 6 as the place the output points at.
+
+  - id: describe-and-it
+    title: "The two strings"
+    question: |
+      A test file starts like this:
+
+      ```ts
+      describe('Bracelet', () => {
+        it('starts with no items', () => {
+      ```
+
+      What is each of the two strings for?
+    evaluation: |
+      Expected: `'Bracelet'` is the name of the group, so tests about the same
+      unit stand together and the group name is printed in front of a failure.
+      `'starts with no items'` names one single test, and that name shows up in
+      the `FAIL` line so you know which behavior broke.
+      Required: (1) the `describe` string groups tests and labels the group;
+      (2) the `it` string names one test or one behavior and appears in the
+      output.
+      Partial: only one of the two explained, or both called "just a comment"
+      while one role is described correctly.
+      Incorrect: says the strings are code that is executed, that they select
+      which file to test, or that they name the function being called.
+
+  - id: no-document
+    title: "A class Node cannot run"
+    question: |
+      Your `Ball` class keeps the `<div>` it draws into and creates elements
+      with `document.createElement`. A test that creates a `Ball` fails with
+      `ReferenceError: document is not defined`. Why, and what do you change in
+      the project so the ball's logic can be tested?
+    evaluation: |
+      Expected: Vitest runs in Node, which has no page and therefore no
+      `document`, so any code touching the DOM breaks there. The fix is to split
+      the class: the logic (position, speed, rules) goes into a file that never
+      mentions `document`, and `index.ts` does the drawing.
+      Required: (1) tests run in Node, where there is no `document` or no
+      browser page; (2) move the logic into a DOM-free file and leave the
+      drawing to `index.ts`.
+      Partial: only one of the two, for example the Node explanation with no
+      fix, or "split it up" with no reason.
+      Incorrect: says the element is missing from `index.html`, that an import
+      is missing, or that the fix is to create the `<div>` inside the test.
+
+  - id: regression-and-tests
+    title: "The bug that comes back"
+    question: |
+      The chapter uses the word **regression**. What is a regression, and why
+      does a test suite find one earlier than clicking through the app?
+    evaluation: |
+      Expected: a regression is code that worked and stops working because
+      something else was changed. Tests find it earlier because every test runs
+      again after every change, in about a second, while clicking only checks
+      the part you happen to be working on right now.
+      Required: (1) working behavior breaks as a side effect of another change;
+      (2) the whole test suite runs automatically and quickly on every change,
+      so the break shows up at once.
+      Partial: only one of the two, for example a correct definition with
+      nothing about when the break is noticed.
+      Incorrect: says a regression is any bug, a bug in new code only, or that
+      tests are faster because they test less.
+
+  - id: edge-case
+    title: "Testing the empty bracelet"
+    question: |
+      Calling `removeLast()` on an empty bracelet is what the chapter calls an
+      **edge case**. What makes an input an edge case, and why is this one worth
+      a test even though the button clearly works today?
+    evaluation: |
+      Expected: an edge case is an input at the border of what the code has to
+      handle, such as empty, the first item, the last item, zero, or a negative
+      number. It is worth a test because it is exactly the case hand clicking
+      skips, and a later change to the array can break it without anybody
+      noticing.
+      Required: (1) an edge case is a value at the border (empty, first, last,
+      zero, negative), not a normal middle case; (2) a test keeps checking it
+      after every later change, which manual clicking does not.
+      Partial: only one of the two, for example a good definition with no reason
+      to test it.
+      Incorrect: says an edge case is a rare bug, an error message, or that the
+      empty case needs no test because the code obviously works.
