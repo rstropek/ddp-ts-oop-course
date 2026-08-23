@@ -83,8 +83,8 @@ instructions: |
   - No unit tests and no end-to-end tests: no Vitest, no Playwright.
   - No type parameters of your own. Using `querySelector<HTMLInputElement>`
     is fine; writing `function first<T>(...)` or `class Stack<T>` is not.
-  - No hand-written linked lists, stacks, or queues. An array, a `Map`, or a
-    `Set` is the right answer here.
+  - No hand-written linked lists, stacks, or queues. An array is the right
+    answer here.
 
   {{fragment "shared.coding_rules_base"}}
 
