@@ -20,22 +20,20 @@ questions:
         answer: |
           it gives you size, position, center and color of the element
 
-  - question: research-remove-listener
+  - question: research-replace-children
     answers:
       - expect: correct
         answer: |
-          remove only takes it out of the page, you don't have to unregister
-          the listener yourself. if you still have the variable you can append
-          it again and the click still works.
-      # Half the answer: nothing about appending it again.
+          canvas.replaceChildren() with nothing in the brackets. it throws out
+          all children, and if you pass elements they become the new children
+          instead. found it on the MDN page for Element.replaceChildren()
+      # Right name, nothing about the arguments.
       - expect: partial
         answer: |
-          the listener goes away together with the element, you don't need to
-          remove it by hand
+          replaceChildren, you call it on the svg and it is empty afterwards
       - expect: incorrect
         answer: |
-          the listener stays active on the page forever and the element is
-          deleted for good, you have to build a new one
+          you loop over canvas.children and call remove() on each one
 
   - question: research-random-int
     answers:

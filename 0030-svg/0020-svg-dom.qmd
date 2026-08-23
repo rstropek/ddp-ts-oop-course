@@ -193,15 +193,15 @@ in this chapter uses `width="400"` next to `viewBox="0 0 400 300"`. Keep that
 pairing and the subtraction above is all the math you need.
 
 ::: {.research title="What is in that rectangle?"}
-The exercise below picks random sizes for its shapes, and its bonus step turns
-a click into a position inside the drawing. Both need something the chapter
-did not spell out.
+The exercise below picks random sizes for its shapes, clears the whole drawing
+with one button, and its bonus step turns a click into a position inside the
+drawing. All three need something the chapter did not spell out.
 
 1. `getBoundingClientRect()` gives back one object full of numbers. Name four
    of its properties and say what each one measures.
-2. Clicking a shape in the exercise removes it with `remove()`. What happens to
-   the click listener that was attached to that element, and can the element
-   come back into the page afterwards?
+2. The Clear button must throw every child out of the `<svg>` in one call,
+   without a loop. Which method of an element does that, and what happens to
+   the arguments you pass to it?
 3. You need a whole random number between two bounds, for example a radius
    from 10 to 50 with both ends possible. Write the expression using
    `Math.random()` and `Math.floor()`, and say which part of it lets 50 come
@@ -246,9 +246,8 @@ canvas at a random spot, and clicking a shape takes it away again.
 7. Give each shape its own click listener that calls `remove()` on it. Expected
    result: clicking a shape takes it off the canvas, and the shapes around it
    stay where they are.
-8. Listen for a click on `clearButton` and empty the drawing with
-   `canvas.replaceChildren()`, which throws out every child of the `<svg>` in
-   one call.
+8. Listen for a click on `clearButton` and empty the drawing with the method
+   from the research box. Expected result: one click, and every shape is gone.
 9. Keep the status line honest. Write a helper that reads
    `canvas.querySelectorAll('.shape').length` and writes a line such as
    `4 shapes on the canvas` into `shapeStatus`. Call it after adding, after
