@@ -61,7 +61,9 @@ The agent's code is only useful if it could have been yours. Prove it:
 3. Delete the agent's change and write the button yourself, without `pi`.
    Use what you already have: `querySelectorAll` is not in your toolbox yet,
    so loop over `list.children` and collect the items whose `classList`
-   contains `done` before you remove them.
+   contains `done` before you remove them. The order matters: `children`
+   is live, it shrinks the moment you remove an item, and a loop that
+   removes while it walks skips every second one.
 4. Compare your version with the agent's. Different is fine. Wrong is not,
    so test both the same way.
 

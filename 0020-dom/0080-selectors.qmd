@@ -268,9 +268,13 @@ comments, one per task of part A.
 
 ## Part A: style the blog {#sec-selectors-css}
 
-Work in `src/styles.css` and replace each comment with a rule. Every task
-needs one of the selector kinds from this chapter, and no task needs a new
-class in `index.html`. Run `npm start` and keep the page open while you work.
+First open `src/index.ts`, delete what is in it, and put
+`import './styles.css';` there, the same line the to-do list started with.
+Without it the page never loads the stylesheet, and none of your rules shows
+up. Then work in `src/styles.css` and replace each comment with a rule.
+Every task needs one of the selector kinds from this chapter, and no task
+needs a new class in `index.html`. Run `npm start` and keep the page open
+while you work.
 
 1. Give every heading inside an article the color `#1d3557`. The three post
    titles turn dark blue, and the "Class blog" heading at the top keeps its
@@ -289,9 +293,8 @@ class in `index.html`. Run `npm start` and keep the page open while you work.
 
 ## Part B: count and change from TypeScript {#sec-selectors-typescript}
 
-Open `src/index.ts` and delete what is in it. Start with
-`import './styles.css';`, then wire up the four buttons one at a time.
-Reload the page after each step and try the button you just wrote.
+Back in `src/index.ts`, below the import, wire up the four buttons one at
+a time. Reload the page after each step and try the button you just wrote.
 
 1. **Count highlights.** When `#countButton` is clicked, count the paragraphs
    with the class `highlight` and write the number into the paragraph
@@ -306,8 +309,7 @@ Reload the page after each step and try the button you just wrote.
    says 3, read question 3 of the research box again and look at where you
    call `querySelectorAll`.
 4. **Shout.** When `#shoutButton` is clicked, turn the text of every article
-   heading into upper case with a loop. TypeScript warns you that
-   `textContent` can be `null`, so check it before you call `toUpperCase()`.
+   heading into upper case with a loop.
 5. **List tags.** When `#tagsButton` is clicked, write the text of all nine
    tags into `#status`, separated by a comma and a space:
    `html, vite, starter, css, colors, teamwork, debugging, devtools, html`.
