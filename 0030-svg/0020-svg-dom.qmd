@@ -11,9 +11,7 @@ once and you will recognize it forever.
 
 ## A circle that stays invisible {#sec-svg-dom-experiment}
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template inside `coursework/` of your course repository, run `npm install`.
+1. Create a new app from our template inside `coursework/`.
 2. In `index.html`, replace everything between `<body>` and `</body>` with
    this:
 

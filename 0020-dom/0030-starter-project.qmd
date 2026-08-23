@@ -9,10 +9,8 @@ opens the box.
 
 ## The one line that connects two files {#sec-starter-project-experiment}
 
-Make a fresh app from the
-[vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-template and name the folder `starter-tour`. Run `npm install` and `npm start`
-in it. The browser shows `Hello World!`, with an exclamation mark that
+Create a new app from our template, name the folder `starter-tour`, and start
+it. The browser shows `Hello World!`, with an exclamation mark that
 `src/index.ts` glued on.
 
 Open `index.html` and delete this line from the bottom of the `<body>`:

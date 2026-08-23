@@ -9,10 +9,8 @@ and a hexagon needs six corner points.
 
 ## Five circles, then twenty-five {#sec-beehive-rows}
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template inside `coursework/` of your course repository, call the folder
-   `packing-experiment`, and run `npm install` and `npm start`.
+1. Create a new app `packing-experiment` from our template inside
+   `coursework/`.
 2. In `index.html`, replace the `<h1>` line with this:
 
    ```html
@@ -205,8 +203,8 @@ A hive of 25 cells, and a bee that leaves a honey pot wherever you send it.
 
 {{< exercise beehive >}}
 
-1. Create a new app from the vite-ts-starter template inside `coursework/` (or
-   `homework/`) of your course repository, run `npm install`. Read
+1. Create a new app from our template inside `coursework/` (or `homework/`).
+   Read
    `index.html`: an `<svg id="hive">` with an empty `<symbol id="hex">` inside
    `<defs>`, two empty groups `#cells` and `#pots`, a `<text id="bee">`, a
    status paragraph, and five buttons inside `#pad`. Run `npm start`. Expected

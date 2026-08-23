@@ -10,7 +10,7 @@ gives you the two tools that put boxes where you want them.
 
 ## Eight boxes that snap into a row {#sec-layout-experiment}
 
-Create a fresh app from the starter and run `npm install`. In `index.html`,
+Create a new app from our template. In `index.html`,
 replace the `<h1>` with eight empty boxes:
 
 ```html

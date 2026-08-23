@@ -9,10 +9,7 @@ arithmetic is the whole job. Start by getting it wrong on purpose.
 
 ## Four bars hanging from the ceiling {#sec-charts-hanging}
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template inside `coursework/` of your course repository, call the folder
-   `chart-experiment`, and run `npm install` and `npm start`.
+1. Create a new app `chart-experiment` from our template inside `coursework/`.
 2. In `index.html`, replace everything between `<body>` and `</body>` with
    this:
 

@@ -9,7 +9,7 @@ about asking for all of them at once.
 
 ## Five paragraphs, one loop {#sec-selectors-experiment}
 
-Create a new app from the starter and replace everything inside `<body>` with
+Create a new app from our template and replace everything inside `<body>` with
 this:
 
 ```html

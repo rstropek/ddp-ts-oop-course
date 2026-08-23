@@ -9,10 +9,7 @@ inside your HTML, where you can read it. Type one and see.
 
 ## A circle you can read {#sec-svg-by-hand-circle}
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template inside `coursework/` of your course repository, call the folder
-   `svg-experiment`, and run `npm install` and `npm start`.
+1. Create a new app `svg-experiment` from our template inside `coursework/`.
 2. In `index.html`, replace the `<h1>` line with this:
 
    ```html
@@ -219,10 +216,7 @@ Year one's smiley comes back, this time written as tags, and a domino tile
 stands next to it. Everything is hand-written SVG in `index.html`, so there is
 no TypeScript in this exercise beyond one import.
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template inside `homework/` of your course repository, call the folder
-   `smiley-domino`, and run `npm install` and `npm start`.
+1. Create a new app `smiley-domino` from our template inside `homework/`.
 2. Replace both lines in `src/index.ts` with `import './styles.css';`, and
    create an empty `src/styles.css` next to it.
 3. In `index.html`, replace the `<h1>` line with an `<svg>` that has

@@ -3,7 +3,7 @@ title: "Research is part of the job"
 ---
 
 Two paragraphs, one string, two different results. Create a fresh app from the
-starter and run `npm install`. Replace the `<h1>` in `index.html` with these
+template. Replace the `<h1>` in `index.html` with these
 two lines:
 
 ```html
@@ -130,9 +130,7 @@ For the exam, the rule for user text has to stick without looking it up.
 
 ## Exercise: show what the user typed {#sec-research-exercise}
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template, run `npm install`, and start it with `npm start`.
+1. Create a new app from our template.
 2. Replace the `<h1>` in `index.html` with this markup:
 
    ```html

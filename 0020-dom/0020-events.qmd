@@ -8,7 +8,7 @@ to TypeScript, and by the end of this chapter yours does too.
 
 ## Click and watch the console {#sec-events-experiment}
 
-Make a fresh app from the course starter, run `npm install`, and open it in
+Create a new app from our template and open it in
 VS Code. In `index.html`, add one button below the heading:
 
 ```html
@@ -158,7 +158,7 @@ use every week belong in your head.
 One app, three things that answer the user. Work through the steps in order and
 check the result of each one in the browser before you go on.
 
-1. Create a new app from the course starter, run `npm install`, and open the
+1. Create a new app from our template and open the
    folder in VS Code.
 
 2. In `index.html`, replace the `<h1>` line with this markup. Leave the

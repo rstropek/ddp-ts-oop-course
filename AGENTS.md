@@ -102,6 +102,23 @@ files alone: the book is tested by letting a smaller LLM work through it, so an
 exercise that needs unstated knowledge, a file that is not there, or a teacher
 in the room is a bug.
 
+## No micro-management
+
+Students are sixteen and in their second year; the book trusts them with the
+routine.
+
+* Creating a project is explained once, in chapter 1.1 (link, ZIP, `npm
+  install`, `npm start`), and repeated in one short form with the link in
+  2.1. From then on every chapter says "Create a new app from our template"
+  (plus a folder name or `coursework/`/`homework/` when later steps refer to
+  it) and nothing more: no link, no `npm install`, no `npm start`. "Run `npm
+  start`" appears only where the step is about looking at the result.
+* Never tell students to write a prediction or an observation "on paper" or
+  to "write down" what they see. "Predict what the console shows" or "compare
+  what the paragraph shows now" is enough. Writing something down is asked
+  for only when the written text *is* the deliverable (explaining an agent's
+  code line by line, the research guide).
+
 ## No glossary
 
 There is no glossary and no definitions page. Never write `[[term]]` markers or

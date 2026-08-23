@@ -10,10 +10,8 @@ function.
 
 ## A circle that slides away {#sec-animation-slide}
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template inside `coursework/` of your course repository, call the folder
-   `animation-experiment`, and run `npm install`.
+1. Create a new app `animation-experiment` from our template inside
+   `coursework/`.
 2. In `index.html`, replace everything between `<body>` and `</body>` with
    this:
 
@@ -242,9 +240,7 @@ that one has to work without looking it up.
 
 Year one's diagonal ball, rebuilt in SVG and with a Start/Stop button.
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template inside `coursework/` of your course repository, run `npm install`.
+1. Create a new app from our template inside `coursework/`.
 2. In `index.html`, replace everything between `<body>` and `</body>` with
    this:
 

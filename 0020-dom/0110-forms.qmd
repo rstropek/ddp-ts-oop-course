@@ -8,10 +8,7 @@ that, and the wrapper comes with a surprise built in. Meet it first.
 
 ## The page that throws your input away {#sec-forms-reload}
 
-1. Create a new app from the
-   [vite-ts-starter](https://github.com/Teaching-HTL-Leonding/vite-ts-starter)
-   template, call the folder `form-experiment`, and run `npm install` and
-   `npm start`.
+1. Create a new app from our template and call the folder `form-experiment`.
 2. In `index.html`, replace everything between `<body>` and `</body>` with
    this:
 

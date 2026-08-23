@@ -8,8 +8,8 @@ point at that file, and you find out what `npm run build` really produces.
 
 ## A picture your program picks {#sec-toolchain-assets-experiment}
 
-Create a new app from the vite-ts-starter template inside `coursework/` of
-your course repository, name it `assets-tour`, and run `npm install`. Save this drawing as `assets/badge.svg`:
+Create a new app `assets-tour` from our template inside `coursework/`. Save
+this drawing as `assets/badge.svg`:
 
 ```html
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="A gold badge">
@@ -193,9 +193,8 @@ its memory, and a later part has you write a skill of your own.
 ## Exercise: get a project ready to hand in {#sec-toolchain-assets-exercise}
 
 Open your bubble chart or your beehive game in `coursework/`, whichever you
-would rather keep. For a clean start instead, create a new app from the
-vite-ts-starter template inside `coursework/`, run `npm install`, and use the
-badge from this chapter.
+would rather keep. For a clean start instead, create a new app from our
+template inside `coursework/` and use the badge from this chapter.
 
 1. **Give the project a picture.** Move an `.svg` file into the project's
    `assets/` folder, add an `<img>` with an id to `index.html`, and set its

@@ -32,7 +32,7 @@ copy for every exercise. Work through these steps now.
    listed in `package.json` and answers with a line like
    `added 19 packages, and audited 20 packages in 865ms`.
 5. Run `npm start`. The terminal prints the address of your own development
-   server:
+   server (version numbers may differ):
 
    ```text
      VITE v8.2.2  ready in 107 ms
