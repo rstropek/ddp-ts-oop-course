@@ -15,13 +15,13 @@ questions:
     answers:
       - expect: correct
         answer: |
-          it is the time since the page was loaded, in milliseconds. that
-          clock never stops, so it also runs on while my animation is paused.
-      # Knows it is a time, thinks it is the frame duration.
-      # First half right, second half missing.
+          it is the time since the page was loaded, in milliseconds, the same
+          number performance.now() gives you. MDN says so on the
+          requestAnimationFrame page.
+      # Time, but no unit and no starting point.
       - expect: partial
         answer: |
-          the time since the page was loaded, in milliseconds
+          it is a timestamp, the current time of the browser
       # Confuses the timestamp with the frame length.
       - expect: incorrect
         answer: |

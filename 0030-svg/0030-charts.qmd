@@ -204,8 +204,8 @@ vertical one, and the research box below sends you after the exact values.
 
 A chart that reacts to a form has to change. Do not go hunting for the one
 `rect` whose height is now wrong. Throw the drawing away and build it again
-from the data. Wrap what you wrote above into two helpers, `drawAxes` and
-`drawBars`, and the update is three lines:
+from the data. Picture what you wrote above wrapped into two helpers,
+`drawAxes` and `drawBars`. Then the whole update is three lines:
 
 ```ts
 const drawChart = () => {
@@ -218,7 +218,9 @@ const drawChart = () => {
 `replaceChildren()` with no arguments empties an element. Call it on the `<svg>`
 itself and it takes everything, including whatever you drew by hand in the
 HTML, so give the moving parts their own layer: a `<g id="plot"></g>` that your
-code clears, with anything permanent sitting outside it.
+code clears, with anything permanent sitting outside it. You do not need to
+rebuild the experiment this way; the bubble chart below is where the pattern
+goes to work.
 
 The `role="img"` and `aria-label` on the `<svg>` tell a screen reader what the
 picture shows, and Biome's accessibility rules insist on them. Being attributes
@@ -251,13 +253,13 @@ Every bar above that line turns red.
 {{< exercise bar-chart >}}
 
 1. Create the app inside `coursework/` of your course repository as the box
-   above says, then run `npm start`. You get a heading and an empty frame:
-   `index.html` holds an `<svg id="chart">` of 640 by 400 and an empty
-   `<p id="legend">` under it.
-2. In `src/index.ts`, write `import './styles.css';` and
+   above says, then read `index.html`: it holds an `<svg id="chart">` of 640
+   by 400 and an empty `<p id="legend">` under it.
+2. In `src/index.ts`, replace everything with `import './styles.css';` and
    `const SVG_NS = 'http://www.w3.org/2000/svg';`, then look up `#chart` as
    `SVGSVGElement` and `#legend` as `HTMLParagraphElement` and throw if either
-   is missing.
+   is missing. Run `npm start`. You get a heading and an empty frame, and a
+   clean console.
 3. Take over the data and the layout:
 
    ```ts
@@ -324,14 +326,15 @@ chart on demand. Step 10 is the finishing touch.
 {{< exercise bubble-chart >}}
 
 1. Create the app inside `coursework/` of your course repository as the box
-   above says, then run `npm start` and read `index.html`. The chart area is
-   drawn by hand inside a `<g class="axis">`: a square from (50, 50) to
-   (450, 450) in SVG pixels, with nine ticks per axis. Below it sits an empty
-   `<g id="bubbles">`, the layer your code owns.
-2. In `src/index.ts`, import the stylesheet, add `SVG_NS`, and look up
-   `#bubbleForm`, `#bubbleColor`, `#bubbleX`, `#bubbleY`, `#bubbleSize`,
-   `#sizeValue`, `#bubbleError`, `#clearBubbles`, and `#bubbles` as an
-   `SVGGElement`. One `if` that throws covers all nine.
+   above says, then read `index.html`. The chart area is drawn by hand inside
+   a `<g class="axis">`: a square from (50, 50) to (450, 450) in SVG pixels,
+   with nine ticks per axis. Below it sits an empty `<g id="bubbleLayer">`,
+   the layer your code owns.
+2. In `src/index.ts`, replace everything with the stylesheet import and
+   `SVG_NS`, then look up `#bubbleForm`, `#bubbleColor`, `#bubbleX`,
+   `#bubbleY`, `#bubbleSize`, `#sizeValue`, `#bubbleError`, `#clearBubbles`,
+   and `#bubbleLayer` as an `SVGGElement`. One `if` that throws covers all
+   nine. Run `npm start`: the form and the empty chart area appear.
 3. Add the layout constants `MARGIN` 50, `AXIS_LENGTH` 400, `BASELINE`
    `MARGIN + AXIS_LENGTH`, `MIN_VALUE` 0, and `MAX_VALUE` 100. Write `scaleX`,
    which maps a value to a pixel from left to right, and `scaleY`, which maps
@@ -368,7 +371,7 @@ chart on demand. Step 10 is the finishing touch.
 9. Make the **Clear** button empty the array, clear the error text, and redraw.
    Assigning a fresh `[]` to `bubbles` is the shortest way to empty it.
    Expected result: the circles are gone and the hand-drawn axes are still
-   there, because your code only ever clears the `#bubbles` layer.
+   there, because your code only ever clears the `#bubbleLayer` group.
 10. Show the slider's number: listen for `input` on the range field and write
     its `value` into the `#sizeValue` span, so the label counts along as you
     drag.

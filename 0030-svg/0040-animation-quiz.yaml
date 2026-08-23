@@ -60,17 +60,18 @@ questions:
     title: "The number the browser passes in"
     question: |
       `requestAnimationFrame` calls your function with one number. What does
-      that number measure, and does it keep counting while your animation is
-      stopped and asks for no frames?
+      that number measure, in which unit, and from which moment does it start
+      counting?
     evaluation: |
-      Expected: the number is a clock reading, the time that has passed since
-      the page started loading. It comes from a clock that keeps running
-      whatever your code does, so yes, it keeps counting while the animation
-      is stopped.
-      Required: (1) it is a time measured from the start of the page, not the
-      length of one frame; (2) it keeps counting while nothing is animated.
-      Partial: names it as a time or timestamp but gets the starting point
-      wrong or misses the second part.
+      Expected: the number is a clock reading in milliseconds, the time that
+      has passed since the page started loading (the same clock as
+      `performance.now()`). Bonus for naming the MDN page for
+      `requestAnimationFrame` or `DOMHighResTimeStamp` as the source.
+      Required: (1) it is a point in time, not the length of one frame and
+      not a frame counter; (2) milliseconds; (3) counted from the moment the
+      page started loading.
+      Partial: names it as a time or timestamp but gets the unit or the
+      starting point wrong or leaves one of them out.
       Incorrect: says it is the duration of the last frame, a frame counter,
       or the number of the animation.
 

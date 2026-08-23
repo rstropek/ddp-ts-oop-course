@@ -216,13 +216,13 @@ holding down.
 
 ::: {.research title="What the browser hands you, and what it takes back"}
 The two exercises below need four answers this chapter does not give. Without
-them you cannot stop an animation cleanly, restart it without a jump, write a
-`@keyframes` rule of your own, or turn a clock hand around the middle of its
-face.
+them you cannot stop an animation cleanly, make sense of the time the browser
+hands you, write a `@keyframes` rule of your own, or turn a clock hand around
+the middle of its face.
 
 1. `requestAnimationFrame` calls your function with one number. What does that
-   number measure, and does it keep counting while you are not asking for
-   frames?
+   number measure, in which unit, and from which moment does it start
+   counting?
 2. `cancelAnimationFrame` takes one argument. What is it, and where in your
    code do you get hold of that value?
 3. The SVG attribute `transform="rotate(...)"` accepts either one number or
