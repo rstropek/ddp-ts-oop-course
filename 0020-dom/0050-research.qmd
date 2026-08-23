@@ -147,10 +147,10 @@ For the exam, the rule for user text has to stick without looking it up.
    element type, and throw an error when one of them is missing.
 4. Add a click listener to the button. In the listener, write the input's
    `value` into the paragraph using `innerHTML`.
-5. Run the app, type `<b>hi</b>` into the input, and click the button. Write
-   down what stands in the paragraph.
+5. Run the app, type `<b>hi</b>` into the input, and click the button. Look
+   at what stands in the paragraph.
 6. Change that one line to use `textContent` instead. Type `<b>hi</b>` again
-   and click. Write down what stands in the paragraph now.
+   and click. Compare what stands in the paragraph now.
 7. Keep the property that belongs in this app. Above that line, write one
    comment naming the property and saying why this app uses it. Your research
    answers are the reason.

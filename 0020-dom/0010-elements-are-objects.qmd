@@ -23,8 +23,8 @@ console.log(sameHeading.textContent);
 ```
 
 Two calls, two variables. The program writes text through the first variable
-and reads text back through the second one. Write your prediction on paper
-before you run anything: what will the console line show?
+and reads text back through the second one. Before you run anything, predict
+what the console line will show.
 
 Start the app with `npm start` and open the address it prints. Then open the
 browser's developer tools with **F12** (`Cmd`+`Option`+`I` on a Mac) and click

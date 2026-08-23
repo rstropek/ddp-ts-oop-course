@@ -281,7 +281,7 @@ Every bar above that line turns red.
 
    The numbers are kilowatt hours, one per month.
 4. Write `scaleY` for these constants, the same shape as the one in this
-   chapter. Check it on paper first: `scaleY(0)` must be 330 and `scaleY(80)`
+   chapter. Check it before you run it: `scaleY(0)` must be 330 and `scaleY(80)`
    must be 30.
 5. Draw the axes into a `g` element with the CSS class `axis`, which the
    stylesheet already colors. The y axis runs from `MARGIN_TOP` down to
@@ -338,7 +338,7 @@ chart on demand. Step 10 is the finishing touch.
 3. Add the layout constants `MARGIN` 50, `AXIS_LENGTH` 400, `BASELINE`
    `MARGIN + AXIS_LENGTH`, `MIN_VALUE` 0, and `MAX_VALUE` 100. Write `scaleX`,
    which maps a value to a pixel from left to right, and `scaleY`, which maps
-   it from bottom to top. On paper: `scaleX(0)` is 50, `scaleX(100)` is 450,
+   it from bottom to top. Check: `scaleX(0)` is 50, `scaleX(100)` is 450,
    `scaleY(0)` is 450, and `scaleY(100)` is 50.
 4. Describe one bubble with a compound type and keep a list of them:
 

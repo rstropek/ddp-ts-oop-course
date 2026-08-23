@@ -244,8 +244,8 @@ answers each break. Work in the `starter-tour` folder from the experiment, with
 `npm start` running in the terminal.
 
 1. **Cut the connection.** Delete the `<script>` line from `index.html` again,
-   save, and reload the page with the browser console open. Write down what the
-   console shows, and one sentence saying why none of it is an error. Put the
+   save, and reload the page with the browser console open. Read what the
+   console shows and explain to yourself why none of it is an error. Put the
    line back.
 
 2. **Rename the program.** Rename `src/index.ts` to `src/main.ts` and reload
@@ -281,7 +281,7 @@ answers each break. Work in the `starter-tour` folder from the experiment, with
    ```
 
    Biome answers with a whole block that points at the variable and ends in
-   `Found 1 warning.` Write down which `tsconfig.json` option asked for the
+   `Found 1 warning.` Find out which `tsconfig.json` option asked for the
    compiler's error, and notice that the two tools disagree about how serious
    an unused variable is. Then delete the line.
 

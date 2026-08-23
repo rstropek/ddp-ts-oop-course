@@ -208,7 +208,7 @@ badge from this chapter.
    `role="img"` and `aria-label` is one finding you may have to fix.
 
 3. **Build it and look at the result.** Run `npm run build`, then list `dist`
-   and write down every file name, hashes included. Run `npm run preview` and
+   and look at every file name, hashes included. Run `npm run preview` and
    use the page at `http://localhost:4173/`. Expected result: it behaves as it
    does under `npm start`, and `git status` does not mention `dist`.
 
