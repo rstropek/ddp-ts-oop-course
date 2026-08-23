@@ -24,6 +24,7 @@ book:
     - part: "Welcome back"
       chapters:
         - 0010-welcome/0010-from-canvas-to-page.qmd
+        - 0010-welcome/0020-coding-buddy-setup.qmd
     - part: "The DOM: a page full of objects"
       chapters:
         - 0020-dom/0010-elements-are-objects.qmd

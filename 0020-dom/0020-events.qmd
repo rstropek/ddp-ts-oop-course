@@ -188,9 +188,9 @@ use every week belong in your head.
 The exercises grow with every chapter, and sooner or later a step description
 will not make sense to you. Get as far as you can on your own first. In
 school, ask your teacher. At home, ask an AI: paste your code and the step
-you do not understand, and say what you tried. A few chapters from now you set
-up a coding buddy that knows this course; until then, the AI chat from last
-year does. Asking well is not cheating. Describing a problem so precisely that
+you do not understand, and say what you tried. You can also ask the coding
+buddy you set up in Part 1, which knows this course. Asking well is not
+cheating. Describing a problem so precisely that
 an AI can help is a skill every developer needs today, and every stuck step
 is a chance to practice it.
 :::

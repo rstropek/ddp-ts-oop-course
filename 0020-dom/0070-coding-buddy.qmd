@@ -2,13 +2,10 @@
 title: "Your coding buddy"
 ---
 
-Last year you asked an AI tutor questions and typed every line of code
-yourself. This year you get a second kind of helper: a **coding agent**, a
-program that reads your project, writes into your files, and runs commands in
-your terminal. The agent is called `pi`, and the model behind it is hosted by
-your school's Novedu platform. This chapter connects the two. You install the
-agent once, and from then on you only swap one code whenever a new part of the
-book starts.
+In Part 1 you installed `pi`, pointed it at the Novedu model, and watched a
+first reply come back. That was the setup. This chapter is about working with
+the agent on real code: what the buddy knows about this course, and how you
+stay the author of lines it wrote for you.
 
 ## What the coding buddy is, and is not {#sec-buddy-what}
 
@@ -28,69 +25,11 @@ Two things never change:
 * The agent's mistakes are your mistakes. Read what it changed before you
   commit it.
 
-## Install pi {#sec-buddy-install}
-
-`pi` is a command-line program. Open a terminal and run the installer from
-[pi.dev](https://pi.dev):
-
-```bash
-curl -fsSL https://pi.dev/install.sh | bash
-```
-
-On Windows, run that line in Git Bash or in WSL. Close the terminal, open a
-new one, and check that `pi --version` prints a version number.
-
-## Tell pi where the model is {#sec-buddy-models}
-
-`pi` keeps its settings in a folder named `.pi/agent` inside your home folder.
-Two files in that folder matter here. The first, `models.json`, says where the
-Novedu endpoint is and what the model is called. It is the same for everybody
-in the course, so copy it as it is:
-
-```json
-{{< include ../models.json >}}
-```
-
-Save it as `~/.pi/agent/models.json` (on Windows:
-`C:\Users\<you>\.pi\agent\models.json`). Create the folder if it is missing.
-
-## Add your key {#sec-buddy-key}
-
-The second file, `auth.json`, holds the **activity code**, and the one you need
-now is the code for Part 2, the DOM. Your teacher hands it out in class. The
-code is the key that opens the door to the model, so it is not printed in this
-book. Create `~/.pi/agent/auth.json` with this content and put the code in
-place of the placeholder:
-
-```json
-{
-  "novedu": {
-    "type": "api_key",
-    "key": "<activity code from your teacher>"
-  }
-}
-```
-
-::: {.callout-warning}
-## The key is for your class
-
-Treat the code like a password. Do not post it anywhere, and do not commit
-`auth.json` into a git repository. It can expire; if `pi` reports an
-authentication error, ask your teacher for a new one.
-:::
-
-## A new code for every part {#sec-buddy-new-part}
-
-Each part of the book has its own coding buddy, so each part has its own
-activity code. Your teacher hands out the next one when a part starts. Open
-`~/.pi/agent/auth.json`, put the new code in place of the old one, and start
-`pi` again, because it reads the file at startup. The old code may stop
-working, and that is on purpose. `models.json` never changes.
-
 ## First run {#sec-buddy-first-run}
 
 Open a terminal in your to-do list project from the previous chapters and
-start the agent:
+start the agent. If `pi --version` fails, go back to the setup chapter in
+Part 1 before you read on.
 
 ```bash
 pi

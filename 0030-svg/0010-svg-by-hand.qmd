@@ -12,8 +12,8 @@ inside your HTML, where you can read it. Type one and see.
 
 Part 3 has its own coding buddy, which knows SVG the way the earlier one knew
 the DOM. Your teacher hands out the code for it, and you put it into
-`~/.pi/agent/auth.json` in place of the Part 2 code. The chapter on your coding
-buddy shows that file.
+`~/.pi/agent/auth.json` in place of the Part 2 code. The setup chapter in
+Part 1 shows that file.
 :::
 
 ## A circle you can read {#sec-svg-by-hand-circle}

@@ -98,9 +98,9 @@ using. Treat its answer as a lead, and check whatever you rely on against MDN.
 Ask precisely. Paste the code you actually ran, then write what you expected
 and what happened instead. "It doesn't work" gets you a guess back.
 
-Two chapters from now you set up your own coding buddy, an AI that knows the
-rules of this course. It points you at the source instead of ending your
-research for you.
+The coding buddy you set up in Part 1 is an AI that knows the rules of this
+course, and two chapters from now you start working with it properly. It points
+you at the source instead of ending your research for you.
 
 ## How a research box works {#sec-research-boxes}
 

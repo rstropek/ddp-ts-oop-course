@@ -151,7 +151,10 @@ shared), then validate with `npx @novedu/cli validate <file> --kind coding`.
 Every chapter that opens a part from Part 3 on carries a short
 `callout-note` titled "New part, new buddy code" right after the intro
 paragraph, two or three sentences telling the student to put the new code into
-`~/.pi/agent/auth.json`; the setup procedure itself stays in 2.7. The activity
+`~/.pi/agent/auth.json`; the setup procedure itself stays in 1.2. Chapter 1.2
+is the only place that explains installing an agent and writing `models.json`
+and `auth.json`; other agents such as little-coder or opencode are allowed
+there, but every command the book shows is a `pi` command. The activity
 code is an API key and is never printed in a chapter.
 
 ## Related skills

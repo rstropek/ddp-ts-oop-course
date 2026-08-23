@@ -10,7 +10,7 @@ object is and what you can do with it.
 
 ## Two variables, one heading {#sec-elements-are-objects-experiment}
 
-Open the project from the previous chapter and replace everything in
+Open your `hello-page` project from Part 1 and replace everything in
 `src/index.ts` with these lines:
 
 ```ts

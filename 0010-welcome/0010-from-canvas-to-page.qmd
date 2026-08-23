@@ -124,11 +124,12 @@ this book and your own notes in front of you.
 
 **The AI rule.** Use AI to get unstuck and to explain error messages you
 have never seen before. Every line you hand in is a line you must be able to
-explain out loud, and "the AI wrote it" is not an explanation. Later in the
-book you set up a coding buddy that knows this course and stays at your level.
+explain out loud, and "the AI wrote it" is not an explanation. The next chapter
+sets up a coding buddy that knows this course and stays at your level.
 
 ## Where you stand {#sec-from-canvas-to-page-done}
 
 Your `hello-page` folder holds a real web page, served by your own development
 server, with a heading that carries your name. Keep the folder. The next
-chapter opens the same two files and starts naming what is inside them.
+chapter puts a coding buddy on your machine, and Part 2 then opens these same
+two files and starts naming what is inside them.

@@ -1,0 +1,159 @@
+---
+title: "Set up your coding buddy"
+---
+
+Last year you asked an AI tutor questions and typed every line of code
+yourself. This year you also get a **coding agent**, a program that reads your
+project, changes your files, and runs commands in your terminal. This chapter
+puts one on your machine and connects it to the model your school provides. You
+do this once, at the start of the year.
+
+The course suggests `pi`, an open source agent you run in a terminal, from
+[pi.dev](https://pi.dev). It is deliberately minimal. Out of the box it edits
+files and runs shell commands, and almost everything past that you add
+yourself. Behind `pi` sits the model that does the actual thinking, Qwen 3.8
+27B, served by your school's Novedu platform.
+
+## What a small model means for you {#sec-buddy-setup-model}
+
+By the standards of 2026, Qwen 3.8 27B is a small model. It writes decent
+TypeScript and it follows clear instructions, and it gets lost when a task runs
+long or a prompt stays vague. Cutting a job into steps the model can finish in
+one turn is the skill you are here for, and a bigger model would let you skip
+that practice by absorbing your sloppy prompt anyway. Nobody is billing you for
+a run that goes wrong either, so a bad answer costs you one retry.
+
+## Install pi {#sec-buddy-setup-install}
+
+You already have Node.js and npm from the starter project, and npm installs
+`pi` too. Open a terminal and run this line, which is the same on Windows,
+macOS, and Linux:
+
+```bash
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+Keep the `--ignore-scripts` flag; it is the install command
+[pi.dev](https://pi.dev) recommends. Then close the terminal, open a fresh one,
+and check that the program is there:
+
+```bash
+pi --version
+```
+
+It answers with a version number such as `0.84.2`. If the terminal instead says
+that `pi` is an unknown command, the folder npm installs global programs into
+is not on your `PATH`. A new terminal window fixes that most of the time; when
+it does not, [pi.dev](https://pi.dev) also offers a one-line installer script
+for each operating system.
+
+## Tell pi where the model is {#sec-buddy-setup-models}
+
+`pi` keeps its settings in a folder named `.pi/agent` inside your home folder.
+Two files in that folder matter. The first, `models.json`, says where the Novedu
+endpoint is and what the model is called. It is the same for everybody in the
+course, so copy it as it is:
+
+```json
+{{< include ../models.json >}}
+```
+
+Save it as `~/.pi/agent/models.json`. On Windows that path reads
+`C:\Users\<you>\.pi\agent\models.json`. Create the folder if it is missing.
+
+## Add your key {#sec-buddy-setup-key}
+
+The second file, `auth.json`, holds the **activity code**. The first one you
+need is the code for Part 2, the DOM, which is the part that starts right after
+this chapter. Your teacher hands it out in class. The code is the key that opens
+the door to the model, so it is not printed in this book. Create
+`~/.pi/agent/auth.json` with this content and put the code in place of the
+placeholder:
+
+```json
+{
+  "novedu": {
+    "type": "api_key",
+    "key": "<activity code from your teacher>"
+  }
+}
+```
+
+::: {.callout-warning}
+## The key is for your class
+
+Treat the code like a password. Do not post it anywhere, and do not commit
+`auth.json` into a git repository. It can expire; if `pi` reports an
+authentication error, ask your teacher for a new one.
+:::
+
+## A new code for every part {#sec-buddy-setup-new-part}
+
+Each part of the book has its own coding buddy, so each part has its own
+activity code. Your teacher hands out the next one when a part starts. Open
+`~/.pi/agent/auth.json`, put the new code in place of the old one, and start
+`pi` again, because it reads the file at startup. The old code may stop
+working, and that is on purpose. `models.json` never changes.
+
+## Start pi for the first time {#sec-buddy-setup-first-start}
+
+`pi` works in the folder you start it from, so open a terminal in a folder you
+do not mind the agent reading. Your `hello-page` project from the previous
+chapter is a good one. Start the agent:
+
+```bash
+pi
+```
+
+Pick the model with `/model` and choose *Coding buddy for the Creative Coding 2
+course*. Then type any message at all and press Enter. You are checking one
+thing here: whether a reply comes back.
+
+::: {.callout-warning}
+## When pi just sits there
+
+The model runs on an endpoint your whole school shares, and a request sometimes
+never comes back. There is no error and no retry, the session simply hangs
+before printing anything, and the same failure also shows up as an empty answer
+after a minute or two. Wait a couple of minutes, press `Escape`, and send the
+same message again. It is not your prompt and it is not your machine.
+:::
+
+Five commands and keys carry you through the year.
+
+* `/model` picks the model for the session.
+* `/new` throws away the conversation so far and starts an empty one.
+* `!<command>` runs a shell command without leaving `pi`, so you can check
+  `ls` or `git status` yourself instead of asking the agent what is in the
+  folder.
+* `Escape` stops the agent in the middle of a turn.
+* `Ctrl+D` closes `pi` when the input line is empty.
+
+`/help` lists the other slash commands, and the documentation on
+[pi.dev](https://pi.dev) explains what `/help` only names.
+
+## Other agents work too {#sec-buddy-setup-other-agents}
+
+`pi` is a suggestion, not a rule. Any coding agent that can talk to an
+OpenAI-compatible endpoint reaches the course model, for example
+[little-coder](https://github.com/itayinbarr/little-coder) or
+[opencode](https://opencode.ai). Whatever you pick needs the same four
+settings:
+
+* the base URL `https://novedu.at/api/coding/v1`
+* an OpenAI chat completions API, which most agents call "OpenAI compatible"
+* the model id `coding`
+* your activity code as the API key
+
+Finding where your agent wants those four is your own job, and that hunt
+through someone's documentation is exactly the research this course asks of you
+all year. Two things come with the choice. Every chapter of this book that
+shows a command shows a `pi` command, and your teacher does not debug other
+agents during class.
+
+## Where you stand {#sec-buddy-setup-done}
+
+`pi` runs on your machine, it knows where the model lives, and it answers when
+you type. Part 2 starts on the next page and takes the page apart element by
+element. The chapter on actually working with the buddy comes later in that
+part, once you have code worth handing to it.
