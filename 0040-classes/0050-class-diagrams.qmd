@@ -229,8 +229,9 @@ before you type a line.
    * The fields are the ones in the box, with their types. `width` and
      `height` start at 0 and `loaded` starts at `false`.
    * The constructor takes the aquarium element, the picture URL, `x`, `y`,
-     `speedX`, and `speedY`. Store the four numbers in fields; the aquarium
-     element becomes a `protected` field through a parameter property.
+     `speedX`, and `speedY`. The four numbers are plain `protected` fields
+     that the constructor body assigns; only the aquarium element becomes a
+     `protected` field through a parameter property.
    * Still in the constructor, create an `<img>` with `createElement`, add
      the class `fish` to it, give it an `alt` text, and register a listener
      for the event from the research box. Inside that listener, set `width`
@@ -260,7 +261,8 @@ before you type a line.
    and `time`, takes only one speed in its constructor and passes 0 as
    `speedY` to `super`, adds `delta` to `time` on every frame, and computes
    `y` from `baseY` and `Math.sin`, with the expression from the research
-   box.
+   box. Multiply `time` by 2 before it goes into `Math.sin`, and one wave
+   takes about three seconds.
 
 6. **The manager.** Create `src/fish-manager.ts` with the class printed
    above.

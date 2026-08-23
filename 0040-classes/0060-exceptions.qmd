@@ -274,8 +274,9 @@ exercise steps say what `src/index.ts` has to do.
    result and touches no element on the page.
 3. Guard the method. When `left` or `right` is `NaN`, throw a
    `ValidationError` with the message `Please type a number into both fields.`.
-   When the operator is `/` and `right` is `0`, throw a `ValidationError` with
-   the message `You cannot divide by zero.`. In the `default` branch of the
+   When the operator is `/` or `%` and `right` is `0`, throw a
+   `ValidationError` with the message `You cannot divide by zero.`, the same
+   rule the calculator had before. In the `default` branch of the
    `switch`, throw a plain `Error` that names the operator it does not know.
 4. In `src/index.ts`, import both classes and create one `Calculator` above the
    click listener.
@@ -296,8 +297,9 @@ exercise steps say what `src/index.ts` has to do.
    no red text, `10 / 0` gives the divide message, `12abc * 2` gives the number
    message, and an empty first field gives the fill-in message. The button must
    be clickable after every one of them.
-10. Break it from the HTML. Add `<option value="%">%</option>` to the
-    `<select>` in `index.html`, pick it, and click Calculate. The page shows
+10. Break it from the HTML. Add `<option value="^">^</option>` to the
+    `<select>` in `index.html`, an operator the calculator never learned,
+    pick it, and click Calculate. The page shows
     `Something went wrong. Look in the console.`, and your `default` branch
     is in the console. Remove the option again.
 11. Run `npm run verify` and fix what it reports.
@@ -357,8 +359,9 @@ shape can reach a constructor yet. You change that.
    shape buttons and fetch it. Its listener opens a `try` block that looks up
    `#thisIdDoesNotExist`, throws
    `new Error('Element #thisIdDoesNotExist not found')` when the lookup gives
-   `null`, and builds a `Rectangle` from that element below the check. Catch
-   with `showError`.
+   `null`, and builds a `Rectangle` with any two numbers below the check.
+   That last line never runs, because the lookup always fails; it is there so
+   the listener looks like a real one. Catch with `showError`.
 10. Click both buttons and compare. The bad side length puts your own sentence
     on the page. The broken button puts the neutral sentence there and writes
     the name and the stack into the console. That difference is the whole point
