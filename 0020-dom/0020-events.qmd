@@ -112,8 +112,11 @@ event object has a `key` property holding what was pressed.
 
 ## Colors straight from TypeScript {#sec-events-style}
 
-Every element object has a `style` property, and through it you set CSS from
-your code:
+HTML says what is on the page. How it looks, its colors, sizes, and fonts, is
+the job of a second language called **CSS**, short for Cascading Style Sheets.
+CSS gets its own chapters later in this part; for now you only need to know
+that every element object has a `style` property, and through it you set CSS
+from your code:
 
 ```ts
 helloButton.style.backgroundColor = 'tomato';
