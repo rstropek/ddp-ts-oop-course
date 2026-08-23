@@ -115,7 +115,7 @@ questions:
   - id: research-getter-call
     title: "A getter with parentheses"
     question: |
-      A getter is read without parentheses. Write `watch.elapsed()` with
+      A getter is read without parentheses. Write `score.points()` with
       parentheses anyway and let TypeScript answer. What does the error say,
       and what does it suggest?
     evaluation: |

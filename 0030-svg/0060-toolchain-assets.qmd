@@ -169,7 +169,8 @@ Checked 10 files in 3ms. No fixes applied.
 ```
 
 The type check found nothing, so `&&` let Biome run, and Biome found nothing
-either. From here on, `npm run verify` is what you run before every commit. A
+either. From here on, `npm run verify` is what you run before every commit, and
+when all it reports is formatting, `npm run check:fix` writes the fix. A
 fresh app from our template does not have the line yet, so adding it to
 `package.json` is part of creating every new app from now on. The part on
 testing adds the test run to that same line.

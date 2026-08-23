@@ -18,7 +18,7 @@ Part 3 code. The setup chapter in Part 1 shows that file.
 
 ## Two counters, the year-one way {#sec-classes-literal}
 
-1. Create a new app from our template inside `coursework/`.
+1. Create a new app `counter-classes` from our template inside `coursework/`.
 2. Replace everything in `src/index.ts` with this:
 
    ```ts

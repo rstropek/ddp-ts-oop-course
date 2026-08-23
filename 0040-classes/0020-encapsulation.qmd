@@ -248,7 +248,7 @@ of `01:07.3`, and your account page proudly shows a balance of
    short string out to a fixed length, and what do its two arguments mean?
 3. A balance of `90.3` has to appear as `90.30`. Which method of a number does
    that, and what kind of value does it give back?
-4. A getter is read without parentheses. Write `watch.elapsed()` with
+4. A getter is read without parentheses. Write `score.points()` with
    parentheses anyway and let TypeScript answer. What does the error say, and
    what does it suggest?
 
