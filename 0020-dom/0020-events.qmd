@@ -42,10 +42,28 @@ Read your four lines again. Nowhere do you call the arrow function. You hand it
 over to `addEventListener`, your program ends, and the browser calls the
 function later, once for every click.
 
-Last year p5.js did the same thing with a rule about names. You wrote
-`function mousePressed()`, and p5 found it because of the name. The browser has
-no magic names. You name the element, the event, and the function yourself, and
-the browser remembers the three of them together.
+Last year p5.js did the same thing, and in the starter project you even saw
+the handover. The frame at the top of `src/index.ts` connected your functions
+to the sketch, one per line:
+
+```ts
+const p = new p5((sketch: p5): void => {
+  sketch.setup = setup;
+  sketch.draw = draw;
+  sketch.mouseClicked = mouseClicked;
+});
+```
+
+You wrote `mouseClicked`, you never called it, and p5.js called it on every
+click. All the p5.js names lived on one object, which is why every command got
+`p.` in front of it.
+
+The browser works the same way, with one object called `document` in place of
+`p`, and the page's elements hanging below it. Two things differ. p5.js had
+one fixed slot per event, `sketch.mouseClicked`, and the whole canvas was one
+surface. The browser has no fixed slots: you name the element, the event, and
+the function yourself in one `addEventListener` call, and you can attach as
+many functions to as many elements as you like.
 
 So a function can travel as a value. Until now you passed numbers, strings, and
 arrays into functions; here the argument *is* a function. Writing
