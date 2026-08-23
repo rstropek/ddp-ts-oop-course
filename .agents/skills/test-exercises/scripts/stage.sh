@@ -27,6 +27,11 @@ dst="$WORKSPACE/book/ch-$part-$chapter.qmd"
 cp "$src" "$dst"
 echo "$dst  <- $part_dir$chapter_file"
 
+# Images the chapter embeds (svgbob diagrams next to the chapter).
+for img in $(grep -oE '\]\([A-Za-z0-9_./-]+\.(svg|png|jpg)\)' "$src" | sed 's/^](//; s/)$//' | sort -u); do
+  [[ -f "$REPO/$part_dir$img" ]] && { mkdir -p "$WORKSPACE/book/$(dirname "$img")"; cp "$REPO/$part_dir$img" "$WORKSPACE/book/$img"; echo "$WORKSPACE/book/$img"; }
+done
+
 for name in $(grep -oE '\{\{< exercise [A-Za-z0-9_-]+' "$src" | awk '{print $3}' | sort -u); do
   [[ -d "$REPO/exercises/$name" ]] || { echo "chapter references exercises/$name, which does not exist" >&2; exit 1; }
   rm -rf "$WORKSPACE/book/exercises/$name"

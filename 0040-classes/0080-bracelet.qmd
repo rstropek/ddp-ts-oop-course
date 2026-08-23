@@ -304,9 +304,10 @@ about mixed colors, and a "Remove last" button.
 
 9. Build the letter grid: one `<button>` per letter, with `type` set to
    `'button'`, the letter as its text, and a click listener. Build the color
-   row: one `<button>` per entry of `SPACER_COLORS`, with its `value` as the
-   background color and an `aria-label` that names the color, so the button
-   says something without carrying text.
+   row the same way: one `<button>` of type `'button'` per entry of
+   `SPACER_COLORS`, with the entry's `value` as the button's background color
+   and an `aria-label` that names the color, so the button says something
+   without carrying text.
 
 10. Wire the clicks. A letter click calls `bracelet.addLetter(letter)` inside a
     `try` and clears the message afterwards. Its `catch` shows `error.message`
