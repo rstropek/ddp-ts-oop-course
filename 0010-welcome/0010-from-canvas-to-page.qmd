@@ -42,6 +42,12 @@ copy for every exercise. Work through these steps now.
 
 6. Open that address in your browser. A big heading says **Hello World!**
 
+One thing to know before it confuses you: the browser also asks the server
+for a small icon for the tab, a file called `favicon.ico`, and the starter
+does not ship one. The browser reports that missing file as an error in its
+developer tools. The page does not care, and you do not have to do anything
+about it.
+
 ## Change the text and watch {#sec-from-canvas-to-page-change}
 
 Leave the server running and open `src/index.ts`. The whole file is two lines
