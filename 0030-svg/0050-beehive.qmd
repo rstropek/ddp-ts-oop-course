@@ -207,11 +207,10 @@ A hive of 25 cells, and a bee that leaves a honey pot wherever you send it.
    Read
    `index.html`: an `<svg id="hive">` with an empty `<symbol id="hex">` inside
    `<defs>`, two empty groups `#cells` and `#pots`, a `<text id="bee">`, a
-   status paragraph, and five buttons inside `#pad`. Run `npm start`. Expected
-   result: pad and status line show up, the hive area is empty, and half a bee
-   sticks out of the top left corner.
-2. In `src/index.ts`, write `import './styles.css';`, the namespace constant
-   `const SVG_NS = 'http://www.w3.org/2000/svg';`, and the layout constants:
+   status paragraph, and five buttons inside `#pad`.
+2. In `src/index.ts`, replace everything with `import './styles.css';`, the
+   namespace constant `const SVG_NS = 'http://www.w3.org/2000/svg';`, and the
+   layout constants:
 
    ```ts
    const COLUMNS = 5;
@@ -224,7 +223,9 @@ A hive of 25 cells, and a bee that leaves a honey pot wherever you send it.
    `RADIUS` is the distance from a cell's center to one of its corners,
    `STEP_X` the horizontal distance between two centers in one row, `STEP_Y` the
    distance between two rows. The last two follow from the hexagon's shape; take
-   them as given.
+   them as given. Run `npm start`. Expected result: pad and status line show
+   up, the hive area is empty, and half a bee sticks out of the top left
+   corner.
 3. Look up the elements with `querySelector<...>` and cover them with one `if`
    that throws: `#hex` (`SVGSymbolElement`), `#cells` and `#pots`
    (`SVGGElement`), `#bee` (`SVGTextElement`), `#status`
@@ -254,9 +255,11 @@ A hive of 25 cells, and a bee that leaves a honey pot wherever you send it.
    `points` attribute to the six corners of a hexagon, and appends it to `#hex`.
    Put that hexagon's center at `STEP_X / 2` across and `RADIUS` down, never at
    `(0, 0)`: a symbol draws nothing above or to the left of its own origin, so
-   negative corners vanish. Build the attribute in a loop that runs six times,
-   pushing strings such as `'25.98,0'` into an array and joining them with a
-   space. Expected result: the page still shows no hive, and your answer to
+   negative corners vanish. Put the first corner straight above the center, at
+   an angle of -90 degrees, and go on in steps of 60 degrees: that pointed top
+   is what lets the rows interlock. Build the attribute in a loop that runs six
+   times, pushing strings such as `'25.98,0'` into an array and joining them
+   with a space. Expected result: the page still shows no hive, and your answer to
    research question 2 says why.
 6. Place the cells. Write a helper that takes a group, a class name, a column,
    and a row, creates a `<use>` element pointing at the hexagon symbol, sets its
