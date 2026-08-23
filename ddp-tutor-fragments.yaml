@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/fragments/fragment-yaml.schema.json
-# Shared fragment library for the Creative Coding 2 book's novedu AI activities.
+# Shared fragment library for the Creative Coding 2 book's Novedu AI activities.
 #
 # ONE RULE decides what belongs here: a fragment lives in this library only
 # while TWO OR MORE activities use it. Everything an activity alone needs is
@@ -8,7 +8,7 @@
 #
 # Served live from GitHub: activities reference this file as
 # ./ddp-tutor-fragments.yaml (repo root), so a `git push` updates every
-# activity immediately (the novedu server re-reads the raw URL on every load).
+# activity immediately (the Novedu server re-reads the raw URL on every load).
 #
 # The seven coding buddies (ddp-coding-buddy-dom.yaml ... -e2e.yaml) are one
 # activity per part of the book. They share everything except the part-specific
@@ -37,7 +37,7 @@
 
 id: ddp-tutor-fragments
 fragments:
-  # Safety net for teenage students. Copied from novedu's shared example
+  # Safety net for teenage students. Copied from Novedu's shared example
   # library (general-fragments.yaml, fragment teenager_safety) so the book's
   # activities have no dependency on a foreign repository.
   - id: teenager_safety

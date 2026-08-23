@@ -1,14 +1,14 @@
 ---
 name: writing-quizzes
 description: >-
-  Author, revise, and publish novedu chapter quizzes and compound (section)
+  Author, revise, and publish Novedu chapter quizzes and compound (section)
   quizzes for this Creative Coding book. Use this skill whenever the user asks
   to create a quiz for a chapter, add/change/review quiz questions, adjust a
   grading rubric or evaluation prompt, write or run golden-answer evals, diagnose
   eval mismatches, build the section-level exam-prep quiz, add an image to a quiz
   question, or publish/update a quiz (validate, upload, mint a code, link it from
   the chapter) — even if they don't say "quiz YAML", "eval YAML", or name the
-  novedu app. Also use it when reviewing existing *-quiz.yaml or
+  Novedu app. Also use it when reviewing existing *-quiz.yaml or
   *-quiz.eval.yaml files for question, rubric, or regression-test quality.
 ---
 
@@ -17,13 +17,13 @@ description: >-
 Each book chapter gets one LLM-graded quiz (`<chapter>-quiz.yaml`, sibling of
 the `.qmd`) and one paired golden-answer regression file
 (`<chapter>-quiz.eval.yaml`). Each book part gets one compound quiz that imports
-all of its chapter quizzes for exam preparation. Quizzes are novedu activities:
+all of its chapter quizzes for exam preparation. Quizzes are Novedu activities:
 open-ended questions only, graded by a small LLM against a hidden rubric, with
 an optional per-question discussion chat. Students use them as anonymous
 self-checks. Eval files are teacher-only test data; never publish them as
 activities or mint codes for them.
 
-Ground truth for the platform lives in the novedu repo
+Ground truth for the platform lives in the Novedu repo
 (`~/github/chat-prototype`): authoring guide `activities/quizzes/README.md`,
 eval guide `activities/evals/README.md`, teacher guide
 `teacher-docs/content/10-yaml-for-teachers/06-testing-the-grader.md`, and CLI
@@ -238,9 +238,9 @@ interpretation.
 ## Publish workflow
 
 Quizzes are served straight from the book's public GitHub repo
-(`rstropek/ddp-ts-oop-course`); the novedu server re-reads the raw
+(`rstropek/ddp-ts-oop-course`); the Novedu server re-reads the raw
 URL on every load, so publishing an edit = `git push`. The CLI runs from the
-novedu repo (`cd ~/github/chat-prototype`, prefix commands with
+Novedu repo (`cd ~/github/chat-prototype`, prefix commands with
 `npm run cli --silent --`, and pass ABSOLUTE paths for files in the book
 repo); `codes sync` and `eval` need a signed-in teacher (`whoami` to check;
 `login` opens a browser the human must finish). Validation needs no sign-in.

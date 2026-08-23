@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/fragments/fragment-yaml.schema.json
-# Shared fragment library for the Creative Coding 2 book's novedu quizzes.
+# Shared fragment library for the Creative Coding 2 book's Novedu quizzes.
 #
 # A quiz has TWO template hosts, and this library feeds both:
 #   instructions:            -> {{fragment "shared.quiz_context"}}

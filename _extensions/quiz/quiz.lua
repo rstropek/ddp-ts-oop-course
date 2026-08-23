@@ -1,18 +1,18 @@
 --[[
-  quiz.lua — Quarto *shortcode* for linking to a chapter quiz on novedu.
+  quiz.lua — Quarto *shortcode* for linking to a chapter quiz on Novedu.
 
   Usage in a chapter:
 
       {{< quiz <key> [title="..."] >}}
 
   Renders a compact callout (like a Quarto `callout-note`) that invites the
-  reader to take the chapter's quiz in the novedu chat app. The book does NOT
+  reader to take the chapter's quiz in the Novedu chat app. The book does NOT
   reproduce the quiz's questions — they live in a YAML activity file hosted on
-  the novedu server; duplicating them here would only go stale.
+  the Novedu server; duplicating them here would only go stale.
 
   <key> is the quiz's key in the activity registry, `ddp-activities.yaml`
   (e.g. `number-systems`), NOT an activity code. The generated lock file
-  ddp-activities.lock.yaml maps every key to the code novedu minted for it and
+  ddp-activities.lock.yaml maps every key to the code Novedu minted for it and
   is merged into the document metadata as `activity-codes` (metadata-files in
   _quarto.yml), so the shortcode resolves
 
@@ -196,7 +196,7 @@ local function cta_label(text)
   return { pandoc.Str("▶ " .. text) }
 end
 
--- Read the configurable novedu base URL from document metadata
+-- Read the configurable Novedu base URL from document metadata
 -- (`novedu-base-url` in _quarto.yml). Returns nil when unset/empty so callers
 -- can degrade gracefully. Trailing slashes are trimmed so we can safely
 -- append "/<code>".
@@ -208,7 +208,7 @@ local function novedu_base(meta)
   return (s:gsub("/+$", ""))
 end
 
--- Resolve a registry key to the activity code novedu minted for it, using the
+-- Resolve a registry key to the activity code Novedu minted for it, using the
 -- `activity-codes` map that ddp-activities.lock.yaml contributes to the document
 -- metadata (metadata-files in _quarto.yml).
 --

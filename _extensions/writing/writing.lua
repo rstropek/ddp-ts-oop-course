@@ -1,5 +1,5 @@
 --[[
-  writing.lua — Quarto *shortcode* for linking to a novedu *writing* activity
+  writing.lua — Quarto *shortcode* for linking to a Novedu *writing* activity
   (the student writes a text in a draft pane; an AI coach reads it and talks,
   but cannot edit it).
 
@@ -174,7 +174,7 @@ local function cta_label(text)
   return { pandoc.Str("▶ " .. text) }
 end
 
--- Read the configurable novedu base URL from document metadata
+-- Read the configurable Novedu base URL from document metadata
 -- (`novedu-base-url` in _quarto.yml). Returns nil when unset/empty so callers
 -- can degrade gracefully. Trailing slashes are trimmed so we can safely
 -- append "/<code>".
@@ -186,7 +186,7 @@ local function novedu_base(meta)
   return (s:gsub("/+$", ""))
 end
 
--- Resolve a registry key to the activity code novedu minted for it, using the
+-- Resolve a registry key to the activity code Novedu minted for it, using the
 -- `activity-codes` map that ddp-activities.lock.yaml contributes to the document
 -- metadata (metadata-files in _quarto.yml).
 --

@@ -33,7 +33,7 @@ you.
 
 ## How the writing activity works {#sec-research-guide-activity}
 
-The link at the end of this chapter opens a writing activity on novedu, and it
+The link at the end of this chapter opens a writing activity on Novedu, and it
 gives you two panes. You write your guide on one side. On the other side sits
 an AI coach that reads whatever stands in the editor at that moment and talks
 to you about it. It can ask you about a sentence and it can tell you a sentence

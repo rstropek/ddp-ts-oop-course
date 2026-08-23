@@ -1,12 +1,12 @@
 --[[
-  tutor.lua — Quarto *shortcode* for linking to a part's AI tutor on novedu.
+  tutor.lua — Quarto *shortcode* for linking to a part's AI tutor on Novedu.
 
   Usage in a chapter (inside its opening "AI tutor" section):
 
       {{< tutor <key> [title="..."] >}}
 
   Renders a compact callout (like a Quarto `callout-tip`) that invites the
-  reader to open the AI tutor for the current book part in the novedu chat
+  reader to open the AI tutor for the current book part in the Novedu chat
   app. Every chapter opens with an `## AI tutor` section: prose that says what
   the situation in that chapter is, then this box. The box's body text is fixed
   here, in one place, because the standing rules of a tutor are the same in
@@ -16,7 +16,7 @@
 
   <key> is the tutor's key in the activity registry, `ddp-activities.yaml`
   (e.g. `tutor-introduction`), NOT an activity code. The generated lock file
-  ddp-activities.lock.yaml maps every key to the code novedu minted for it and
+  ddp-activities.lock.yaml maps every key to the code Novedu minted for it and
   is merged into the document metadata as `activity-codes` (metadata-files in
   _quarto.yml), so the shortcode resolves
 
@@ -200,7 +200,7 @@ local function cta_label(text)
   return { pandoc.Str("▶ " .. text) }
 end
 
--- Read the configurable novedu base URL from document metadata
+-- Read the configurable Novedu base URL from document metadata
 -- (`novedu-base-url` in _quarto.yml). Returns nil when unset/empty so callers
 -- can degrade gracefully. Trailing slashes are trimmed so we can safely
 -- append "/<code>".
@@ -212,7 +212,7 @@ local function novedu_base(meta)
   return (s:gsub("/+$", ""))
 end
 
--- Resolve a registry key to the activity code novedu minted for it, using the
+-- Resolve a registry key to the activity code Novedu minted for it, using the
 -- `activity-codes` map that ddp-activities.lock.yaml contributes to the document
 -- metadata (metadata-files in _quarto.yml).
 --

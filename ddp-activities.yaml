@@ -1,19 +1,19 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/registry/registry-yaml.schema.json
 # Activity registry for the Creative Coding 2 book.
 #
-# Every novedu activity a chapter links to is listed here under a stable KEY;
+# Every Novedu activity a chapter links to is listed here under a stable KEY;
 # the chapters reference that key, never a code:
 #
 #     {{< quiz dom-basics title="The DOM" >}}
 #
-# Reconcile it with novedu and regenerate the lock file with:
+# Reconcile it with Novedu and regenerate the lock file with:
 #
 #     npx @novedu/cli codes sync ddp-activities.yaml
 #
 # Commit BOTH this file and ddp-activities.lock.yaml. Full format reference:
 # https://github.com/Teaching-HTL-Leonding/novedu-chat-mvp/blob/main/docs/registry.md
 
-# novedu re-reads the activity YAML from this repository's raw URLs on every
+# Novedu re-reads the activity YAML from this repository's raw URLs on every
 # load, so publishing a quiz or tutor edit stays a plain `git push`.
 base-url: "https://raw.githubusercontent.com/rstropek/ddp-ts-oop-course/refs/heads/main/"
 

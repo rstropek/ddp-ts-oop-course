@@ -59,7 +59,7 @@ reader to MDN, a search engine, or their AI tutor or coding buddy instead.
 
 The `::: {.research quiz="<key>" title="..."}` div (extension
 `_extensions/research`) marks the spots where the book deliberately stops
-explaining. A **research quiz** on novedu drives the task: its questions are
+explaining. A **research quiz** on Novedu drives the task: its questions are
 exactly what the book leaves out, and the student answers what they know,
 researches what they don't, and returns until every question is answered.
 The contract:
@@ -136,7 +136,7 @@ drafts next to an AI coach that reads but never edits; it is not anonymous.
 
 ## The coding buddy
 
-Students use the `pi` coding agent all year, connected to one novedu coding
+Students use the `pi` coding agent all year, connected to one Novedu coding
 activity **per part**, so generated code never runs ahead of the book:
 `ddp-coding-buddy-dom.yaml` (Part 2), `-svg` (Part 3), `-classes` (Part 4),
 `-tests` (Part 5), `-generics` (Part 6), `-data-structures` (Part 7), and `-e2e`

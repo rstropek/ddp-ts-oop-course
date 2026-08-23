@@ -143,7 +143,7 @@ and names the concept afterwards.
   that flips a class and the one that answers whether a class is set.
 * Exercise: to-do list (add, mark done, delete). Bonus: count of open items.
 
-### 2.7 Your coding buddy: pi on novedu [NEW, drafted as 0020-dom/0070-coding-buddy.qmd]
+### 2.7 Your coding buddy: pi on Novedu [NEW, drafted as 0020-dom/0070-coding-buddy.qmd]
 * Placed here because the to-do list is the first app big enough that an
   agent helps and can also mislead.
 * Install `pi`, copy the book's `models.json` to `~/.pi/agent/`, put the
@@ -170,13 +170,13 @@ and names the concept afterwards.
 * Exercise: given a blog page, select and style; then from TypeScript, count
   and toggle all paragraphs with class `highlight`.
 
-### 2.9 Your own research guide [NEW, novedu writing activity]
+### 2.9 Your own research guide [NEW, Novedu writing activity]
 * Placed after six research boxes. No experiment, no quiz: the chapter is one
   task. The student writes their personal research guide (150 to 300 words,
   English or German, first person): when MDN, when a search engine, when an
   AI and which one, what they type, how they check an AI answer, what they
   write down for the exam.
-* A novedu **writing** activity (`{{< writing research-guide >}}`) hosts it:
+* A Novedu **writing** activity (`{{< writing research-guide >}}`) hosts it:
   draft pane plus a Socratic coach that reads the draft, asks one or two
   questions per turn, never rewrites, never criticizes personal habits, and
   corrects only factual errors (what MDN is, what the exam allows). Not

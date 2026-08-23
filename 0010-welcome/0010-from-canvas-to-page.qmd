@@ -110,7 +110,7 @@ Every research box belongs to a quiz, so you can let the quiz drive you. Read a
 question, answer it if you can, research it if you cannot, and come back until
 every question has an answer.
 
-**Most chapters end with a quiz** on the novedu platform. You answer in your
+**Most chapters end with a quiz** on the Novedu platform. You answer in your
 own words, an AI reads your answers and tells you what is solid and what to
 read again, and the whole thing is anonymous. German answers are fine. This
 chapter has no quiz, because so far nothing has been explained.

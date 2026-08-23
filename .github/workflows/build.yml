@@ -18,7 +18,7 @@ on:
       - '.agents/**'          # Claude Code skills / agent config
       - '.claude'             # symlink to .agents
       - 'skills-lock.json'
-      - '**/*-quiz.yaml'      # novedu quiz sources (hosted separately)
+      - '**/*-quiz.yaml'      # Novedu quiz sources (hosted separately)
       - 'ddp-quiz-fragments.yaml'
       - '**/*-quiz/**'        # images used only by the quizzes
       - '**/*.bob'            # svgbob sources; the committed .svg is what renders
