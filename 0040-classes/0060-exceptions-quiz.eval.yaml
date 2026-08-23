@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the exceptions chapter quiz
+# (0040-classes/0060-exceptions.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: exceptions-quiz-eval
+target: ./0060-exceptions-quiz.yaml
+
+questions:
+  - question: research-finally-paths
+    answers:
+      - expect: correct
+        answer: |
+          finally runs when the try block just ends normally, when something
+          is thrown, and also when you leave with return inside the try. mdn
+          try...catch page says that.
+      # Two paths named, the return case and the source missing.
+      - expect: partial
+        answer: |
+          it runs when everything worked and also when an error was thrown
+      - expect: incorrect
+        answer: |
+          finally only runs after the catch block, so if nothing is thrown it
+          is skipped
+
+  - question: research-error-name-stack
+    answers:
+      - expect: correct
+        answer: |
+          name is just 'Error' for a normal error, and stack is the text with
+          the message and the list of functions and the line where it came
+          from
+      # `name` right, `stack` guessed wrong.
+      - expect: partial
+        answer: |
+          name is "Error". stack is how many errors happened before this one.
+      - expect: incorrect
+        answer: |
+          name holds the text Something broke and stack holds all the
+          variables that were set at that moment
+
+  - question: research-number-empty
+    answers:
+      - expect: correct
+        answer: |
+          Number('') gives 0 and Number('abc') gives NaN. isNaN only finds the
+          abc one, the empty field looks like a normal zero.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          Number('') ist 0 und Number('abc') ist NaN. Number.isNaN erwischt
+          nur das abc, das leere feld kommt als 0 durch.
+      # Both values right, wrong on which one isNaN catches.
+      - expect: partial
+        answer: |
+          '' wird zu 0 und 'abc' wird zu NaN, und Number.isNaN findet beide
+      - expect: incorrect
+        answer: |
+          both of them give NaN, so one isNaN check is enough for both
+
+  - question: unknown-catch-variable
+    answers:
+      - expect: correct
+        answer: |
+          because you can throw anything, not only an Error, so ts doesn't
+          know what error is. i put if (error instanceof Error) around it,
+          then message works.
+      # Fix without the reason.
+      - expect: partial
+        answer: |
+          you have to write if (error instanceof Error) before you use
+          error.message
+      - expect: incorrect
+        answer: |
+          just write error as Error, then the squiggle is gone
+
+  - question: instanceof-branch-order
+    answers:
+      - expect: correct
+        answer: |
+          a ValidationError is also an Error so the first if is already true
+          and the else if never happens. check ValidationError first and
+          Error second.
+      # Fix without the reason.
+      - expect: partial
+        answer: |
+          he has to turn the two branches around
+      - expect: incorrect
+        answer: |
+          instanceof does not work with classes you wrote yourself, he needs
+          to compare error.name instead
+
+  - question: model-throws-ui-catches
+    answers:
+      - expect: correct
+        answer: |
+          the Rectangle class can be used on another page or in a test where
+          that paragraph doesn't exist, so it should not touch the html. it
+          throws and the code in index.ts that catches decides what the user
+          sees.
+      # Right instinct, no word on who shows the message.
+      - expect: partial
+        answer: |
+          because a class should not change the page, that is not its job
+      - expect: incorrect
+        answer: |
+          throwing is much faster than writing into the dom, and a constructor
+          cannot change the page anyway

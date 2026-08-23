@@ -1,0 +1,384 @@
+---
+title: "Encapsulation: what a class keeps to itself"
+---
+
+Every field you wrote in the last chapter was open to the whole file. Any line
+in `index.ts` could reach into an object and put any value into any of its
+fields, and TypeScript nodded along. That works for an hour. Then one line
+writes a number the rest of the class was never built for.
+
+## A score of minus five {#sec-encapsulation-nonsense}
+
+1. Create a new app `encapsulation-experiment` from our template inside
+   `coursework/`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Score</h1>
+   <p id="scoreLine">Score: 0</p>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Replace everything in `src/index.ts` with this:
+
+   ```ts
+   class Score {
+     points: number = 0;
+
+     add(amount: number) {
+       this.points += amount;
+     }
+   }
+
+   const scoreLine = document.querySelector<HTMLParagraphElement>('#scoreLine');
+
+   if (!scoreLine) {
+     throw new Error('The page has no score line');
+   }
+
+   const score = new Score();
+   score.add(10);
+   score.points = -5;
+
+   scoreLine.textContent = `Score: ${score.points}`;
+   ```
+
+4. Run `npm start`.
+
+The page says `Score: -5`, and nothing warned you. The class is written as if
+`points` only ever grows, and the line `score.points = -5;` walks past all of
+that. A public field is an open door: anyone may write anything the type
+allows, and `-5` is a `number`.
+
+## The private keyword {#sec-encapsulation-private}
+
+Put `private` in front of the field:
+
+```ts
+private points: number = 0;
+```
+
+VS Code draws a red squiggle, and `npx tsc --noEmit` names both places:
+
+```
+src/index.ts(17,7): error TS2341: Property 'points' is private and only accessible within class 'Score'.
+src/index.ts(19,41): error TS2341: Property 'points' is private and only accessible within class 'Score'.
+```
+
+Line 17 is the assignment you wanted to stop. Line 19 is the display line,
+which only reads the value, and `private` shuts that one too. Private means
+private for reading as well.
+
+So give the class the ways in that the outside really needs. Delete
+`score.points = -5;` and add two members to `Score`:
+
+```ts
+subtract(amount: number) {
+  this.points -= amount;
+  if (this.points < 0) {
+    this.points = 0;
+  }
+}
+
+current(): number {
+  return this.points;
+}
+```
+
+Now read the score through the method:
+
+```ts
+scoreLine.textContent = `Score: ${score.current()}`;
+```
+
+Call `score.subtract(30)` on a score of 10 and the page shows `Score: 0`. A
+negative score has become impossible, because the only ways in are `add` and
+`subtract`, and `subtract` knows the rule.
+
+## The rule lives inside the class {#sec-encapsulation-invariant}
+
+A sentence like "a score never goes below zero" is an **invariant**: something
+a class promises about itself at every moment, whatever the rest of the program
+does.
+
+An invariant holds only if every line that changes the value respects it.
+Making the field private cuts those lines down to the methods of one class, and
+they all fit on one screen. **Encapsulation** is the name for that move: the
+data sits packed inside the object, and the outside gets methods instead of
+fields.
+
+`private` is a rule TypeScript enforces while you write. The JavaScript that
+reaches the browser has no lock on the field, and somebody poking at your page
+in the developer console can still change it. It guards your program against
+the code you write on a tired Friday afternoon.
+
+## Fields that are set once and never again {#sec-encapsulation-readonly}
+
+Some values belong to an object from the moment it is created and should never
+move afterwards, such as the width of a board or the maximum a score can reach.
+`readonly` says so:
+
+```ts
+class Score {
+  private points: number = 0;
+  readonly maxPoints: number;
+
+  constructor(maxPoints: number) {
+    this.maxPoints = maxPoints;
+  }
+
+  // add, subtract, and current as before
+}
+```
+
+Create the object with `const score = new Score(100);`. Reading
+`score.maxPoints` anywhere is fine, and it is meant to be, because the
+scoreboard has to print the maximum somewhere. Writing it gets you
+`error TS2540: Cannot assign to 'maxPoints' because it is a read-only
+property.`
+
+A `readonly` field can be given its value where it is declared or inside the
+constructor. Every later assignment is an error, inside the class as much as
+outside. `private` decides who may touch a field, `readonly` decides when, and
+plenty of fields want both.
+
+## Getters and setters {#sec-encapsulation-getters}
+
+`score.current()` does its job, and it reads like an action, when all it does
+is look up a number. TypeScript can keep the field private and still let the
+outside read it like a field:
+
+```ts
+class Score {
+  private pointsValue: number = 0;
+  readonly maxPoints: number;
+
+  // constructor as before
+
+  get points(): number {
+    return this.pointsValue;
+  }
+}
+```
+
+The stored value now has a name of its own, `pointsValue`, and it stays
+private. `get points()` is a method the outside reads without parentheses, as
+`score.points`. Assigning to it is still an error, so the door the class wanted
+shut stays shut.
+
+A getter earns its place when it computes instead of handing a field back. A
+stopwatch keeps no field with the elapsed time: it keeps the clock reading from
+when it started, and `get elapsed()` does the arithmetic when somebody asks.
+
+The other direction exists too:
+
+```ts
+set points(value: number) {
+  this.pointsValue = Math.min(Math.max(value, 0), this.maxPoints);
+}
+```
+
+With that setter in the class, `score.points = 500;` compiles again, and on a
+score whose `maxPoints` is 100 the value that gets stored is 100. The outside
+writes what it likes and the class decides what to keep.
+
+Setters stay rare in this course. `score.points = score.points - 30;` says
+nothing about why the score dropped, while `score.subtract(30);` does. Reach
+for a setter only when the outside really is just setting a value that the
+class has to check.
+
+## The short way to write a constructor field {#sec-encapsulation-parameter-properties}
+
+`maxPoints` cost three lines: the field, the constructor parameter, and the
+assignment between them. TypeScript folds all three into one:
+
+```ts
+class Score {
+  private pointsValue: number = 0;
+
+  constructor(private readonly maxPoints: number) {}
+
+  get points(): number {
+    return this.pointsValue;
+  }
+}
+```
+
+An access keyword in front of a constructor parameter turns that parameter into
+a field of the same name and fills it before the constructor body runs. Drop
+`readonly` and the field can still change from inside the class; write
+`readonly` on its own and the field is readable from outside and locked
+everywhere. The empty `{}` is a constructor body with nothing left to do, and
+only constructor parameters work this way.
+
+## protected, one chapter early {#sec-encapsulation-protected}
+
+A third keyword sits next to `private` and `readonly`. `protected` closes a
+member to the outside exactly like `private`, and opens it to classes that are
+built on top of this one. Building one class on top of another is what the next
+chapter is about, so `protected` has nothing to guard yet. It is here so the
+word is not new when a `protected` field turns up in front of you.
+
+## Changing the inside without breaking the outside {#sec-encapsulation-why}
+
+Invariants are one reason to hide a field. The other shows up the day you
+change your mind about how the class works.
+
+Say the score has to remember how it got there, so the game can float a
+"plus 10" over the board. The class stops keeping one number and keeps an array
+of every change instead, and `get points()` adds that array up. Every line
+outside still writes `score.add(10)` and reads `score.points`, and none of them
+has to be touched.
+
+That rewrite is painless only because nothing outside ever reached for
+`pointsValue`. The public part of a class is a promise you have to keep, and
+the private part is where you may still change your mind.
+
+::: {.research title="Clock readings and tidy numbers"}
+The two exercises below need four answers this chapter does not give. Without
+them your stopwatch cannot measure anything, its display reads `1:7.3` instead
+of `01:07.3`, and your account page proudly shows a balance of
+`90.30000000000001`.
+
+1. Both `Date.now()` and `performance.now()` hand you a number of
+   milliseconds. What does each of them count from, and which one is the better
+   choice for measuring how long something took?
+2. Your stopwatch has to show `07` seconds, not `7`. Which string method pads a
+   short string out to a fixed length, and what do its two arguments mean?
+3. A balance of `90.3` has to appear as `90.30`. Which method of a number does
+   that, and what kind of value does it give back?
+4. A getter is read without parentheses. Write `watch.elapsed()` with
+   parentheses anyway and let TypeScript answer. What does the error say, and
+   what does it suggest?
+
+Padding a number and fixing its decimal places come back in almost every exam
+task that prints a value, so those two have to work without looking them up.
+:::
+
+## Exercise: a stopwatch {#sec-encapsulation-stopwatch}
+
+A `Stopwatch` class with three private numbers inside it, and a page that shows
+the time as `mm:ss.t` and never touches those numbers.
+
+1. Create a new app from our template inside `coursework/`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Stopwatch</h1>
+
+   <p id="display">00:00.0</p>
+
+   <p>
+     <button id="startButton" type="button">Start</button>
+     <button id="stopButton" type="button">Stop</button>
+     <button id="resetButton" type="button">Reset</button>
+   </p>
+
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Create `src/styles.css` and give `#display` a monospace font family at about
+   `3rem`, so the digits keep their places while they run. Replace everything
+   in `src/index.ts` with `import './styles.css';`, then run `npm start`: big
+   digits and three buttons that do nothing yet.
+4. Write `class Stopwatch` in `src/index.ts`, under the import line. Give it
+   three private fields with explicit types: `startTime`
+   (a clock reading, starts at 0), `accumulated` (the milliseconds collected by
+   earlier runs, starts at 0), and `running` (a boolean, starts as `false`).
+5. Add `start()`. When the watch is already running it returns immediately.
+   Otherwise it stores the current clock reading in `startTime` and sets
+   `running` to `true`. Research question 1 tells you which function gives you
+   that reading.
+6. Add `stop()`. When the watch is not running it returns immediately.
+   Otherwise it adds the time that has passed since `startTime` to
+   `accumulated` and sets `running` to `false`.
+7. Add `reset()`, which sets `accumulated` back to 0 and `running` to `false`.
+8. Add `get elapsed(): number`. While the watch runs, the answer is
+   `accumulated` plus the time since `startTime`. While it stands still, the
+   answer is `accumulated` on its own.
+9. Below the class, select the display and the three buttons with
+   `document.querySelector<T>` and throw an error when any of them is missing.
+   Then create the watch with `const watch = new Stopwatch();`.
+10. Write a helper `const format = (milliseconds: number): string => { ... };`
+    that returns text in the shape `mm:ss.t`: whole minutes, then seconds from
+    0 to 59, then one digit for tenths of a second. Minutes and seconds are
+    always two characters wide, which is research question 2.
+11. Show the time with an animation loop, the same shape as the ball in the
+    animation chapter:
+
+    ```ts
+    const tick = () => {
+      display.textContent = format(watch.elapsed);
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+    ```
+
+12. Give each button a `click` listener that calls `start`, `stop`, or `reset`.
+    Click Start and the digits run. Stop freezes them, Start picks up where it
+    stopped, and Reset puts `00:00.0` back on the page.
+13. Try to cheat: add `watch.accumulated = 60000;` at the end of the file and
+    run `npx tsc --noEmit`. The compiler refuses, which is the point of the
+    whole exercise. Delete the line again.
+
+### Optional: buttons that know the state {#sec-encapsulation-stopwatch-toggle}
+
+Give `Stopwatch` a getter `get isRunning(): boolean`, then set
+`startButton.disabled = watch.isRunning;` and
+`stopButton.disabled = !watch.isRunning;` inside the animation loop. The
+buttons grey themselves out, and the page reads the flag without ever being
+able to change it.
+
+## Exercise: an account that refuses to go negative {#sec-encapsulation-bank}
+
+The page you copy in already runs, and it lets you take out more money than the
+account holds.
+
+{{< exercise bank-account >}}
+
+1. Run `npm start`. The page shows a balance of 100, a number field, and two
+   buttons. Deposit 10 twice and the balance climbs to 120.
+2. Now type 500 and click Withdraw. The balance drops to `-380` and the page
+   prints it without a murmur. Open `src/index.ts`: the account is the object
+   literal `const account = { balance: 100 };`, and both listeners do
+   arithmetic on `account.balance` directly. The rule that a balance never goes
+   below zero lives only in your head.
+3. Write `class BankAccount` at the top of the file, above the object literal.
+   Give it one private field, `balanceValue: number`.
+4. Give the class a constructor with two parameters: `readonly owner: string`
+   as a parameter property, and a plain `startBalance: number` that the
+   constructor body assigns to `balanceValue`.
+5. Add `get balance(): number`, which hands back `balanceValue`.
+6. Add `deposit(amount: number): boolean`. When `amount` is not a number
+   (`Number.isNaN`) or is not above zero, it changes nothing and returns
+   `false`. Otherwise it adds the amount to the balance and returns `true`.
+7. Add `withdraw(amount: number): boolean`. It returns `false` for the same two
+   bad amounts and also when `amount` is larger than the balance. Otherwise it
+   subtracts the amount and returns `true`.
+8. Replace the object literal with `const account = new BankAccount('Alex', 100);`.
+9. Change `showBalance` so the line reads `Alex: 120.00`, with the owner's name
+   in front and the balance always carrying two decimal places. Research
+   question 3 covers the second half.
+10. Rewrite the Deposit listener. It hands `amountInput.valueAsNumber` to
+    `account.deposit`. When the call returns `true` it clears `message`, and
+    when it returns `false` it writes `Enter an amount above zero.` into
+    `message`. Either way it calls `showBalance()`.
+11. Rewrite the Withdraw listener the same way, with the message
+    `Enter an amount above zero, and no more than your balance.`
+12. Test it. Withdrawing 500 from 100 leaves the balance alone and shows the
+    message in red. Clearing the number field and clicking Deposit does the
+    same instead of turning the balance into `NaN`. Depositing 20 and
+    withdrawing 20 gets you back to where you started.
+13. Add `account.balanceValue = 1000000;` at the end of the file and run
+    `npx tsc --noEmit`. Compare the error with what the object literal let you
+    do in step 2, then delete the line.
+
+## Check your understanding {#sec-encapsulation-quiz}
+
+Six short questions, four of them the research task. If a research question is
+still open, look it up first and come back.
+
+{{< quiz encapsulation title="Encapsulation" >}}

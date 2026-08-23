@@ -1,0 +1,188 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Exceptions: when code cannot go on"
+# (0040-classes/0060-exceptions.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point to the source, never the answer). The last
+# three cover the chapter's own points: the `unknown` catch variable, the
+# order of the two `instanceof` branches, and why the class throws while the
+# page catches.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: exceptions-quiz
+name: "Quiz: Exceptions"
+
+title: "Check your understanding: exceptions"
+description: |
+  Six short questions about the chapter *Exceptions: when code cannot go
+  on*, three of them the research task. Answer in your own words; if you
+  cannot answer a research question yet, look it up and come back. One or
+  two sentences are enough. This quiz is anonymous and is here for you.
+  Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="throw new ValidationError('You cannot divide by zero.');"
+      scope="after the exceptions chapter of the classes part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "`document.querySelector<HTMLInputElement>('#id')` with a null check that throws"
+        "`textContent`, `createElement`, `append`, `replaceChildren`, `classList`, and events such as `click` and `input`"
+        "forms: `input.value`, `valueAsNumber`, `Number()`, and `Number.isNaN`"
+        "own classes with fields, methods, `this`, and `new`"
+        "`private`, `readonly`, `protected`, getters and setters, and parameter properties"
+        "`extends`, `super`, overriding, and `abstract` classes"
+        "polymorphism, and ES modules with one class per file, `export` and `import`"
+        "`throw new Error(...)`, `try`/`catch`/`finally`, `unknown` in a catch, `instanceof`, and `class ValidationError extends Error`")
+      not_yet=(array
+        "the exact rule for when `finally` runs, what `name` and `stack` hold, and what `Number('')` returns (those are the research tasks right now)"
+        "callback types, `Map`, `Set`, and `enum`"
+        "automated tests with Vitest or Playwright"
+        "generics of your own, `async`, `fetch`, or `localStorage`")}}
+
+questions:
+  - id: research-finally-paths
+    title: "Every way out of a try"
+    question: |
+      Your click listener disables a button, then opens a `try` block and
+      gives the button back in the `finally` block. Name the ways the code
+      can leave that `try` block and still run `finally`, and say where you
+      read it.
+    evaluation: |
+      Expected: `finally` runs on every exit path: the `try` block finishing
+      normally, an error being thrown (caught or not), and a `return` (also
+      `break` or `continue`) inside the `try` or `catch` block. Source is the
+      MDN page on `try...catch`.
+      Required: (1) names the normal end AND at least the throw path AND the
+      `return` path; (2) names a source (MDN or the docs page).
+      Partial: names only two of the three paths, or names all three but no
+      source.
+      Incorrect: says `finally` runs only after an error was caught, or only
+      when nothing was thrown.
+
+  - id: research-error-name-stack
+    title: "What is inside an Error"
+    question: |
+      You create `const problem = new Error('Something broke');`. Next to
+      `message`, the object carries `name` and `stack`. What does each of the
+      two hold here?
+    evaluation: |
+      Expected: `name` is the string `'Error'` for a plain `Error`. `stack` is
+      a text with the message plus the chain of function calls and the file
+      and line where the error was created, which is what the console prints
+      under the red line.
+      Required: (1) `name` is `'Error'` (the kind of error as a string);
+      (2) `stack` is the call chain or the place in the code where the error
+      came from.
+      Partial: one of the two right, the other missing or wrong.
+      Incorrect: says `name` holds the message, or that `stack` holds the
+      values of the variables.
+
+  - id: research-number-empty
+    title: "An empty field and a word"
+    question: |
+      What does `Number('')` return, and what does `Number('abc')` return?
+      Which of the two does a check with `Number.isNaN` catch?
+    evaluation: |
+      Expected: `Number('')` returns `0`. `Number('abc')` returns `NaN`. Only
+      `Number('abc')` is caught by `Number.isNaN`, so an empty field slips
+      through that check and needs its own test.
+      Required: (1) `Number('')` is `0`; (2) `Number('abc')` is `NaN`;
+      (3) `Number.isNaN` catches only the `'abc'` case.
+      Partial: two of the three, for example both return values but the wrong
+      answer on which one `Number.isNaN` catches.
+      Incorrect: says `Number('')` is `NaN`, or that both are caught by
+      `Number.isNaN`.
+
+  - id: unknown-catch-variable
+    title: "The compiler in the catch block"
+    question: |
+      This code does not compile:
+
+      ```ts
+      try {
+        doTheMath();
+      } catch (error) {
+        errorParagraph.textContent = error.message;
+      }
+      ```
+
+      TypeScript answers `error TS18046: 'error' is of type 'unknown'.` Why
+      does it give the catch variable that type, and what do you add to make
+      the line compile?
+    evaluation: |
+      Expected: `throw` can send up any value, not only an `Error`, so
+      TypeScript cannot know what is in the catch variable and types it
+      `unknown`, which blocks every property. Wrap the line in
+      `if (error instanceof Error) { ... }`; inside that `if`, `error.message`
+      is allowed.
+      Required: (1) the reason: anything can be thrown, so the type is not
+      known; (2) the fix: narrow with `instanceof Error` (an `if` around it).
+      Partial: gives the `instanceof Error` fix with no reason, or the reason
+      with no working fix.
+      Incorrect: proposes `as Error` or a non-null mark, or says the catch
+      variable has to be declared with a type.
+
+  - id: instanceof-branch-order
+    title: "The branch that eats the message"
+    question: |
+      `ValidationError extends Error`. A student writes this catch block and
+      wonders why the page always says `Something went wrong`, even for a
+      division by zero that threw a `ValidationError`:
+
+      ```ts
+      } catch (error) {
+        if (error instanceof Error) {
+          errorParagraph.textContent = 'Something went wrong';
+        } else if (error instanceof ValidationError) {
+          errorParagraph.textContent = error.message;
+        }
+      }
+      ```
+
+      Explain what goes wrong, and how you fix it.
+    evaluation: |
+      Expected: a `ValidationError` is also an `Error`, so the first branch is
+      already true for it and the second one is never reached. Swap the two:
+      test `instanceof ValidationError` first, `instanceof Error` after it.
+      Required: (1) the `Error` branch matches a `ValidationError` too, so the
+      second branch never runs; (2) put the `ValidationError` check first.
+      Partial: only says "swap the branches" without the reason, or only says
+      that a `ValidationError` is an `Error` without the fix.
+      Incorrect: says `instanceof` is broken for own classes, or blames a
+      missing `this.name`.
+
+  - id: model-throws-ui-catches
+    title: "Who says no to a bad width"
+    question: |
+      Your `Rectangle` constructor throws a `ValidationError` when the width
+      is `0` or below. It would be shorter to write the message straight into
+      the red paragraph from the constructor. Give the reason the course
+      throws instead.
+    evaluation: |
+      Expected: the class does not know who is using it (a page, a test,
+      another class), and it may run where there is no red paragraph at all.
+      Throwing is how it refuses without deciding how the problem is shown;
+      the code that owns the page catches and decides that.
+      Required: (1) the class must not depend on a specific page or element
+      (it can be reused or tested elsewhere); (2) showing the message is the
+      job of the code that catches.
+      Partial: only one of the two, for example "the class should not touch
+      the DOM" without saying who shows the message.
+      Incorrect: says throwing is faster, or that a constructor is not allowed
+      to change the page.

@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the bracelet chapter quiz
+# (0040-classes/0080-bracelet.qmd). One correct, one partial, one incorrect
+# per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: bracelet-quiz-eval
+target: ./0080-bracelet-quiz.yaml
+
+questions:
+  - question: research-loop-over-string
+    answers:
+      - expect: correct
+        answer: |
+          letter is one character at a time, first 'A', then 'B' and so on. if
+          the string is empty the body is never executed.
+      # Iteration described, empty string ignored.
+      - expect: partial
+        answer: |
+          it walks through the string and gives you each letter
+      - expect: incorrect
+        answer: |
+          letter is the position number, so 0, 1, 2, and on an empty string you
+          get an error
+
+  - question: research-pop-returns
+    answers:
+      - expect: correct
+        answer: |
+          pop gives you back the element it removed and the array is one shorter.
+          on an empty array nothing is removed and you get undefined, no crash.
+      # Return value right, empty case missing.
+      - expect: partial
+        answer: |
+          you get the last element back and it is gone from the array
+      - expect: incorrect
+        answer: |
+          it returns the new length of the array, and on an empty array it
+          throws an error
+
+  - question: research-at-minus-one
+    answers:
+      - expect: correct
+        answer: |
+          at(-1) counts from the back, so with an empty array you get undefined.
+          items[-1] is always undefined because the brackets don't count
+          backwards, there is just no index -1.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          bei einem leeren array liefert at(-1) undefined. items[-1] ist immer
+          undefined, weil eckige klammern nicht von hinten zaehlen.
+      # Only the at() half.
+      - expect: partial
+        answer: |
+          at(-1) is the last element of the array
+      - expect: incorrect
+        answer: |
+          at(-1) throws when the array is empty, and items[-1] is the last
+          element
+
+  - question: research-aria-label
+    answers:
+      - expect: correct
+        answer: |
+          the screen reader reads the aria-label out loud, so the button has a
+          name even though there is no text in it. it is only an attribute, the
+          browser never draws it, so you don't see anything.
+      # Purpose named, invisibility not mentioned.
+      - expect: partial
+        answer: |
+          it is for blind users so the button is not just empty for them
+      - expect: incorrect
+        answer: |
+          it shows a little tooltip when you hover over the button
+
+  - question: render-after-every-change
+    answers:
+      - expect: correct
+        answer: |
+          addLetter only pushes into the array and never calls render, so the
+          page stays old. removeLast calls render and that one builds the whole
+          container from the array again, so all the cubes from before pop up
+          together, minus the last one.
+      # Missing render spotted, burst not explained.
+      - expect: partial
+        answer: |
+          you forgot this.render() at the end of addLetter
+      - expect: incorrect
+        answer: |
+          the letters were never put into the items array, undo puts them in
+
+  - question: throw-versus-return
+    answers:
+      - expect: correct
+        answer: |
+          because the bead is really added, the method worked. it's just a
+          comment. if you throw, you say it did not happen and the rest of the
+          method including render would be skipped.
+      # Feels the difference but never says the bead is added.
+      - expect: partial
+        answer: |
+          a warning is not so bad, an error means you really did something wrong
+      - expect: incorrect
+        answer: |
+          throwing is much slower and you can only throw one error per class

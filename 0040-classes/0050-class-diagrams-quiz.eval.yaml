@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the class diagram chapter quiz
+# (0040-classes/0050-class-diagrams.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: class-diagrams-quiz-eval
+target: ./0050-class-diagrams-quiz.yaml
+
+questions:
+  - question: research-position-absolute
+    answers:
+      - expect: correct
+        answer: |
+          the div around it needs position: relative. without that the fish
+          would be placed from the corner of the whole page.
+      # Value named, fallback missing.
+      - expect: partial
+        answer: |
+          you put position: relative on the aquarium div
+      - expect: incorrect
+        answer: |
+          the div also needs position: absolute, otherwise left and top do
+          nothing at all
+
+  - question: research-natural-size
+    answers:
+      - expect: correct
+        answer: |
+          they are the real pixel size of the image file, not the css size.
+          right after src the image isn't downloaded yet so it's 0, you have
+          to wait for the load event on the img.
+      # Two of three: size and load event, but no reason for the 0.
+      - expect: partial
+        answer: |
+          it's the size the picture really has, and you read it in the load
+          listener
+      - expect: incorrect
+        answer: |
+          that's the width and height from the css, and you wait for
+          DOMContentLoaded
+
+  - question: research-math-sin
+    answers:
+      - expect: correct
+        answer: |
+          sin gives back something from -1 to 1 and x is an angle in radians.
+          so y = 200 + Math.sin(time) * 40
+      # German correct answer.
+      - expect: correct
+        answer: |
+          Math.sin liefert werte zwischen -1 und 1, x ist ein winkel im
+          bogenmass. der ausdruck ist 200 + Math.sin(zeit) * 40
+      # Range and radians, no expression.
+      - expect: partial
+        answer: |
+          between -1 and 1, and x is an angle in radians
+      - expect: incorrect
+        answer: |
+          it returns 0 to 1 and x is the angle in degrees, so
+          200 + Math.sin(x) * 40
+
+  - question: box-to-code
+    answers:
+      - expect: correct
+        answer: |
+          private seconds: number;
+          start(): void {}
+          protected onTick(): void {}
+      # Private and protected right, but public written out.
+      - expect: partial
+        answer: |
+          private seconds: number;
+          public start(): void {}
+          protected onTick(): void {}
+      - expect: incorrect
+        answer: |
+          protected seconds: number;
+          start(): void {}
+          private #onTick(): void {}
+
+  - question: two-arrows
+    answers:
+      - expect: correct
+        answer: |
+          Car extends Vehicle, and Garage has an array of vehicles like
+          private vehicles: Vehicle[]
+      # Only the inheritance half.
+      - expect: partial
+        answer: |
+          the triangle means class Car extends Vehicle
+      - expect: incorrect
+        answer: |
+          Vehicle extends Car, and Garage extends Vehicle too
+
+  - question: where-the-field-goes
+    answers:
+      - expect: correct
+        answer: |
+          speed goes in Fish because all of them move, amplitude only in
+          SinusFish. if you put it in Fish every other fish drags around a
+          field it never uses and the base class knows about one special kind
+      # Right places, no reason.
+      - expect: partial
+        answer: |
+          speed into Fish and amplitude into SinusFish
+      - expect: incorrect
+        answer: |
+          amplitude belongs in Fish so all fish can use it later, and every
+          fish class gets its own speed field

@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the inheritance chapter quiz
+# (0040-classes/0030-inheritance.qmd). One correct, one partial, one incorrect
+# per question, plus one German correct answer per quiz. Teacher-only test
+# data; never publish as an activity. Grading runs on the quiz's own small
+# model (Qwen on SCCH, free); the feedback audit uses a frontier judge via
+# --judge-llm-* and costs money, so run it after rubric changes, not
+# routinely.
+
+id: inheritance-quiz-eval
+target: ./0030-inheritance-quiz.yaml
+
+questions:
+  - question: research-gravity
+    answers:
+      - expect: correct
+        answer: |
+          velocityY += GRAVITY * deltaSeconds; and then y += velocityY *
+          deltaSeconds; gravity is in pixels per second squared because it is
+          an acceleration.
+      # Position line right, speed line missing.
+      - expect: partial
+        answer: |
+          you move the ball with y += velocityY * deltaSeconds and gravity is
+          in pixels per second
+      # The classic mistake: gravity moved to the position directly.
+      - expect: incorrect
+        answer: |
+          you add the gravity to y every frame, so y += GRAVITY, and gravity is
+          in pixels
+
+  - question: research-filter
+    answers:
+      - expect: correct
+        answer: |
+          the function has to return true if the item stays. filter does not
+          touch the old array, it gives back a new one, so i write balls =
+          balls.filter(...)
+      # German correct answer.
+      - expect: correct
+        answer: |
+          die funktion muss true zurueckgeben, damit das element drin bleibt.
+          das alte array bleibt gleich, filter liefert ein neues array zurueck.
+      # True/false rule right, thinks it edits in place.
+      - expect: partial
+        answer: |
+          return true and the item stays, false and filter deletes it out of
+          the array
+      - expect: incorrect
+        answer: |
+          the function returns the item you want to keep and filter changes the
+          array you called it on
+
+  - question: research-fill-opacity
+    answers:
+      - expect: correct
+        answer: |
+          fill-opacity. 0 is invisible and 1 is normal.
+      # Right attribute, percent range.
+      - expect: partial
+        answer: |
+          fill-opacity, you can set it from 0 to 100
+      - expect: incorrect
+        answer: |
+          you use opacity with values from 0 to 1
+
+  - question: protected-fix
+    answers:
+      - expect: correct
+        answer: |
+          write protected y instead of private y in Ball. protected means the
+          subclasses may use it too but nobody outside.
+      # Names the keyword, no reason.
+      - expect: partial
+        answer: |
+          just make it protected
+      - expect: incorrect
+        answer: |
+          delete private so the field is public, then everyone can use it
+
+  - question: abstract-contract
+    answers:
+      - expect: correct
+        answer: |
+          you cannot do new Ball() any more, the compiler says you cannot make
+          an instance of an abstract class. and inside Ball you can use
+          this.bounciness because every subclass must write it.
+      # Only the first half.
+      - expect: partial
+        answer: |
+          new Ball() does not work any more
+      - expect: incorrect
+        answer: |
+          an abstract class can only have abstract members, so Ball cannot have
+          normal methods, and subclasses can leave bounciness out if they want
+
+  - question: array-of-base
+    answers:
+      - expect: correct
+        answer: |
+          100, 300, 100. every ball uses its own speed getter, fall just reads
+          this.speed.
+      # Values right, no reason.
+      - expect: partial
+        answer: |
+          it logs 100 then 300 then 100
+      - expect: incorrect
+        answer: |
+          it prints nothing because Ball is abstract and has no speed

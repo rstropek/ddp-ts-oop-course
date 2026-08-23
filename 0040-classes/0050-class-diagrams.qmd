@@ -1,0 +1,294 @@
+---
+title: "Class diagrams: design before you type"
+---
+
+A base class, three subclasses, and a manager are five files, and not one of
+them shows how the five fit together. A class diagram does. It fits on a
+single page, and moving a method on it costs one line instead of three
+files.
+
+## Read a program from one picture {#sec-class-diagrams-read}
+
+This is the bouncing balls from the inheritance chapter: three of its ball
+kinds, and the game loop lifted out of `index.ts` into a class of its own.
+
+![A bouncing-balls program on one page: five classes with their members, and
+the two arrows that connect them.](balls-diagram.svg){width=610}
+
+Answer these three from the picture. No editor, no files, no code.
+
+1. Four of the five boxes are classes you could hand to `new`. One is not.
+   Which one, and what in the picture says so?
+2. `Game` keeps one array. What goes into it, and which of the three ball
+   kinds may be pushed in?
+3. Two members show up in `Ball` and again in every box below it. Name them,
+   and say what that repetition means for the code.
+
+You just read a design without opening a file. The notation that made it
+readable comes next, and the answers with it.
+
+## What one box says {#sec-class-diagrams-box}
+
+![One class, three compartments. The name sits on top, the fields in the
+middle, the methods at the bottom.](class-box.svg){width=470}
+
+Every class is one box, split into three compartments stacked on top of each
+other. Types are written the way TypeScript writes them, so a field line and
+a method line are almost the code already. `(abstract)` behind the name means
+the class is `abstract`, so `new Ball(...)` never compiles.
+
+The character in front of a member says who may touch it:
+
+* `+` is public. In this course that means no keyword at all, because public
+  is the default.
+* `-` is `private`, so only code inside that same class.
+* `#` is `protected`, so the class and everything that extends it.
+
+This notation is a small corner of UML, the Unified Modeling Language, which
+software teams have drawn since the nineties. This book uses three pieces of
+it: boxes, compartments, and two arrows.
+
+A subclass box carries only what it adds or overrides, never the members it
+inherited, and a box with nothing new in a compartment leaves that
+compartment away. Types may go missing there too, once the parent box has
+spelled them out.
+
+## What the arrows say {#sec-class-diagrams-arrows}
+
+Two arrows carry the bouncing-balls picture.
+
+The **hollow triangle** is `extends`. The triangle sits at the base class, so
+the arrow runs from `GummyBall` up to `Ball` and reads "GummyBall extends
+Ball". The direction is worth learning: an arrow points from the class that
+knows the other one to the class it depends on. `GummyBall` names `Ball` in
+its very first line, and `Ball` never names `GummyBall`.
+
+The **plain arrow with a label** covers everything else, which is one class
+holding or using another. `Game` has a field of type `Ball[]`, so the label
+reads "has many". A class that holds exactly one gets "has", a class that
+only calls a method on another gets "uses". The label is prose, not syntax,
+and its job is to tell the reader in three words what the field is for.
+
+Back to the three questions. `Ball` is the class you cannot create, because
+`(abstract)` stands behind its name. `Game` keeps a `Ball[]`, and all three
+kinds fit into it, since every one of them extends `Ball`. And `bounciness`
+and `onReachedBottom` show up four times each because they are abstract in
+`Ball`, so every kind has to bring its own. That is exactly why one array and
+one loop produce three different behaviors.
+
+## The same picture as text {#sec-class-diagrams-mermaid}
+
+Paper works, and paper is what you get in an exam. On a computer, mermaid
+draws the picture from text you type:
+
+```default
+classDiagram
+    class Ball {
+        <<abstract>>
+        #y: number
+        #velocityY: number
+        #radius: number
+        +update(delta: number) boolean
+        #onReachedBottom() boolean
+    }
+    Ball <|-- GummyBall
+    Ball <|-- SteelBall
+    Ball <|-- FragileBall
+    Game --> Ball : has many
+```
+
+`<|--` draws the hollow triangle and `-->` the plain arrow. `<<abstract>>`
+marks a class the same way the pictures above do. Paste the block into
+[the mermaid live editor](https://mermaid.live) and the diagram appears next
+to your text. Changing a design is then one line of typing, which beats an
+eraser.
+
+## An aquarium, on paper first {#sec-class-diagrams-aquarium}
+
+Here is the program you build in the exercise below, described in five
+sentences.
+
+A `div` shows a photo of an aquarium. Fish are `<img>` elements placed inside
+that photo at coordinates the program controls. Three kinds swim differently:
+one straight left and right, one diagonally and bouncing off all four walls,
+one left and right while riding a sine wave up and down. Every fish bounces
+off the left and the right wall, turns its picture around when it changes
+direction, and needs its own width to notice that it touched a wall. One
+object owns the list of fish and runs the animation loop.
+
+Before any of that turns into a file, it turns into this:
+
+![The aquarium as five classes. `Fish` does everything the kinds share, and
+`FishManager` never mentions a kind by name.](aquarium-diagram.svg){width=700}
+
+Read the picture once and you know the program. `Fish` is abstract, so a
+plain fish never exists. `step` is the only public method, so `FishManager`
+can call nothing else. `update` is protected and abstract, so every kind
+brings its own movement and nobody outside the family triggers it.
+`keepInside` stands in `Fish` and again in `CrissCrossFish`, the one kind
+that also bounces off the top and the bottom. `SinusFish` is the only box
+with fields of its own.
+
+Now turn one box into one file. Here is all of `FishManager`:
+
+```ts
+import type { Fish } from './fish';
+
+export class FishManager {
+  private fishes: Fish[] = [];
+  private lastTime = 0;
+
+  add(fish: Fish): void {
+    this.fishes.push(fish);
+  }
+
+  start(): void {
+    const tick = (timestamp: number) => {
+      if (this.lastTime === 0) {
+        this.lastTime = timestamp;
+      }
+      const delta = (timestamp - this.lastTime) / 1000;
+      this.lastTime = timestamp;
+
+      for (const fish of this.fishes) {
+        fish.step(delta);
+      }
+
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+  }
+}
+```
+
+The loop is the one from the animation chapter, with `delta` in seconds so
+speeds are pixels per second. `Fish` appears here only as a type and never as
+a value, so the import line is `import type`. And `tick` is an arrow function
+for the reason the first chapter of this part gave: it borrows the `this`
+around it, so `this.fishes` inside it still means the manager. Write
+`function tick(...)` instead and `this` is gone by the time the browser calls
+it.
+
+::: {.callout-tip}
+## Draw it, then type it
+
+The picture is free to change and the files are not. Notice on paper that
+`keepInside` belongs in `Fish` and you move one line. Notice it after typing
+and you rename a method, move it to another file, fix two imports, and run
+the type check twice.
+:::
+
+::: {.research title="Placing a picture by hand, and asking it how big it is"}
+The exercise below puts every fish at coordinates it computes itself, and a
+fish cannot bounce off the right wall before it knows how wide it is.
+
+1. `position: absolute` lets you place an element at a `left` and a `top` of
+   your choice. Which `position` value does the surrounding `div` need so
+   those coordinates count from the corner of the `div` instead of the corner
+   of the page, and what does the browser use as the reference when no
+   element around it has that value?
+2. An `<img>` element has `naturalWidth` and `naturalHeight`. What do the two
+   hold, why is `naturalWidth` still 0 in the line right after you set `src`,
+   and which event tells you it is safe to read them?
+3. `Math.sin(x)` returns a number between which two values, and what does the
+   argument `x` stand for? Write the expression that turns it into a movement
+   of 40 pixels up and down around the line `y = 200`.
+
+For the exam, keep the two `position` values and how they work together in
+your head. Placing something by hand comes back in every game you write.
+:::
+
+## Exercise: the aquarium {#sec-class-diagrams-exercise}
+
+Build the program from the diagram above, and design a fish of your own
+before you type a line.
+
+{{< exercise aquarium >}}
+
+1. **Draw it yourself.** Cover the aquarium picture above and draw the
+   diagram from the five sentences that describe the program, on paper or in
+   the mermaid live editor. Then add a fourth kind of fish of your own: one
+   that swims in a circle, one that gets faster the further right it goes.
+   For every member you write down, decide whether it belongs in `Fish` or in
+   one kind. Then uncover the picture and compare. Expected result: the same
+   members in the same boxes, or a reason why yours sit in better places.
+
+2. **Look at what you copied.** `index.html` holds a heading, three buttons,
+   and an empty `<div id="aquarium">`. `src/styles.css` gives that `div` its
+   size and the background photo. Neither file needs a change yet.
+
+3. **Two declarations from the research box.** In `src/styles.css`, add the
+   one declaration to `#aquarium` that makes it the box a fish's coordinates
+   count from. Then add a rule for `.fish` with the one declaration that lets
+   an image sit at a `left` and a `top` of its own.
+
+4. **The base class.** Create `src/fish.ts` with `export abstract class Fish`
+   and the members from the `Fish` box:
+
+   * The fields are the ones in the box, with their types. `width` and
+     `height` start at 0 and `loaded` starts at `false`.
+   * The constructor takes the aquarium element, the picture URL, `x`, `y`,
+     `speedX`, and `speedY`. Store the four numbers in fields; the aquarium
+     element becomes a `protected` field through a parameter property.
+   * Still in the constructor, create an `<img>` with `createElement`, add
+     the class `fish` to it, give it an `alt` text, and register a listener
+     for the event from the research box. Inside that listener, set `width`
+     and `height` to a third of the natural size, write both into
+     `style.width` and `style.height` so the picture shrinks with them, and
+     set `loaded` to `true`. Set `src` after the listener, and `append` the
+     image to the aquarium.
+   * `step(delta)` is public. While `loaded` is `false` it returns at once.
+     Otherwise it calls `update(delta)`, then `keepInside()`, then `draw()`.
+   * `update` is `protected abstract update(delta: number): void;` and has no
+     body here.
+   * `keepInside()` is protected. Read the aquarium's width with
+     `this.aquarium.getBoundingClientRect().width`. When `x` is below 0, or
+     when `x` plus the fish's width is past that edge, put the fish exactly
+     on the edge and flip the sign of `speedX`.
+   * `draw()` is private. Write `${this.x}px` into `style.left` and the same
+     for `top`, and set `style.transform` to `scaleX(-1)` while `speedX` is
+     negative and to `scaleX(1)` otherwise.
+
+5. **The three kinds.** Create `src/horizontal-fish.ts`,
+   `src/criss-cross-fish.ts`, and `src/sinus-fish.ts`, one class per file,
+   each one `extends Fish` and each one with its own `update`. Speeds are
+   pixels per second, so every movement is a speed times `delta`.
+   `HorizontalFish` moves `x` only. `CrissCrossFish` moves `x` and `y`, and
+   it also overrides `keepInside`: call `super.keepInside()` first, then do
+   the same thing for the top and the bottom edge. `SinusFish` adds `baseY`
+   and `time`, takes only one speed in its constructor and passes 0 as
+   `speedY` to `super`, adds `delta` to `time` on every frame, and computes
+   `y` from `baseY` and `Math.sin`, with the expression from the research
+   box.
+
+6. **The manager.** Create `src/fish-manager.ts` with the class printed
+   above.
+
+7. **Wire the page.** Replace `src/index.ts`. Import the stylesheet, import
+   the six pictures from `/assets/fish1.png` to `/assets/fish6.png`, and
+   import your four classes. Look up the `div` and the three buttons with
+   `querySelector<...>` and one `if` that throws. Create one `FishManager`.
+   Each button adds a fish of its kind: a random one of the six pictures, a
+   start height between 20 and 320, and a speed between 40 and 100 pixels
+   per second that is negative half of the time. Call `manager.start()` on
+   the last line. Then run `npm start`.
+
+   Expected result: each click drops a fish into the photo, it swims, it
+   turns around at the wall, and its picture faces the way it swims. If the
+   fish line up in a row in the top left corner and never move, step 3 is
+   missing.
+
+8. **Your own kind.** Add the fish you designed in step 1: a new file, a
+   fourth button in `index.html`, and one more listener in `src/index.ts`.
+   Expected result: your diagram from step 1 and your `src` folder now say
+   the same thing.
+
+9. Run `npm run verify` and fix what it reports.
+
+## Check your understanding {#sec-class-diagrams-quiz}
+
+Six short questions, and the first three are the research questions from
+above.
+
+{{< quiz class-diagrams title="Class diagrams" >}}

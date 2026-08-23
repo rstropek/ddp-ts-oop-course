@@ -1,0 +1,38 @@
+body {
+  font-family: system-ui, sans-serif;
+  color: #222222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+
+/* The box the balls live in. The border shows the floor they bounce off. */
+#stage {
+  background-color: #f2f5f9;
+  border: 3px solid #4a4a6a;
+  border-radius: 6px;
+}
+
+#controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+button {
+  font: inherit;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #4a4a6a;
+  border-radius: 5px;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #dfe6f0;
+}

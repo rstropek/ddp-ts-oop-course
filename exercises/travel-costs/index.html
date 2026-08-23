@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel reimbursement</title>
+  </head>
+  <body>
+    <h1>Travel reimbursement</h1>
+
+    <p>
+      <label for="distanceInput">Distance in km</label>
+      <input id="distanceInput" type="number" min="0" step="0.25" value="10">
+    </p>
+
+    <p id="buttons">
+      <button id="carButton" type="button">Car</button>
+      <button id="carOneButton" type="button">Car, 1 extra passenger</button>
+      <button id="carTwoButton" type="button">Car, 2 extra passengers</button>
+      <button id="motorcycleButton" type="button">Motorcycle</button>
+      <button id="bicycleButton" type="button">Bicycle</button>
+      <button id="walkButton" type="button">Walk</button>
+    </p>
+
+    <ul id="travelList"></ul>
+
+    <p id="total">Total reimbursement: <span id="totalReimbursement">0.00</span> &euro;</p>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

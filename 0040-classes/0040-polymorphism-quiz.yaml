@@ -1,0 +1,179 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Polymorphism, and one class per file"
+# (0040-classes/0040-polymorphism.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point to the source, never the answer). The last
+# three cover the chapter's own points: what a `switch` over a kind field
+# costs compared with a class per kind, the two lines that move a class into
+# its own file, and why one import needs the real class while the other does
+# not.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: polymorphism-quiz
+name: "Quiz: Polymorphism and modules"
+
+title: "Check your understanding: polymorphism and modules"
+description: |
+  Six short questions about the chapter *Polymorphism, and one class per
+  file*, three of them the research task. Answer in your own words; if you
+  cannot answer a research question yet, look it up and come back. One or
+  two sentences are enough. This quiz is anonymous and is here for you.
+  Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const shapes: Shape[] = [new Rect(30, 20), new Line(30)];"
+      scope="after the polymorphism and modules chapter of the classes part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "`document.querySelector<HTMLButtonElement>('#id')` with a null check that throws, `textContent`, `createElement`, `append`, and `replaceChildren`"
+        "`class` with a constructor, fields, methods, `this`, and `new`"
+        "`private`, `readonly`, `protected`, getters and setters, and parameter properties such as `constructor(private width: number)`"
+        "`extends`, `super`, overriding a method, `abstract` classes and abstract members, and one array holding objects of the base type"
+        "polymorphism: the same call running a different method body depending on the object"
+        "ES modules: `export` in front of a class, `import { Rect } from './rect';`, `import type` for a name used only as a type, one class per file"
+        "`npm start`, `npm run check`, and `npm run build`")
+      not_yet=(array
+        "how to print a number with two decimals, what `export default` is, and what a leading `./` in an import path means (those are the research tasks right now)"
+        "class diagrams, `throw` and `try`/`catch` beyond the null check that throws"
+        "`instanceof`, callback types, `Map`, `Set`, or `enum`"
+        "generics of your own, automated tests, `async`, `fetch`, or `localStorage`")}}
+
+questions:
+  - id: research-two-decimals
+    title: "Two decimals"
+    question: |
+      An area comes out as `3216.990877275948`, and the page should show
+      `3216.99`. Which method of a number gives you that text, and what type
+      does the method return?
+    evaluation: |
+      Expected: `toFixed(2)`, called on the number. It returns a string, not
+      a number.
+      Required: (1) names `toFixed` (any argument, `2` is the case here);
+      (2) says the result is a string.
+      Partial: names `toFixed` but calls the result a number, or says "a
+      string" without naming the method.
+      Incorrect: answers only `Math.round` or `Math.floor`, or claims
+      `toFixed` changes the number itself.
+
+  - id: research-default-export
+    title: "Two kinds of export"
+    question: |
+      Besides a named export such as `export class Rectangle`, a file can use
+      `export default`. How does importing a default export differ from
+      importing a named export?
+    evaluation: |
+      Expected: a named export is imported inside braces under its exact
+      exported name, `import { Rectangle } from './rectangle';`. A default
+      export is imported without braces and the importing file picks the
+      name itself, `import Whatever from './rectangle';`. A file has at most
+      one default export.
+      Required: (1) named export: braces and the matching name; (2) default
+      export: no braces and a name the importing file chooses.
+      Partial: only one of the two, for example the braces rule without the
+      free name for the default.
+      Incorrect: says both are written the same way, or that a file can have
+      several default exports.
+
+  - id: research-import-path
+    title: "Where an import looks"
+    question: |
+      `import { Rectangle } from './rectangle';` and
+      `import { defineConfig } from 'vite';` are both imports. What does the
+      leading `./` say about where the file is looked for, and where does the
+      search go when the `./` is missing?
+    evaluation: |
+      Expected: `./` makes it a relative path, resolved from the folder of
+      the file that contains the import, so `./rectangle` is the
+      `rectangle.ts` sitting next to it. Without `./` the text is a package
+      name and the tool looks for an installed package in `node_modules`.
+      Required: (1) `./` means relative to the importing file's own folder;
+      (2) a bare name means an installed package, found in `node_modules`.
+      Partial: only one of the two halves.
+      Incorrect: says `./` means the project root, or that both spellings
+      search in the same place.
+
+  - id: switch-versus-classes
+    title: "One more kind of shape"
+    question: |
+      A file holds four functions built like this one, all switching over the
+      same `kind`:
+
+      ```ts
+      const area = (shape: Shape): number => {
+        switch (shape.kind) {
+          case 'rect':
+            return shape.width * shape.height;
+          case 'triangle':
+            return (shape.width * shape.height) / 2;
+        }
+      };
+      ```
+
+      You add `'line'` to the union type. What happens, and what would the
+      same change cost if every shape were a class with its own `area()`
+      method?
+    evaluation: |
+      Expected: all four functions stop compiling, because a `switch` with no
+      branch for `'line'` can now reach the end without returning, so you add
+      a `case` in four places. With classes you write one new class `Line`
+      with its own `area()` and change nothing that already exists.
+      Required: (1) every switch needs a new branch, and the compiler reports
+      the ones that are missing; (2) the class version costs one new class
+      and no edit to existing code.
+      Partial: only one of the two halves.
+      Incorrect: says nothing happens and the program keeps working, or that
+      the class version also has to be edited in four places.
+
+  - id: export-and-import
+    title: "Moving a class out"
+    question: |
+      You move `class Rectangle` out of `src/index.ts` into a new file
+      `src/rectangle.ts`. `src/index.ts` now reports
+      `Cannot find name 'Rectangle'`. Name the two lines that fix this, and
+      say which file each one belongs in.
+    evaluation: |
+      Expected: in `src/rectangle.ts` the class declaration gets `export` in
+      front of it, `export class Rectangle ...`. In `src/index.ts` a line
+      `import { Rectangle } from './rectangle';` goes at the top.
+      Required: (1) `export` in front of the class in `rectangle.ts`; (2) an
+      import of `Rectangle` from `'./rectangle'` in `index.ts`.
+      Partial: only one of the two, or an import that names the wrong file.
+      Incorrect: adds a second `<script>` tag to `index.html`, or claims the
+      class is found automatically because both files are in `src`.
+
+  - id: import-type
+    title: "Why one import keeps its class"
+    question: |
+      `src/rect.ts` begins with `import { Shape } from './shape';` and
+      `src/index.ts` begins with `import type { Shape } from './shape';`.
+      Both files import the same class. Why can `src/rect.ts` not use
+      `import type` as well?
+    evaluation: |
+      Expected: `rect.ts` writes `class Rect extends Shape`, and `extends`
+      needs the real class while the program runs, so the import must bring a
+      value. `index.ts` uses the name only as a type annotation, in
+      `const shapes: Shape[]`, and a type-only import is removed from the
+      built code.
+      Required: (1) `rect.ts` uses `Shape` as a value at run time, because of
+      `extends` (or `new`); (2) `index.ts` uses the name only as a type.
+      Partial: says `import type` is only for types without connecting it to
+      `extends` needing the real class.
+      Incorrect: says `import type` is just faster or shorter, or that the
+      two lines mean the same thing.

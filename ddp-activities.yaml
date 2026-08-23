@@ -107,3 +107,27 @@ activities:
     toolchain-assets:
       file: 0030-svg/0060-toolchain-assets-quiz.yaml
       note: "Creative Coding 2 book: Toolchain step: scripts and assets (0060) — GitHub-hosted"
+    classes:
+      file: 0040-classes/0010-classes-quiz.yaml
+      note: "Creative Coding 2 book: From object literals to classes (0010) — GitHub-hosted"
+    encapsulation:
+      file: 0040-classes/0020-encapsulation-quiz.yaml
+      note: "Creative Coding 2 book: Encapsulation (0020) — GitHub-hosted"
+    inheritance:
+      file: 0040-classes/0030-inheritance-quiz.yaml
+      note: "Creative Coding 2 book: Inheritance and abstract classes (0030) — GitHub-hosted"
+    polymorphism:
+      file: 0040-classes/0040-polymorphism-quiz.yaml
+      note: "Creative Coding 2 book: Polymorphism, and one class per file (0040) — GitHub-hosted"
+    class-diagrams:
+      file: 0040-classes/0050-class-diagrams-quiz.yaml
+      note: "Creative Coding 2 book: Class diagrams: design before you type (0050) — GitHub-hosted"
+    exceptions:
+      file: 0040-classes/0060-exceptions-quiz.yaml
+      note: "Creative Coding 2 book: Exceptions: when code cannot go on (0060) — GitHub-hosted"
+    callbacks-maps:
+      file: 0040-classes/0070-callbacks-maps-quiz.yaml
+      note: "Creative Coding 2 book: Objects talking to each other: callbacks and Maps (0070) — GitHub-hosted"
+    bracelet:
+      file: 0040-classes/0080-bracelet-quiz.yaml
+      note: "Creative Coding 2 book: Rules, state, and undo: the bracelet (0080) — GitHub-hosted"

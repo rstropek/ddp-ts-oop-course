@@ -47,6 +47,16 @@ book:
         - 0030-svg/0040-animation.qmd
         - 0030-svg/0050-beehive.qmd
         - 0030-svg/0060-toolchain-assets.qmd
+    - part: "Your own classes"
+      chapters:
+        - 0040-classes/0010-classes.qmd
+        - 0040-classes/0020-encapsulation.qmd
+        - 0040-classes/0030-inheritance.qmd
+        - 0040-classes/0040-polymorphism.qmd
+        - 0040-classes/0050-class-diagrams.qmd
+        - 0040-classes/0060-exceptions.qmd
+        - 0040-classes/0070-callbacks-maps.qmd
+        - 0040-classes/0080-bracelet.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

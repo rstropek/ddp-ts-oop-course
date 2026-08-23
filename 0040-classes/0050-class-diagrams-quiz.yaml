@@ -1,0 +1,182 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Class diagrams: design before you type"
+# (0040-classes/0050-class-diagrams.qmd).
+# The three research questions of the chapter's research box come first (ids
+# prefixed `research-`) and get the research feedback rule (point to the
+# source, never the answer). The last three cover the chapter's own points:
+# turning box notation into TypeScript members, telling the two arrows apart,
+# and deciding which box a field belongs in.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: class-diagrams-quiz
+name: "Quiz: Class diagrams"
+
+title: "Check your understanding: class diagrams"
+description: |
+  Six short questions about the chapter *Class diagrams: design before you
+  type*, three of them the research task. Answer in your own words; if you
+  cannot answer a research question yet, look it up and come back. One or
+  two sentences are enough. This quiz is anonymous and is here for you.
+  Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="protected abstract update(delta: number): void;"
+      scope="after the class diagram chapter of the classes part"
+      reveal=false
+      knows=(array
+        "classes with fields, methods, a constructor and `this`, created with `new`"
+        "`private`, `protected`, `readonly`, getters and setters, and parameter properties"
+        "`extends`, `super`, overriding a method, and `abstract` classes and methods"
+        "one array of the base type, one loop, and a different behavior per subclass"
+        "ES modules: one class per file with `export` and `import`, and `src/index.ts` only wiring the UI"
+        "the DOM: `querySelector<T>` with a null check that throws, `createElement`, `append`, `classList`, `element.style.x`, and `getBoundingClientRect()`"
+        "`requestAnimationFrame` with a `lastTime` delta, and CSS `transform`"
+        "importing a picture file to get a URL string for an `<img>` `src`"
+        "reading a class diagram: three compartments, `+`, `-`, `#`, the hollow triangle for `extends`, and a labeled arrow for `has many`")
+      not_yet=(array
+        "which `position` values place a child inside a box, what `naturalWidth` and the image `load` event give you, and what `Math.sin` returns (those are the research tasks right now)"
+        "`throw` of your own beyond the null check, and `try`/`catch`"
+        "callbacks as types, `Map`, `Set`, and `enum`"
+        "generics of your own, automated tests, `async`, or `fetch`")}}
+
+questions:
+  - id: research-position-absolute
+    title: "Coordinates inside a box"
+    question: |
+      A fish image gets `position: absolute` and then a `left` and a `top`
+      that your program computes. Which `position` value does the
+      surrounding `div` need so those coordinates count from that `div`, and
+      what does the browser measure from when no element around the image
+      has such a value?
+    evaluation: |
+      Expected: the surrounding `div` needs `position: relative` (any value
+      other than the default `static` works; `relative` is the usual choice).
+      Without such an ancestor the browser falls back to the initial
+      containing block, which is the page or viewport, so the image is placed
+      relative to the page corner.
+      Required: (1) names `position: relative` on the container; (2) says
+      that without it the coordinates count from the page, viewport, or
+      document.
+      Partial: names `relative` but not the fallback, or describes the
+      fallback without naming the value.
+      Incorrect: says the container also needs `position: absolute`, or that
+      `display: block` or `overflow: hidden` is what makes it work.
+
+  - id: research-natural-size
+    title: "How big is that picture"
+    question: |
+      An `<img>` element has `naturalWidth` and `naturalHeight`. What do the
+      two hold, why is `naturalWidth` still 0 in the line right after you set
+      `src`, and which event tells you it is safe to read them?
+    evaluation: |
+      Expected: they hold the picture's own size in pixels, as stored in the
+      image file, independent of any width the CSS gives it. Right after
+      `src` is set the browser has not finished loading the file, so nothing
+      is known yet and both are 0. The `load` event on the image fires when
+      the picture has arrived, and inside that listener the values are
+      correct.
+      Required: (1) the real pixel size of the image file; (2) it is 0
+      because the image has not loaded yet; (3) names the `load` event.
+      Partial: two of the three.
+      Incorrect: says they hold the CSS width and height, or names
+      `DOMContentLoaded` or a timer as the way to wait.
+
+  - id: research-math-sin
+    title: "A wave from Math.sin"
+    question: |
+      `Math.sin(x)` returns a number between which two values, and what does
+      the argument `x` stand for? Write the expression that turns it into a
+      movement of 40 pixels up and down around the line `y = 200`.
+    evaluation: |
+      Expected: `Math.sin` returns a number from -1 to 1. `x` is an angle in
+      radians, where a full circle is `2 * Math.PI`. The expression is
+      `200 + Math.sin(x) * 40` (any equivalent, for example
+      `200 + 40 * Math.sin(time)`).
+      Required: (1) the range -1 to 1; (2) `x` is an angle in radians;
+      (3) an expression of the shape `200 + Math.sin(...) * 40`.
+      Partial: two of the three, for example the range and radians without a
+      usable expression.
+      Incorrect: says the range is 0 to 1, or that `x` is in degrees.
+
+  - id: box-to-code
+    title: "From box to class members"
+    question: |
+      A class diagram shows this box:
+
+      ```
+      class Timer {
+          -seconds: number
+          +start() void
+          #onTick() void
+      }
+      ```
+
+      Write the three members as TypeScript lines inside `class Timer`, in
+      the style this course uses.
+    evaluation: |
+      Expected: `private seconds: number;`, `start(): void { ... }` with no
+      keyword in front (public is the default in this course), and
+      `protected onTick(): void { ... }`.
+      Required: (1) `-` becomes `private`; (2) `+` becomes no keyword at all;
+      (3) `#` becomes `protected`.
+      Partial: two of the three, for example writing `public start(): void`.
+      Incorrect: swaps `private` and `protected`, or reads `#` as a private
+      field name such as `#onTick`.
+
+  - id: two-arrows
+    title: "Two arrows, two meanings"
+    question: |
+      A diagram holds these two lines:
+
+      ```
+      Vehicle <|-- Car
+      Garage --> Vehicle : has many
+      ```
+
+      Say what each of the two means for the code you would write.
+    evaluation: |
+      Expected: the hollow triangle is inheritance, so `class Car extends
+      Vehicle`. The plain labeled arrow is a field, so `Garage` holds
+      several `Vehicle` objects, for example `private vehicles: Vehicle[]`.
+      Required: (1) `Car extends Vehicle`; (2) `Garage` has a field (an
+      array or list) holding `Vehicle` objects.
+      Partial: only one of the two, or both named but with `Garage` said to
+      extend something.
+      Incorrect: reverses the inheritance to `Vehicle extends Car`, or reads
+      both arrows as inheritance.
+
+  - id: where-the-field-goes
+    title: "Which box does it belong in"
+    question: |
+      You are drawing the aquarium diagram. Every fish has a speed. Only the
+      sinus fish needs an amplitude, the number of pixels it swings up and
+      down. Which box does each of the two go in, and what do you lose by
+      putting the amplitude into `Fish`?
+    evaluation: |
+      Expected: the speed goes into `Fish`, because every kind needs it. The
+      amplitude goes into `SinusFish` only. Put it into `Fish` and every
+      other kind carries a field it never uses, and the base class knows
+      about a movement only one kind has, which is exactly what the reader of
+      the diagram is misled by.
+      Required: (1) speed in `Fish`, amplitude in `SinusFish`; (2) names a
+      cost of moving it up, such as unused fields in the other kinds or the
+      base class knowing about one special kind.
+      Partial: both placed correctly with no reason, or a good reason with
+      one of the two placed wrongly.
+      Incorrect: puts the amplitude into `Fish` and the speed into each kind
+      separately.

@@ -1,0 +1,462 @@
+---
+title: "Polymorphism, and one class per file"
+---
+
+Every class you have written so far sits in `src/index.ts`, next to the code
+that talks to the page. This chapter splits that file up, one class per file.
+Before that it deals with the reason classes are worth the trouble: a program
+that grows a new kind of thing should not need a new branch in ten places.
+
+## A switch for every question {#sec-polymorphism-switch}
+
+Create a new app `shape-switch` from our template inside `coursework/`.
+Replace `src/index.ts` with this and run `npm start`:
+
+```ts
+type Shape = {
+  kind: 'rect' | 'triangle';
+  width: number;
+  height: number;
+};
+
+const area = (shape: Shape): number => {
+  switch (shape.kind) {
+    case 'rect':
+      return shape.width * shape.height;
+    case 'triangle':
+      return (shape.width * shape.height) / 2;
+  }
+};
+
+const describe = (shape: Shape): string => {
+  switch (shape.kind) {
+    case 'rect':
+      return `Rectangle ${shape.width} by ${shape.height}`;
+    case 'triangle':
+      return `Triangle ${shape.width} by ${shape.height}`;
+  }
+};
+
+const shapes: Shape[] = [
+  { kind: 'rect', width: 30, height: 20 },
+  { kind: 'triangle', width: 30, height: 20 },
+];
+
+for (const shape of shapes) {
+  console.log(`${describe(shape)} has area ${area(shape)}`);
+}
+```
+
+Open the browser console with F12:
+
+```
+Rectangle 30 by 20 has area 600
+Triangle 30 by 20 has area 300
+```
+
+Now a third kind arrives. Add `'line'` to the union in the type and one more
+object to the array:
+
+```ts
+  kind: 'rect' | 'triangle' | 'line';
+```
+
+```ts
+  { kind: 'line', width: 30, height: 0 },
+```
+
+Run `npm run build` and read what comes back:
+
+```
+src/index.ts(7,30): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+src/index.ts(16,34): error TS2366: Function lacks ending return statement and return type does not include 'undefined'.
+```
+
+TypeScript checked both `switch` statements and stopped the build, because
+neither of them answers for a `'line'`. That part is good news. The work is
+still yours though, one edit per `switch`, so two edits here. A real drawing
+program also has a `draw` and a `color` function, and there one new kind costs
+four edits in four places, each of them easy to forget.
+
+## The object answers for itself {#sec-polymorphism-classes}
+
+Delete everything in `src/index.ts` and write the same two shapes as classes:
+
+```ts
+abstract class Shape {
+  abstract area(): number;
+  abstract describe(): string;
+}
+
+class Rect extends Shape {
+  constructor(
+    private width: number,
+    private height: number,
+  ) {
+    super();
+  }
+
+  area(): number {
+    return this.width * this.height;
+  }
+
+  describe(): string {
+    return `Rectangle ${this.width} by ${this.height}`;
+  }
+}
+
+class Triangle extends Shape {
+  constructor(
+    private width: number,
+    private height: number,
+  ) {
+    super();
+  }
+
+  area(): number {
+    return (this.width * this.height) / 2;
+  }
+
+  describe(): string {
+    return `Triangle ${this.width} by ${this.height}`;
+  }
+}
+
+const shapes: Shape[] = [new Rect(30, 20), new Triangle(30, 20)];
+
+for (const shape of shapes) {
+  console.log(`${shape.describe()} has area ${shape.area()}`);
+}
+```
+
+The console prints the same two lines as before. Now add the line, the same
+third kind that just cost you two compiler errors:
+
+```ts
+class Line extends Shape {
+  constructor(private length: number) {
+    super();
+  }
+
+  area(): number {
+    return 0;
+  }
+
+  describe(): string {
+    return `Line of length ${this.length}`;
+  }
+}
+```
+
+Put one more object into the array and reload:
+
+```ts
+const shapes: Shape[] = [new Rect(30, 20), new Triangle(30, 20), new Line(30)];
+```
+
+```
+Rectangle 30 by 20 has area 600
+Triangle 30 by 20 has area 300
+Line of length 30 has area 0
+```
+
+Nothing else needed a change. The loop at the bottom never learned that a
+third kind exists, because `Line` brought its own `area` and its own
+`describe` with it.
+
+## The name is polymorphism {#sec-polymorphism-name}
+
+`shape.area()` is one call in your source code, and it runs three different
+method bodies depending on which object `shape` holds at that moment. "Poly"
+is Greek for many and "morph" for form, so the word says many forms. One name,
+many method bodies, and the object decides which body runs. This is
+**polymorphism**, and the array of `Ball` objects in the previous chapter was
+already doing it.
+
+A `switch` over a `kind` field is what polymorphism replaces. Those branches
+ask an object what it is so the caller can decide what to do. Give the object
+a method instead and let it answer for itself. When you catch yourself writing
+`switch (thing.kind)` or `if (thing.kind === 'circle')`, that is the signal.
+
+Not every `switch` is a mistake. A `switch` over two kinds in one single place
+is fine, so leave it alone. A class hierarchy earns its keep once the same set
+of kinds gets asked several different questions, which is exactly what the two
+calculators below do.
+
+## One class per file {#sec-polymorphism-modules}
+
+From here on, every class in this course gets a file of its own, named after
+the class in lowercase. `Shape` lives in `src/shape.ts`, `Rect` in
+`src/rect.ts`, and a two-word class such as `ToolSelection` gets a hyphen,
+`src/tool-selection.ts`. Splitting the file you just wrote takes one new word.
+
+Create `src/shape.ts` and move the abstract class into it:
+
+```ts
+export abstract class Shape {
+  abstract area(): number;
+  abstract describe(): string;
+}
+```
+
+`export` marks a name that other files may use. Anything in a file without
+`export` in front of it stays inside that file, invisible from outside. A file
+with at least one `import` or `export` is called a **module**.
+
+Now `src/rect.ts`:
+
+```ts
+import { Shape } from './shape';
+
+export class Rect extends Shape {
+  constructor(
+    private width: number,
+    private height: number,
+  ) {
+    super();
+  }
+
+  area(): number {
+    return this.width * this.height;
+  }
+
+  describe(): string {
+    return `Rectangle ${this.width} by ${this.height}`;
+  }
+}
+```
+
+The name in the braces has to match the exported name. The text after `from`
+is the path to the file, and the research box below asks you to pin down what
+its leading `./` means. Course style leaves the `.ts` off the end, and this
+starter would accept `'./shape.ts'` too, because its `tsconfig.json` switches
+`allowImportingTsExtensions` on.
+
+Move `Triangle` and `Line` the same way, and `src/index.ts` shrinks to this:
+
+```ts
+import { Line } from './line';
+import { Rect } from './rect';
+import type { Shape } from './shape';
+import { Triangle } from './triangle';
+
+const shapes: Shape[] = [new Rect(30, 20), new Triangle(30, 20), new Line(30)];
+
+for (const shape of shapes) {
+  console.log(`${shape.describe()} has area ${shape.area()}`);
+}
+```
+
+No class is left in `src/index.ts`. It picks the classes it needs and wires
+them together, and that is the job it keeps for the rest of the year.
+
+## Two kinds of import {#sec-polymorphism-import-type}
+
+One of the four import lines in `src/index.ts` carries an extra word:
+
+```ts
+import type { Shape } from './shape';
+```
+
+There, the name `Shape` is only ever used as a type, in
+`const shapes: Shape[]`, and types are gone by the time the browser sees your
+code. Write that line as a plain `import` and Biome points at it:
+
+```
+src/index.ts:3:8 lint/style/useImportType  FIXABLE
+  ! All these imports are only used as types.
+```
+
+`import type` says that you need the name for the compiler and for nothing
+else, so the whole line disappears from the built code. In `src/rect.ts` the
+plain `import` has to stay, because `extends Shape` reaches for the real class
+while the program runs. Put a `type` in front of it there and TypeScript stops
+you:
+
+```
+src/rect.ts(3,27): error TS1361: 'Shape' cannot be used as a value because it was imported using 'import type'.
+```
+
+Two rules cover every case you will meet this year. A name you use with `new`,
+with `extends`, or as a value needs a plain `import`. A name that appears only
+after a colon or in angle brackets takes `import type`.
+
+## What Vite does with five files {#sec-polymorphism-vite}
+
+Run `npm start`, open the developer tools with F12, pick the Network tab, and
+reload the page. The browser asks for each file on its own: `index.ts`,
+`line.ts`, `rect.ts`, `shape.ts`, and `triangle.ts`. That is the dev server
+handing you one module at a time, so a change to `line.ts` reloads `line.ts`.
+The finished build is a different story:
+
+```bash
+npm run build
+```
+
+```
+✓ 8 modules transformed.
+dist/index.html                0.33 kB │ gzip: 0.24 kB
+dist/assets/index-QKlOSpwk.js  1.28 kB │ gzip: 0.58 kB
+```
+
+Five source files, one JavaScript file in `dist`. Splitting your code into
+small files costs your visitors nothing.
+
+::: {.research title="Two decimals, and where an import looks"}
+Both calculators below print areas and euro amounts with exactly two decimals,
+and each of them is a folder of files importing each other. Neither detail is
+spelled out in this chapter.
+
+1. An area comes out as `3216.990877275948` and you want the text `3216.99`.
+   Which method of a number gives you that, and what type does the method
+   return?
+2. Search for `export default`. How does importing a default export differ
+   from importing a named export such as `export class Rectangle`?
+3. `import { Rectangle } from './rectangle';` and
+   `import { defineConfig } from 'vite';` are both imports. What does the
+   leading `./` say about where the file is looked for, and where does the
+   search go when the `./` is missing?
+
+Question 1 has to stick for the exam. Rounding a number for display shows up
+in almost every task, and you will write it without a search engine.
+:::
+
+## Exercise A: a shapes calculator {#sec-polymorphism-exercise-shapes}
+
+{{< exercise shapes-calculator >}}
+
+The page is ready: five buttons with the ids `addRectangleButton`,
+`addSquareButton`, `addEllipseButton`, `addCircleButton`, and `addLineButton`,
+an empty `<ul id="shapesList">`, and a `<span id="totalArea">` inside the
+total line. Each button adds one shape with random sizes, the list shows every
+shape with its area, and the total line adds them up.
+
+Six classes, six files. Build them in this order:
+
+1. **`src/shape.ts`.** An abstract class `Shape` with an abstract getter
+   `description` that returns a string, and a normal method `area()` that
+   returns `0`. Every shape without an area of its own keeps that answer.
+
+2. **`src/rectangle.ts`.** `Rectangle extends Shape`, with `width` and
+   `height` as private parameter properties. `description` returns text like
+   `Rectangle 30 by 20`, and `area()` returns width times height.
+
+3. **`src/square.ts`.** `Square extends Rectangle`. Its constructor takes one
+   side as a private parameter property of its own and hands it to `super`
+   twice; `Rectangle` keeps its width and height private, so `Square` cannot
+   read them. Override `description` only, so the list says
+   `Square with side 7` instead of `Rectangle 7 by 7`. The area comes from
+   `Rectangle` unchanged.
+
+4. **`src/ellipse.ts`.** `Ellipse extends Shape` with `radiusX` and `radiusY`.
+   Its area is `Math.PI * radiusX * radiusY`.
+
+5. **`src/circle.ts`.** `Circle extends Ellipse`, one radius handed to `super`
+   twice, `description` overridden.
+
+6. **`src/line.ts`.** `Line extends Shape` with a length. Write no `area()`
+   here at all. The one in `Shape` already returns `0`, and that is the right
+   answer for a line.
+
+7. **`src/index.ts`.** Import `./styles.css` first, then the five classes you
+   create objects from, and `Shape` with `import type`. Fetch the seven
+   elements with `document.querySelector<...>` and throw in one `if` when
+   something is missing. Keep the shapes in `const shapes: Shape[] = [];`.
+
+8. **A render function.** Write `render` as a helper that empties
+   `#shapesList` with `replaceChildren()`, then loops over `shapes` and
+   appends one `<li>` per shape. A line reads
+   `Circle with radius 10: area 314.16`, so the area is rounded to two
+   decimals. Add the areas up on the way through and write the total into
+   `#totalArea`, with two decimals as well.
+
+9. **Five listeners.** Each `click` builds its shape with whole random numbers
+   from 1 to 100, pushes it, and calls `render`. `Math.floor(Math.random() *
+   100) + 1` gives you one such number.
+
+10. **Run `npm start` and test.** Click Line five times: five entries appear,
+    every one of them with `area 0.00`, and the total stays `0.00`. Then click
+    Square once and check that the total is the side times itself.
+
+11. **Run `npm run verify`** and fix what it reports.
+
+## Exercise B: what the trip is worth {#sec-polymorphism-exercise-travel}
+
+{{< exercise travel-costs >}}
+
+Your company pays employees per kilometer, and how much depends on how they
+travelled. The page has a distance field with the id `distanceInput`, six
+buttons, a `<ul id="travelList">`, and a `<span id="totalReimbursement">`.
+The rules:
+
+| Means of transport | Reimbursement in euro |
+| --- | --- |
+| Car | `distance * 0.5 + passengers * 0.15` |
+| Motorcycle | `distance * 0.25` |
+| Bicycle | `0` up to and including 1 km, otherwise the same as a motorcycle |
+| Walk | `0` up to and including 1 km, otherwise `distance * 0.38` |
+
+`passengers` counts the people riding along, not the driver. Three buttons
+create a car: `carButton` with nobody along, `carOneButton` with one, and
+`carTwoButton` with two. The other three are `motorcycleButton`,
+`bicycleButton`, and `walkButton`.
+
+1. **`src/travel.ts`.** An abstract class `Travel` whose constructor takes
+   `protected readonly distance: number` as a parameter property. Give it an
+   abstract getter `description`, an abstract method `reimbursement(): number`,
+   and one normal method `summary()` that glues both together into a line such
+   as `Car, 10.00 km: 5.00 €`. Both numbers get two decimals.
+
+2. **`src/car.ts`.** `Car extends Travel` with a second constructor parameter
+   `private readonly passengers: number`. Its `description` reads `Car` for
+   nobody along, `Car with 1 additional passenger` for one, and
+   `Car with 2 additional passengers` for more.
+
+3. **`src/motorcycle.ts`.** `Motorcycle extends Travel`. It needs no
+   constructor of its own, because the one in `Travel` already takes exactly
+   the distance.
+
+4. **`src/bicycle.ts`.** `Bicycle extends Motorcycle`, because above 1 km the
+   money is the same. Override `reimbursement()` to return `0` for a distance
+   of 1 km or less, and to return `super.reimbursement()` otherwise. Override
+   `description` too.
+
+5. **`src/walk.ts`.** `Walk extends Travel` with its own rate of `0.38` and
+   the same 1 km limit.
+
+6. **`src/index.ts`.** Same shape as the shapes calculator: stylesheet, the
+   nine elements with a null check, `const travels: Travel[] = [];`, a
+   `render` helper that rebuilds `#travelList` from `summary()` and writes the
+   total into `#totalReimbursement`, and six listeners. Read the distance with
+   `distanceInput.valueAsNumber`.
+
+7. **Test with this sequence.** Type the distance, then click the button, in
+   this order:
+
+   | Button | Distance | Line shows |
+   | --- | ---: | ---: |
+   | Car | 10 | 5.00 € |
+   | Car, 1 extra passenger | 10 | 5.15 € |
+   | Car, 2 extra passengers | 10 | 5.30 € |
+   | Bicycle | 10 | 2.50 € |
+   | Bicycle | 0.75 | 0.00 € |
+   | Walk | 0.75 | 0.00 € |
+
+   The total must end at `17.95`. If it does not, the line that is wrong tells
+   you which class to open.
+
+8. **Run `npm run verify`** and fix what it reports.
+
+::: {.callout-tip}
+## When you finish early
+
+Empty the distance field and click a button. `valueAsNumber` hands you `NaN`,
+and the whole list turns into `NaN €`. Catch it with `Number.isNaN` before you
+create the travel, and refuse a negative distance in the same `if`.
+:::
+
+## Check your understanding {#sec-polymorphism-quiz}
+
+Six questions, the first three of them the research task above.
+
+{{< quiz polymorphism title="Polymorphism and modules" >}}

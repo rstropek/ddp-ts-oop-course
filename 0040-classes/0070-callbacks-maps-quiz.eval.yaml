@@ -1,0 +1,104 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden answers for 0070-callbacks-maps-quiz.yaml ("Objects talking to each
+# other: callbacks and Maps"). Teacher-only test data. Never publish as an
+# activity, never mint a code.
+
+id: callbacks-maps-quiz-eval
+target: ./0070-callbacks-maps-quiz.yaml
+
+questions:
+  - question: research-pointer-events
+    answers:
+      - expect: correct
+        answer: |
+          pointer events work for mouse, finger and pen with the same code,
+          mouse events only for a mouse. for a drag you need pointerdown,
+          pointermove and pointerup. from the MDN page about pointer events.
+      # Event names right, nothing about touch or pen.
+      - expect: partial
+        answer: |
+          you need pointerdown, pointermove and pointerup
+      - expect: incorrect
+        answer: |
+          pointerdown is just the new name for mousedown, they do the same
+          thing
+
+  - question: research-pointer-capture
+    answers:
+      - expect: correct
+        answer: |
+          you pass event.pointerId from the pointerdown event. after that the
+          element gets all the pointer events even when the mouse goes outside
+          it, until pointerup
+      # Right value, no effect described.
+      - expect: partial
+        answer: |
+          it takes event.pointerId
+      - expect: incorrect
+        answer: |
+          you pass event.button and then the browser stops sending move events
+
+  - question: research-stroke-dasharray
+    answers:
+      - expect: correct
+        answer: |
+          first number is how long a dash is, second one how long the gap is,
+          and then it repeats. so 6 4 means dash of 6 then gap of 4.
+      # German correct answer for this quiz.
+      - expect: correct
+        answer: |
+          die erste zahl ist die länge vom strich, die zweite die länge von der
+          lücke, das wiederholt sich dann immer
+      # Dashes and gaps mentioned, but which is which stays open.
+      - expect: partial
+        answer: |
+          the two numbers are for the dashes and the gaps
+      - expect: incorrect
+        answer: |
+          it draws 6 dashes that are 4 units wide
+
+  - question: callback-who-calls
+    answers:
+      - expect: correct
+        answer: |
+          ToolSelection calls it in selectTool, so it runs when you click a
+          tool button. the line in index.ts only gives the function away and
+          saves it.
+      # Right moment, no actor.
+      - expect: partial
+        answer: |
+          it runs every time the tool changes
+      - expect: incorrect
+        answer: |
+          it runs straight away when onToolChange is called, because that is
+          where the arrow function stands
+
+  - question: map-get-check
+    answers:
+      - expect: correct
+        answer: |
+          get can also give back undefined when the key is not in the map, and
+          undefined has no classList. put it in a const first and wrap it in
+          if (button) { button.classList.add('active'); }
+      # Reason right, no fix.
+      - expect: partial
+        answer: |
+          because get returns HTMLButtonElement or undefined
+      - expect: incorrect
+        answer: |
+          the map is still empty, you have to call set before you can use get
+
+  - question: enum-vs-union
+    answers:
+      - expect: correct
+        answer: |
+          it prints 1. with the string union the value is already the text, so
+          the log shows rect and you can put it into a class name without
+          translating it back.
+      # Number right, no reason for the course choice.
+      - expect: partial
+        answer: |
+          the console shows 1
+      - expect: incorrect
+        answer: |
+          the console shows RECT because that is the name of the member

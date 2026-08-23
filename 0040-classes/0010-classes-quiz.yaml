@@ -1,0 +1,184 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "From object literals to classes"
+# (0040-classes/0010-classes.qmd). The first three questions are the chapter's
+# research-box questions.
+
+id: classes-quiz
+name: "Quiz: From object literals to classes"
+title: "Check your understanding: from object literals to classes"
+description: |
+  Six short questions about the chapter *From object literals to classes*.
+  Answer in your own words. There are no answer options to pick from, and this
+  quiz is anonymous: it's here for you, so you can see what you already
+  understand and what you should read again. One or two sentences are enough
+  for most answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml" # repo root, resolves on GitHub and locally
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="this.count += this.step;"
+      scope="after the first chapter of Part 4"
+      reveal=false
+      knows=(array
+        "a `class` with fields, a constructor, and methods, and `this` as the object a method was called on"
+        "`new Counter(10)` building independent objects from one class"
+        "union literal types such as `type Player = 'red' | 'yellow'`"
+        "a field holding a 2D array, with the `undefined` check that `noUncheckedIndexedAccess` asks for"
+        "an arrow function as an event listener, so `this` still means the object"
+        "Parts 2 and 3: `querySelector<T>` with a null check, `createElement`, `classList`, `textContent`, `append`, click events, CSS Grid and Flexbox, SVG from TypeScript"
+        "year one: arrays, 2D arrays, loops, `if`, `switch`, functions, object literals with compound types, value against reference")
+      not_yet=(array
+        "`private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, and abstract classes"
+        "`export` and `import` of your own files"
+        "`try`/`catch`, `Map`, `Set`, and callback types"
+        "generics of your own, automated tests, `async` and `fetch`")}}
+
+questions:
+  - id: research-array-from-map
+    title: "The second argument of Array.from"
+    question: |
+      A board row is built with `Array.from({ length: 7 }, () => 'empty')`.
+      What is the second argument of `Array.from` for, and what does the
+      finished array hold?
+    evaluation: |
+      Expected: the second argument is a function that `Array.from` calls once
+      for every position, and the value it returns becomes the element at that
+      position. Here it is called seven times and returns `'empty'` each time,
+      so the array is `['empty', 'empty', 'empty', 'empty', 'empty', 'empty',
+      'empty']`, seven separate entries.
+      Required: 1) the function runs once per element and its return value
+      fills that element; 2) the result is an array of seven `'empty'` strings.
+      Partial: the result described correctly with nothing about the function
+      being called per element, or the other way round.
+      Incorrect: calls the second argument a filter, a starting value, or a
+      length.
+
+  - id: research-shared-inner-array
+    title: "Six rows or one row six times"
+    question: |
+      Compare `new Array(6).fill([])` with `Array.from({ length: 6 }, () => [])`.
+      One of them gives six separate inner arrays, the other gives six names for
+      one and the same array. Which is which, and what would the wrong one do to
+      a game board?
+    evaluation: |
+      Expected: `new Array(6).fill([])` evaluates the empty array once and puts
+      that one reference into all six places, so all six rows are the same
+      array. `Array.from({ length: 6 }, () => [])` calls the function six times
+      and each call makes a new array, so the six rows are separate. With the
+      `fill` version, writing one disc into a row would make it appear in all
+      six rows.
+      Required: 1) `fill` shares one array, `Array.from` with the function makes
+      six; 2) the reason is that the function runs once per row while `fill`
+      copies one reference; 3) the effect on the board is that a change shows up
+      in every row.
+      Partial: the two named the right way round with no reason and no effect.
+      Incorrect: the two swapped, or claims that both give separate arrays.
+
+  - id: research-round-cell
+    title: "A round cell in a grid"
+    question: |
+      A cell of the board is a `<button>` inside a CSS Grid. Which CSS property
+      turns that square box into a circle, and which one keeps the cell exactly
+      as tall as it is wide without naming a pixel size?
+    evaluation: |
+      Expected: `border-radius: 50%` rounds the box into a circle, and
+      `aspect-ratio: 1` (also written `1 / 1`) keeps the height equal to the
+      width, whatever width the grid column gives it.
+      Required: both property names, each with what it does.
+      Partial: one of the two named correctly.
+      Incorrect: names `width` and `height` in pixels, or `border-radius` for
+      both jobs.
+
+  - id: two-independent-objects
+    title: "Two counters, two counts"
+    question: |
+      ```ts
+      class Counter {
+        count: number;
+
+        constructor(start: number) {
+          this.count = start;
+        }
+
+        add(amount: number): void {
+          this.count += amount;
+        }
+      }
+
+      const a = new Counter(0);
+      const b = new Counter(100);
+      a.add(5);
+      b.add(5);
+      console.log(a.count, b.count);
+      ```
+
+      What does the console show, and why?
+    evaluation: |
+      Expected: `5 105`. Each `new Counter(...)` builds its own object with its
+      own `count` field, so `a.add(5)` changes only `a` and `b.add(5)` only `b`.
+      The class is the blueprint and holds no numbers itself.
+      Required: 1) the output `5 105`; 2) each object has its own fields, so the
+      two calls do not affect each other.
+      Partial: the right output with no reason, or the right reason with a wrong
+      number.
+      Incorrect: any answer where the two counters share one `count`, such as
+      `105 105` or `110 110`.
+
+  - id: missing-this
+    title: "The method that will not compile"
+    question: |
+      ```ts
+      class Timer {
+        seconds: number = 0;
+
+        tick(): void {
+          seconds += 1;
+        }
+      }
+      ```
+
+      TypeScript refuses the method `tick`. What is wrong, and how do you fix
+      it?
+    evaluation: |
+      Expected: inside a method, a bare `seconds` means a variable of that
+      method, and there is none, so TypeScript reports that it cannot find the
+      name. A field is reached through the object the method was called on, so
+      the line has to read `this.seconds += 1;`.
+      Required: 1) the field needs `this.` in front of it; 2) the fixed line
+      `this.seconds += 1;` or the same statement in words.
+      Partial: the fix given with no explanation of why the bare name fails.
+      Incorrect: blames the missing constructor, the type `number`, or suggests
+      declaring a new local variable `seconds`.
+
+  - id: union-instead-of-string
+    title: "Why not just a string"
+    question: |
+      A game stores whose turn it is. One version writes
+      `let turn: string = 'red';`. The other writes
+      `type Player = 'red' | 'yellow';` and then `let turn: Player = 'red';`.
+      What does the second version buy you?
+    evaluation: |
+      Expected: with the union type only the two listed values fit, so
+      `turn = 'blue'` or a typo such as `'ylelow'` is an error in the editor,
+      before the program runs. VS Code also offers the two allowed values while
+      you type. With `string`, any text is accepted and the mistake only shows
+      up as a bug in the browser.
+      Required: 1) only the listed values are allowed; 2) a wrong value is
+      caught by TypeScript while writing instead of at run time.
+      Partial: says it is safer or cleaner without naming the caught wrong
+      value.
+      Incorrect: claims it makes the program faster, or that `string` would also
+      reject `'blue'`.

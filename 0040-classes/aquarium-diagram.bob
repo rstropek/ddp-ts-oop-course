@@ -1,0 +1,43 @@
+                          +----------------------------------+
+                          |           FishManager            |
+                          +----------------------------------+
+                          | "-fishes: Fish[]"                |
+                          | "-lastTime: number"              |
+                          +----------------------------------+
+                          | "+add(fish: Fish): void"         |
+                          | "+start(): void"                 |
+                          +----------------------------------+
+                                            |
+                                            |  has many
+                                            v
+                          +----------------------------------+
+                          |        "Fish  (abstract)"        |
+                          +----------------------------------+
+                          | "#x: number"                     |
+                          | "#y: number"                     |
+                          | "#speedX: number"                |
+                          | "#speedY: number"                |
+                          | "#width: number"                 |
+                          | "#height: number"                |
+                          | "#aquarium: HTMLElement"         |
+                          | "-element: HTMLImageElement"     |
+                          | "-loaded: boolean"               |
+                          +----------------------------------+
+                          | "+step(delta: number): void"     |
+                          | "#update(delta: number): void"   |
+                          | "#keepInside(): void"            |
+                          | "-draw(): void"                  |
+                          +----------------------------------+
+                                            ^
+                                           /_\
+                                            |
+              +-----------------------------+-----------------------------+
+              |                             |                             |
++--------------------------+  +--------------------------+  +--------------------------+
+|      HorizontalFish      |  |      CrissCrossFish      |  |        SinusFish         |
++--------------------------+  +--------------------------+  +--------------------------+
+| "#update(delta: number)" |  | "#update(delta: number)" |  | "-baseY: number"         |
++--------------------------+  | "#keepInside(): void"    |  | "-time: number"          |
+                              +--------------------------+  +--------------------------+
+                                                            | "#update(delta: number)" |
+                                                            +--------------------------+

@@ -1,0 +1,107 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden answers for 0010-classes-quiz.yaml ("From object literals to classes").
+# Teacher-only test data. Never publish as an activity, never mint a code.
+
+id: classes-quiz-eval
+target: ./0010-classes-quiz.yaml
+
+questions:
+  - question: research-array-from-map
+    answers:
+      - expect: correct
+        answer: |
+          the second argument is a function that runs once for every place in
+          the new array, and what it gives back lands in that place. here it
+          runs 7 times and always returns 'empty', so you get seven 'empty'
+          entries.
+      # Result right, nothing about the function running per element.
+      - expect: partial
+        answer: |
+          you end up with an array of seven times 'empty'
+      - expect: incorrect
+        answer: |
+          it is a filter that throws away the values you do not want
+
+  - question: research-shared-inner-array
+    answers:
+      - expect: correct
+        answer: |
+          fill puts the same empty array into all six slots, so all rows are one
+          array. Array.from calls the arrow six times and every call makes a new
+          array, so you get six real rows. with fill, dropping one disc would
+          show up in every row of the board.
+      # German correct answer for this quiz.
+      - expect: correct
+        answer: |
+          bei fill wird das leere array nur einmal erzeugt und die referenz
+          sechsmal eingetragen, also sind alle zeilen dasselbe array. bei
+          Array.from läuft die funktion sechsmal und erzeugt jedes mal ein neues
+          array. mit fill würde ein stein in allen zeilen auftauchen.
+      # Named the right way round, no reason and no effect.
+      - expect: partial
+        answer: |
+          Array.from gives six separate arrays and fill gives six times the same
+          one
+      - expect: incorrect
+        answer: |
+          fill is the safe one because it copies the array six times, Array.from
+          just reuses it
+
+  - question: research-round-cell
+    answers:
+      - expect: correct
+        answer: |
+          border-radius: 50% makes the square into a circle and aspect-ratio: 1
+          keeps the height the same as the width
+      # Only one of the two.
+      - expect: partial
+        answer: |
+          border-radius 50 percent makes it round
+      - expect: incorrect
+        answer: |
+          you set width: 40px and height: 40px so it stays square
+
+  - question: two-independent-objects
+    answers:
+      - expect: correct
+        answer: |
+          5 105. every new Counter gets its own count field, so adding 5 to a
+          does nothing to b.
+      # Right output, no reason.
+      - expect: partial
+        answer: |
+          it prints 5 105
+      - expect: incorrect
+        answer: |
+          105 105, because count belongs to the class and both counters use the
+          same one
+
+  - question: missing-this
+    answers:
+      - expect: correct
+        answer: |
+          seconds on its own is not the field, typescript looks for a local
+          variable and finds none. it has to be this.seconds += 1;
+      # The fix without the reason.
+      - expect: partial
+        answer: |
+          write this.seconds += 1
+      - expect: incorrect
+        answer: |
+          the class has no constructor, so seconds is never created. add a
+          constructor and it works.
+
+  - question: union-instead-of-string
+    answers:
+      - expect: correct
+        answer: |
+          with Player only 'red' and 'yellow' are allowed, so turn = 'blue' or a
+          typo is already red in vs code and never reaches the browser. with
+          string every text is fine and you only notice in the running game.
+      # Vague, no caught wrong value.
+      - expect: partial
+        answer: |
+          it is safer and the code is easier to read
+      - expect: incorrect
+        answer: |
+          it makes the game run faster because a union is smaller than a string

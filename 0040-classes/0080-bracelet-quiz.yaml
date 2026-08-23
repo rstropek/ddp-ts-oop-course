@@ -1,0 +1,167 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Rules, state, and undo: the bracelet"
+# (0040-classes/0080-bracelet.qmd).
+# The four research questions of the chapter's research box come first (ids
+# prefixed `research-`) and get the research feedback rule (point to the
+# source, never the answer). The last two cover the chapter's own design
+# points: rendering the whole picture from the model after every change, and
+# when a model throws versus when it returns a value.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: bracelet-quiz
+name: "Quiz: The bracelet"
+
+title: "Check your understanding: rules, state, and undo"
+description: |
+  Six short questions about the chapter *Rules, state, and undo: the
+  bracelet*, four of them the research task. Answer in your own words; if
+  you cannot answer a research question yet, look it up and come back. One
+  or two sentences are enough. This quiz is anonymous and is here for you.
+  Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="this.items.push(new LetterCube(letter));"
+      scope="after the bracelet chapter, the last chapter of the part on classes"
+      reveal=false
+      knows=(array
+        "classes with fields, constructors, methods, and `this`"
+        "`private`, `readonly`, getters and setters"
+        "`extends`, `super`, overriding, and `abstract` classes with abstract methods"
+        "polymorphism: one array of the base type, one call, different behavior"
+        "ES modules: one class per file with `export` and `import`, and an `index.ts` that only wires the UI"
+        "reading and drawing a small class diagram"
+        "`throw new Error(...)`, `try`/`catch`, `unknown` in `catch`, `instanceof`, and error classes of their own"
+        "callback types, optional properties, `Map` and `Set`"
+        "the DOM: `document.querySelector<T>('#id')` with a null check that throws, `createElement`, `append`, `replaceChildren()`, `classList`, `textContent`, and `element.style`"
+        "events with `addEventListener`, CSS with Flexbox and Grid, SVG, `npm run verify`, git, and the `pi` coding buddy")
+      not_yet=(array
+        "what `pop()` gives back, what `at(-1)` gives back, how `for...of` walks over a string, and what `aria-label` does (those are the research tasks right now)"
+        "the word stack, and named data structures such as queues or linked lists"
+        "automated tests with Vitest or Playwright"
+        "generics of their own beyond `querySelector<T>`, `Map`, and `Set`"
+        "`async`, `fetch`, or `localStorage`")}}
+
+questions:
+  - id: research-loop-over-string
+    title: "A loop over letters"
+    question: |
+      The letter grid is built with `for (const letter of 'ABCDEFG')`. What
+      does `letter` hold in each round of that loop, and what does the loop do
+      when the string is empty?
+    evaluation: |
+      Expected: `letter` holds one character of the string per round, in order
+      ('A', then 'B', and so on), each as a string of length 1. An empty string
+      means the body never runs.
+      Required: (1) one character (or code point) per round, in order; (2) with
+      an empty string the loop body runs zero times.
+      Partial: only one of the two, for example "it goes through the letters"
+      with nothing about the empty string.
+      Incorrect: says `letter` holds the index number, or that the loop crashes
+      on an empty string.
+
+  - id: research-pop-returns
+    title: "What pop hands back"
+    question: |
+      `items.pop()` takes the last element out of an array. What does the call
+      hand back to you, and what happens when the array is already empty?
+    evaluation: |
+      Expected: `pop()` returns the element it removed and shortens the array by
+      one. On an empty array it removes nothing, returns `undefined`, and does
+      not throw.
+      Required: (1) it returns the removed element; (2) on an empty array it
+      returns `undefined` (or "nothing") and causes no error.
+      Partial: only one of the two, for example "it gives back the last element"
+      with nothing about the empty case.
+      Incorrect: says `pop()` returns the shortened array or the new length, or
+      that it throws an error on an empty array.
+
+  - id: research-at-minus-one
+    title: "Reading the last element"
+    question: |
+      `items.at(-1)` reads the last element of an array. What do you get from
+      `at(-1)` when the array is empty, and what does `items[-1]` give you
+      instead?
+    evaluation: |
+      Expected: `at(-1)` counts from the end, so on an empty array it gives
+      `undefined`. `items[-1]` is not counted from the end at all: square
+      brackets take the index literally, there is no property `-1`, so it is
+      `undefined` for every array.
+      Required: (1) `at(-1)` on an empty array is `undefined`; (2) `items[-1]`
+      is always `undefined` because square brackets do not count backwards.
+      Partial: only one of the two, for example "at(-1) is the last element"
+      with nothing about `items[-1]`.
+      Incorrect: says `at(-1)` throws an error, or that `items[-1]` is the last
+      element too.
+
+  - id: research-aria-label
+    title: "A button with no text"
+    question: |
+      A color button in the bracelet editor has a background color and nothing
+      inside it. What does an `aria-label` attribute change for somebody using
+      a screen reader, and why does a sighted visitor never see it?
+    evaluation: |
+      Expected: `aria-label` gives the element an accessible name, so the screen
+      reader announces that text instead of finding nothing to read. It is not
+      content, only an attribute in the accessibility tree, so the browser never
+      draws it on the page.
+      Required: (1) it supplies the name a screen reader reads out; (2) it is
+      never rendered visually.
+      Partial: only one of the two, for example "it helps blind people" with
+      nothing about the text staying invisible.
+      Incorrect: says it shows a tooltip on hover, or that it puts the text
+      inside the button.
+
+  - id: render-after-every-change
+    title: "The forgotten render"
+    question: |
+      Your `Bracelet` class ends `addLetter` with
+      `this.items.push(new LetterCube(letter));` and nothing else. Now no cube
+      shows up when you press a letter, but pressing "Remove last" suddenly
+      makes several cubes appear at once. Explain both halves.
+    evaluation: |
+      Expected: `addLetter` never calls `render()`, so the array grows while the
+      page keeps showing the old picture. `removeLast()` does call `render()`,
+      which rebuilds the container from the whole array, so every item pushed in
+      the meantime (minus the one just popped) appears at that moment.
+      Required: (1) the missing `render()` call in `addLetter`; (2) `removeLast`
+      renders from the whole array, which is why everything shows up at once.
+      Partial: only one of the two, for example "you forgot to render" without
+      explaining the burst of cubes.
+      Incorrect: says the cubes were not added to the array, or that undo added
+      them.
+
+  - id: throw-versus-return
+    title: "Two kinds of bad news"
+    question: |
+      Adding a spacer bead when a letter cube is due throws a `RuleError`.
+      Adding a spacer bead in a new color returns the warning text
+      `'You are mixing spacer colors!'` instead of throwing. Why is the second
+      one not an exception too?
+    evaluation: |
+      Expected: because the bead really is added. The mixed color is allowed, so
+      the operation succeeded and only deserves a comment; a `throw` would say
+      the opposite and would also skip the rest of the method, including the
+      render. The pattern break is different: nothing was added, so the caller
+      must be stopped.
+      Required: (1) with the warning the item is still added and the operation
+      succeeded; (2) an exception means the operation did not happen (or must be
+      stopped), which is not the case here.
+      Partial: only one of the two, for example "a warning is not as bad as an
+      error" with nothing about the bead being added.
+      Incorrect: says exceptions are too slow or too complicated, or that a
+      warning cannot be thrown at all for technical reasons.

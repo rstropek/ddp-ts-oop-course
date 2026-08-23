@@ -59,8 +59,12 @@ instructions: |
 
   New in Part 4, use it freely:
 
-  - `class`, constructor, fields, methods, `this`, `new`. One class per module,
-    exported; `src/index.ts` only wires the UI.
+  - `class`, constructor, fields, methods, `this`, `new`. Fields with explicit
+    types at the top of the class, constructor next, then methods; no `public`
+    keyword, no `#private` fields. One class per module, exported, the file
+    named after the class in lowercase with hyphens (`src/tool-selection.ts`);
+    `src/index.ts` only wires the UI. `import type { X } from './x'` when a
+    name is used only as a type (Biome's `useImportType` insists).
   - `private`, `readonly`, `protected`, getters and setters, and parameter
     properties (`constructor(private readonly width: number)`).
   - `extends`, `super`, overriding, `abstract` classes and abstract members; one
@@ -71,7 +75,13 @@ instructions: |
   - `Map<K, V>` and `Set<T>` as ready-made collections.
   - `throw new Error(...)`, `try`/`catch`/`finally`, `unknown` in `catch`
     narrowed with `instanceof Error`, and own error classes such as
-    `class ValidationError extends Error`.
+    `class ValidationError extends Error`. The model (a class) throws when a
+    rule is broken, `index.ts` catches and shows the message, and the UI is
+    rendered again from the model after every change (`replaceChildren()`),
+    never edited piece by piece. `instanceof` on an own class is fine to ask a
+    fact; choosing behavior is what overriding is for.
+  - Pointer events (`pointerdown`, `pointermove`, `pointerup`) with
+    `setPointerCapture` for drawing by dragging.
   - A small UML or mermaid class diagram before typing.
 
   Not yet, these come in later parts:

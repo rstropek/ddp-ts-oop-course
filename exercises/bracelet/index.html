@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friendship bracelet editor</title>
+  </head>
+  <body>
+    <h1>Friendship bracelet editor</h1>
+
+    <div id="preview">
+      <!-- The Bracelet class fills this element with cubes and beads. -->
+      <div id="bracelet"></div>
+    </div>
+
+    <p id="message"></p>
+
+    <!-- One button per letter, created in src/index.ts. -->
+    <div id="letterGrid" class="grid"></div>
+
+    <!-- One round button per spacer color, created in src/index.ts. -->
+    <div id="colorRow" class="color-row"></div>
+
+    <button type="button" id="undoButton" class="undo-button">Remove last</button>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

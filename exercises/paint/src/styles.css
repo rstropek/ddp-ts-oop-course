@@ -1,0 +1,62 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 52rem;
+  margin: 2rem auto;
+}
+
+.app {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 11rem;
+}
+
+.tool-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toolbar button {
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+.tool-buttons button.active {
+  background-color: #1f6feb;
+  color: white;
+}
+
+#canvas {
+  flex: none;
+  outline: 1px solid #ccc;
+  background-color: #fafafa;
+  touch-action: none;
+}
+
+#canvas circle {
+  fill: #6aa9ff;
+  stroke: #1f6feb;
+  stroke-width: 2;
+}
+
+#canvas rect {
+  fill: #ffb0a8;
+  stroke: #d64541;
+  stroke-width: 2;
+}
+
+#canvas .selected {
+  stroke: #f0a800;
+  stroke-width: 4;
+}
+
+#statusLine {
+  margin-top: 0.75rem;
+}

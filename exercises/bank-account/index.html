@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank account</title>
+  </head>
+  <body>
+    <h1>Bank account</h1>
+
+    <p id="balanceLine">Balance: 100</p>
+
+    <p>
+      <label for="amount">Amount</label>
+      <input id="amount" type="number" min="0" step="1" value="10">
+    </p>
+
+    <p>
+      <button id="depositButton" type="button">Deposit</button>
+      <button id="withdrawButton" type="button">Withdraw</button>
+    </p>
+
+    <p id="message" class="message"></p>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

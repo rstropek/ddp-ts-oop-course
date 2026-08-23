@@ -1,0 +1,196 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Objects talking to each other: callbacks and Maps"
+# (0040-classes/0070-callbacks-maps.qmd). The first three questions are the
+# chapter's research-box questions.
+
+id: callbacks-maps-quiz
+name: "Quiz: Objects talking to each other"
+title: "Check your understanding: callbacks and Maps"
+description: |
+  Six short questions about the chapter *Objects talking to each other:
+  callbacks and Maps*. Answer in your own words. There are no answer options
+  to pick from, and this quiz is anonymous: it's here for you, so you can see
+  what you already understand and what you should read again. One or two
+  sentences are enough for most answers, and answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml" # repo root, resolves on GitHub and locally
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="type ToolChangeCallback = (tool: ToolType) => void;"
+      scope="after the chapter on callbacks, Maps, and Sets"
+      reveal=false
+      knows=(array
+        "classes with fields, a constructor, methods, and `this`"
+        "`private`, `readonly`, `protected`, getters and setters, parameter properties"
+        "`extends`, `super`, overriding, `abstract` classes and members"
+        "polymorphism, and ES modules with one class per file and `export`/`import`"
+        "`throw`, `try`/`catch`/`finally`, `unknown` in `catch`, `instanceof Error`, own error classes"
+        "callback types, optional properties with `?`, `Map`, `Set`, union literal types such as `type ToolType = 'circle' | 'rect'`"
+        "the DOM and SVG from Parts 2 and 3: `querySelector<T>` with a null check, `createElementNS`, `setAttribute`, `classList`, `addEventListener`"
+        "arrays, loops, `if`, `switch`, and functions from year one")
+      not_yet=(array
+        "generics of your own, such as `class Stack<T>`"
+        "automated tests with Vitest or Playwright"
+        "linked lists, stacks, and queues"
+        "`async`, `fetch`, and `localStorage`"
+        "optional chaining `?.`, spread, and destructuring")}}
+
+questions:
+  - id: research-pointer-events
+    title: "Pointer events or mouse events"
+    question: |
+      The browser fires `mousedown`, and it also fires `pointerdown`. What
+      does the pointer family handle that the mouse family does not, and
+      which three pointer events does one drag need from press to release?
+    evaluation: |
+      Expected: pointer events cover mouse, touch, and pen with one set of
+      events (and carry extra data such as pressure or the pointer type),
+      while mouse events only describe a mouse. A drag needs `pointerdown`,
+      `pointermove`, and `pointerup`. Bonus for naming the MDN Pointer events
+      page.
+      Required: 1) that pointer events also cover touch and pen input, not
+      only the mouse; 2) the three event names.
+      Partial: the three names with no account of what pointer events add, or
+      the input kinds named with a wrong or incomplete event list.
+      Incorrect: claims pointer events are only a new name for the same
+      thing, or names mouse events (`mousedown`, `mousemove`, `mouseup`) as
+      the answer.
+
+  - id: research-pointer-capture
+    title: "Holding on to the pointer"
+    question: |
+      `element.setPointerCapture(...)` wants one number. Where do you get
+      that number, and what changes about the events after the call?
+    evaluation: |
+      Expected: the number is `event.pointerId`, read from the pointer event
+      you are handling. After the call every following pointer event for that
+      pointer is sent to the capturing element, even when the pointer leaves
+      it, until `pointerup` or `pointercancel` releases the capture (or
+      `releasePointerCapture` does).
+      Required: 1) `pointerId` from the event; 2) that the element keeps
+      receiving the events even when the pointer moves outside it.
+      Partial: only one of the two, for example `pointerId` named with no
+      account of the effect.
+      Incorrect: names a different value such as `event.button`,
+      `event.clientX`, or an element id, or says the call blocks or stops the
+      events.
+
+  - id: research-stroke-dasharray
+    title: "Reading a dash pattern"
+    question: |
+      In CSS, `stroke-dasharray` turns a solid outline into a dashed one.
+      What do the two numbers in a value such as `6 4` mean?
+    evaluation: |
+      Expected: the numbers alternate dash length and gap length along the
+      outline, so `6 4` draws a 6-unit dash, then a 4-unit gap, repeated. The
+      lengths are in user units of the drawing, not always pixels.
+      Required: 1) the first number is the drawn dash; 2) the second is the
+      gap, and the pattern repeats.
+      Partial: says dashes and gaps without saying which number is which, or
+      calls both numbers a length with no mention of the gap.
+      Incorrect: reads them as a start offset, as a count of dashes, or as a
+      width and a height.
+
+  - id: callback-who-calls
+    title: "Who calls the arrow function"
+    question: |
+      `ToolSelection` keeps a callback and calls it when the tool changes:
+
+      ```typescript
+      onToolChange(callback: ToolChangeCallback): void {
+        this.toolChangeCallback = callback;
+      }
+
+      private selectTool(tool: ToolType): void {
+        this.currentToolValue = tool;
+        if (this.toolChangeCallback) {
+          this.toolChangeCallback(tool);
+        }
+      }
+      ```
+
+      In `index.ts` you write:
+
+      ```typescript
+      toolSelection.onToolChange((tool) => {
+        statusLine.show(tool);
+      });
+      ```
+
+      Who calls the arrow function, and when does it run?
+    evaluation: |
+      Expected: `ToolSelection` calls it, inside `selectTool`, which runs when
+      the user clicks a tool button. The line in `index.ts` only hands the
+      function over and stores it; it does not run the body.
+      Required: 1) `ToolSelection` (the object that stored the callback) calls
+      it, not `index.ts`; 2) it runs when the tool changes, that is on a
+      button click.
+      Partial: only one of the two, for example the right moment named with
+      no account of who does the calling.
+      Incorrect: says the arrow function runs immediately at registration, or
+      that `index.ts` calls it, or that the browser calls it directly.
+
+  - id: map-get-check
+    title: "The button the map may not have"
+    question: |
+      `buttons` is a `Map<ToolType, HTMLButtonElement>`. TypeScript underlines
+      this line:
+
+      ```typescript
+      this.buttons.get(tool).classList.add('active');
+      ```
+
+      Why does TypeScript complain, and how do you fix the line?
+    evaluation: |
+      Expected: `Map.get` gives back `HTMLButtonElement | undefined`, because
+      the key may not be in the map, and `undefined` has no `classList`. Fix:
+      store the result and check it first, for example
+      `const button = this.buttons.get(tool); if (button) {
+      button.classList.add('active'); }`.
+      Required: 1) `get` can return `undefined` for a missing key; 2) a fix
+      that checks the value before using it.
+      Partial: only one of the two, for example a correct `if` with no reason,
+      or "it can be undefined" with no fix.
+      Incorrect: blames a missing `set` call, suggests `!` or `as`, or claims
+      `get` throws when the key is missing.
+
+  - id: enum-vs-union
+    title: "What the console prints"
+    question: |
+      A classmate writes this and logs `ToolType.RECT`:
+
+      ```typescript
+      enum ToolType {
+        CIRCLE,
+        RECT,
+        POINTER,
+      }
+      ```
+
+      What appears in the console, and why does this course write
+      `type ToolType = 'pointer' | 'circle' | 'rect';` instead?
+    evaluation: |
+      Expected: the console shows `1`, because enum members are numbered from
+      zero. With the union literal type the value is the string itself, so it
+      reads as `rect` in the console and goes into a class name or an
+      attribute unchanged; it also leaves nothing behind in the compiled
+      JavaScript.
+      Required: 1) the literal value `1`; 2) one real reason for the union
+      literal type (the value is a readable string, it can be used directly in
+      the DOM, or nothing is generated).
+      Partial: only one of the two, for example `1` with no reason, or a wrong
+      number with a good reason.
+      Incorrect: says the console shows `RECT` or `'rect'`, and gives no
+      correct reason either.

@@ -1,0 +1,343 @@
+---
+title: "Rules, state, and undo: the bracelet"
+---
+
+A friendship bracelet is a row of beads, and a row of beads is a list. What
+makes it interesting is that not every list is a legal bracelet: a letter cube,
+then a spacer bead, then a letter cube, and so on. This chapter has no new
+keyword in it. It is about where a rule like that lives, and about the design
+decision that turns undo into two lines.
+
+## Two ways to keep a list {#sec-bracelet-experiment}
+
+Create a new app from our template inside `coursework/`. Replace the body of
+`index.html` with this, keeping the `<script>` line at the end:
+
+```html
+<h1>Word list</h1>
+
+<input id="wordInput" type="text">
+<button type="button" id="addButton">Add</button>
+<button type="button" id="undoButton">Undo</button>
+
+<ul id="list"></ul>
+```
+
+Now put this into `src/index.ts`:
+
+```ts
+const list = document.querySelector<HTMLUListElement>('#list');
+const wordInput = document.querySelector<HTMLInputElement>('#wordInput');
+const addButton = document.querySelector<HTMLButtonElement>('#addButton');
+const undoButton = document.querySelector<HTMLButtonElement>('#undoButton');
+if (!list || !wordInput || !addButton || !undoButton) {
+  throw new Error('An element is missing from index.html');
+}
+
+addButton.addEventListener('click', () => {
+  const item = document.createElement('li');
+  item.textContent = wordInput.value;
+  list.append(item);
+  wordInput.value = '';
+});
+
+undoButton.addEventListener('click', () => {
+  const last = list.lastElementChild;
+  if (last) {
+    last.remove();
+  }
+});
+```
+
+Run `npm start`, type three words, add each one, and press Undo twice. It
+works. `lastElementChild` hands you the last element inside `#list`, or `null`
+when the list is empty, and `remove()` takes it out of the tree.
+
+Now find where this app keeps the words. There is no array and no variable
+holding them: they live in the page, in the `<li>` elements, and the only way
+to find out what the user built is to read the page back.
+
+## The same list from an array {#sec-bracelet-array}
+
+Keep `index.html` and the lookups at the top, and replace the two listeners
+with this:
+
+```ts
+const words: string[] = [];
+
+const render = () => {
+  list.replaceChildren();
+  for (const word of words) {
+    const item = document.createElement('li');
+    item.textContent = word;
+    list.append(item);
+  }
+};
+
+addButton.addEventListener('click', () => {
+  words.push(wordInput.value);
+  wordInput.value = '';
+  render();
+});
+
+undoButton.addEventListener('click', () => {
+  words.pop();
+  render();
+});
+```
+
+The page behaves exactly as before. What changed is where the words live: in
+`words`, an array your program owns. `render()` throws every `<li>` away with
+`replaceChildren()` and builds the list again from the array, the way the
+bubble chart in the SVG part redrew itself after every new bubble.
+
+Neither listener touches an `<li>` any more. Both of them change `words` and
+then ask `render()` to draw the whole list again.
+
+## Adding a rule {#sec-bracelet-rule}
+
+Give the word list a rule: the same word twice in a row is not allowed.
+
+The version that edits the page directly has to ask the page what it shows:
+
+```ts
+const last = list.lastElementChild;
+if (last && last.textContent === wordInput.value) {
+  return;
+}
+```
+
+That works, and look at what it costs. The rule is about words, but the code is
+about elements: a `string | null` your own program put there earlier, plus a
+separate case for the empty list. Every further rule means another walk through
+the DOM.
+
+The version that keeps a `words` array reads like the rule itself:
+
+```ts
+if (wordInput.value === words[words.length - 1]) {
+  return;
+}
+```
+
+The array is the truth, and the page is only a picture of it.
+
+## Model first {#sec-bracelet-model}
+
+The `words` array of the word list is a **model**: the data your app is really
+about, plus the rules that say which states are allowed. In this part of the
+book a model is a class, or a small set of classes; the bracelet editor's model
+is a `Bracelet` class that holds the items. Three habits go with it, and every
+app in this chapter and the next follows them.
+
+**The model owns the state and the rules.** Nothing outside the model may push
+into its array. A method such as `addLetter` is the only door, and that door
+checks.
+
+**The whole picture is drawn from the model after every change.** One `render`
+method empties the container and builds it again. It never patches, so the
+page can never drift away from the data.
+
+**A move the model refuses is an exception.** `addLetter` throws a `RuleError`
+of your own, exactly as the calculator's logic did in the chapter on
+exceptions, and the code that wired up the button catches it and puts
+`error.message` on the page. The model never decides where a message goes.
+
+Not every complaint is a refusal, though. Putting a green bead next to a row of
+red ones is allowed, it just deserves a comment. That is a return value, not a
+`throw`: `addSpacer` puts the bead on the string and hands back a warning text,
+or `undefined` when it has nothing to say. Throw when the operation did not
+happen. Return a value when it did.
+
+Undo falls out of this for free. Take the last item off the array, render
+again. The model needs no memory of what the user did, because the array is
+the memory.
+
+::: {.callout-note}
+## One compromise, on purpose
+
+The `Bracelet` class still knows one DOM element: the container it draws into.
+A model that knows nothing about the page is easier to test, and the part on
+testing splits this class in two for exactly that reason. For now, keeping the
+drawing inside the model keeps the wiring short.
+:::
+
+## The bracelet on paper {#sec-bracelet-design}
+
+Four classes carry the whole editor, and the diagram is worth drawing before
+any of them is typed.
+
+![The bracelet on one page: `Bracelet` holds many `BraceletItem`, `LetterCube`
+and `SpacerBead` are the two kinds of item, and both adding methods throw a
+`RuleError`, an error class of your own that extends
+`Error`.](bracelet-classes.svg){width=660}
+
+Read the middle box first. `BraceletItem` is abstract and promises one thing:
+every item can build the element that shows it. `Bracelet` holds
+`BraceletItem[]`, so it never mentions `LetterCube` or `SpacerBead` when it
+renders. It loops over the array and calls `render()` on whatever is in there,
+which is polymorphism doing real work. The two `render` methods in the picture
+do different jobs: an item builds one element and hands it back, and the
+bracelet's private one empties the container and collects them all.
+
+The rule itself needs one question answered: which kind of item is the last one
+on the string? An empty bracelet expects a letter cube. After a letter cube a
+spacer bead is due, and after a spacer bead a letter cube. That is the entire
+pattern, and it depends only on the last item.
+
+::: {.research title="Reading the end of an array, and a button with no text"}
+Your undo removes the last item, your rule asks what the last item is, your
+letter buttons come from one string, and your color buttons carry no text at
+all. MDN has all four answers.
+
+1. `for (const letter of 'ABC')` walks over a string. What is `letter` in each
+   round, and what does the loop do when the string is empty?
+2. `pop()` takes the last element out of an array. What does it give back, and
+   what happens when you call it on an array that is already empty?
+3. `at(-1)` reads the last element of an array. What do you get from `at(-1)`
+   when the array is empty, and what does `array[-1]` give you instead?
+4. Your color buttons have a background color and nothing inside them, so
+   somebody using a screen reader hears nothing useful. What does an
+   `aria-label` attribute change for them, and why does a sighted visitor never
+   see it?
+
+For the exam, remember what `pop()` does to an empty array. Your undo button
+calls it whether the bracelet holds anything or not.
+:::
+
+## Exercise: the friendship bracelet editor {#sec-bracelet-exercise}
+
+Letter cubes and spacer beads on a string, with the alternating rule, a warning
+about mixed colors, and a "Remove last" button.
+
+{{< exercise bracelet >}}
+
+1. Create a new app from our template inside `homework/`, in a folder called
+   `bracelet`. Read the `index.html` you copied in: a `#preview` box with an
+   empty `<div id="bracelet">` inside it, a `<p id="message">` for errors and
+   warnings, two empty containers `#letterGrid` and `#colorRow` that your code
+   fills with buttons, and `#undoButton`.
+
+2. Create `src/bracelet-item.ts` with the promise every item makes:
+
+   ```ts
+   export abstract class BraceletItem {
+     abstract render(): HTMLElement;
+   }
+   ```
+
+3. Create `src/letter-cube.ts`. `LetterCube` extends `BraceletItem`, takes the
+   letter in its constructor, and keeps it in a private field. Its `render()`
+   creates a `<div>`, adds the class `cube` to it, puts the letter in as
+   `textContent`, and returns it. The stylesheet already knows `.cube`.
+
+4. Create `src/spacer-bead.ts`. `SpacerBead` works the same way with a color
+   instead of a letter: class `bead`, and the color goes into
+   `bead.style.backgroundColor`. Declare the field as `readonly color: string`,
+   without `private`. The `Bracelet` class needs to read it in step 6, and
+   `readonly` still stops anybody from changing it.
+
+5. Create `src/rule-error.ts` with an error class of your own:
+
+   ```ts
+   export class RuleError extends Error {
+     constructor(message: string) {
+       super(message);
+       this.name = 'RuleError';
+     }
+   }
+   ```
+
+6. Create `src/bracelet.ts`. The `Bracelet` class holds three private fields: a
+   `BraceletItem[]` that starts empty, the container element, and a boolean
+   that remembers whether the color warning has already been shown. Its
+   constructor takes the container element and renders once. Then these
+   methods:
+
+   * `addLetter(letter: string): void` throws
+     `new RuleError('You need to add a spacer bead next!')` when a spacer bead
+     is due. Otherwise it pushes a new `LetterCube` and renders.
+   * `addSpacer(color: string): string | undefined` throws
+     `new RuleError('You need to add a letter cube next!')` when a letter cube
+     is due. Otherwise it pushes a new `SpacerBead` and renders. When the
+     bracelet already carries a spacer bead in a different color and the
+     warning has not been shown yet, it remembers that it has now been shown
+     and returns `'You are mixing spacer colors!'`. In every other case it
+     returns `undefined`.
+   * `removeLast(): void` pops the array and renders.
+   * A private method that answers whether a letter cube is due. Read the last
+     item and decide: nothing there means a letter cube, a `SpacerBead` means a
+     letter cube, anything else means a spacer bead.
+   * A private method that answers whether the bracelet already carries a
+     spacer bead in some other color. Loop over the items and test each one
+     with `item instanceof SpacerBead`. Asking what kind of thing you have is
+     fine here, because the answer is a fact about the bracelet, not a choice
+     between two behaviors.
+   * A private `render()` that calls `replaceChildren()` on the container and
+     appends `item.render()` for every item.
+
+   `BraceletItem` appears only after a colon in this file, so its import is
+   `import type { BraceletItem } from './bracelet-item';`.
+
+7. Replace everything in `src/index.ts`. It imports the stylesheet, `Bracelet`,
+   and `RuleError`, and it holds no class of its own. Start with the two lists:
+
+   ```ts
+   const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ♥★';
+   const SPACER_COLORS = [
+     { name: 'rose', value: '#f4a0a0' },
+     { name: 'sand', value: '#f4d4a0' },
+     { name: 'mint', value: '#a0d4a0' },
+     { name: 'blue', value: '#a0a0f4' },
+     { name: 'lilac', value: '#d4a0f4' },
+     { name: 'pink', value: '#f4a0d4' },
+     { name: 'aqua', value: '#a0f4f4' },
+     { name: 'lime', value: '#d4f4a0' },
+     { name: 'peach', value: '#f4c8a0' },
+   ];
+   ```
+
+8. Look up `#bracelet`, `#message`, `#letterGrid`, `#colorRow`, and
+   `#undoButton` with one null check that throws, then create the bracelet with
+   `new Bracelet(braceletBox)` and write a small `showMessage(text: string)`
+   helper that sets the paragraph's `textContent`.
+
+9. Build the letter grid: one `<button>` per letter, with `type` set to
+   `'button'`, the letter as its text, and a click listener. Build the color
+   row: one `<button>` per entry of `SPACER_COLORS`, with its `value` as the
+   background color and an `aria-label` that names the color, so the button
+   says something without carrying text.
+
+10. Wire the clicks. A letter click calls `bracelet.addLetter(letter)` inside a
+    `try` and clears the message afterwards. Its `catch` shows `error.message`
+    when the error `instanceof RuleError`, and re-throws anything else, because
+    an error you did not plan for must not disappear. A color click does the
+    same around `bracelet.addSpacer(color)` and shows the returned warning when
+    it is not `undefined`. The undo button calls `bracelet.removeLast()` and
+    clears the message.
+
+11. Run `npm start` and try all of it. Expected results: a letter cube appears
+    on the string; a second letter right after it leaves the bracelet
+    untouched and shows "You need to add a spacer bead next!"; a spacer bead on
+    the empty bracelet shows "You need to add a letter cube next!"; a bead in a
+    second color is added and shows "You are mixing spacer colors!" once and
+    never again; "Remove last" takes items off one at a time and does nothing
+    on an empty bracelet.
+
+12. Run `npm run verify`, fix what it reports, and commit.
+
+## The same skeleton, other names {#sec-bracelet-skeleton}
+
+A sandwich stacker asks for an ingredient layer, then a sauce stripe, then an
+ingredient layer. Other words, same four classes: an abstract layer with
+`render()`, two subclasses that know how to draw themselves, a `Sandwich` that
+holds the array and refuses the wrong move, and an `index.ts` that catches the
+refusal and shows it. Build the bracelet from an empty folder once and you can
+build that one too, which is worth practicing before a lesson where the
+internet and the agent are switched off.
+
+## Check your understanding {#sec-bracelet-quiz}
+
+Six short questions, four of them from the research task.
+
+{{< quiz bracelet title="The bracelet" >}}

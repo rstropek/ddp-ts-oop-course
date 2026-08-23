@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the polymorphism and modules chapter quiz
+# (0040-classes/0040-polymorphism.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: polymorphism-quiz-eval
+target: ./0040-polymorphism-quiz.yaml
+
+questions:
+  - question: research-two-decimals
+    answers:
+      - expect: correct
+        answer: |
+          you write area.toFixed(2) and you get back a string, not a number
+      # Method named, but the return type is wrong.
+      - expect: partial
+        answer: |
+          toFixed(2) rounds it to 3216.99 and gives you a number again
+      - expect: incorrect
+        answer: |
+          Math.round does it, it cuts everything after the second digit
+
+  - question: research-default-export
+    answers:
+      - expect: correct
+        answer: |
+          named ones you import with curly braces and the exact name. a
+          default export has no braces and you can call it whatever you
+          want in the importing file.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          bei named exports brauchst du geschwungene klammern und genau den
+          namen, beim default export keine klammern und du darfst den namen
+          selber aussuchen.
+      # Braces rule right, misses that the default name is free.
+      - expect: partial
+        answer: |
+          named exports need { } around the name, default ones don't
+      - expect: incorrect
+        answer: |
+          there is no difference, both are written with import { x } from
+          and a file can have as many defaults as it wants
+
+  - question: research-import-path
+    answers:
+      - expect: correct
+        answer: |
+          ./ means the file right next to the one i'm writing, so a relative
+          path from that folder. without it, it's a package name and it
+          looks in node_modules.
+      # Only the relative half.
+      - expect: partial
+        answer: |
+          the ./ says it's in the same folder as my file
+      - expect: incorrect
+        answer: |
+          ./ always starts at the project root and 'vite' is looked up there
+          too, it's the same thing
+
+  - question: switch-versus-classes
+    answers:
+      - expect: correct
+        answer: |
+          all four switches break, tsc says the function can end without
+          returning, so i have to add a case 'line' four times. with classes
+          i just write one new Line class with its own area() and touch
+          nothing else.
+      # Only the class half.
+      - expect: partial
+        answer: |
+          with classes you only add a new class and you are done
+      - expect: incorrect
+        answer: |
+          nothing happens, the switch just skips the line and returns
+          undefined, and with classes you also have to change every file
+
+  - question: export-and-import
+    answers:
+      - expect: correct
+        answer: |
+          in rectangle.ts you put export in front of the class, and in
+          index.ts you add import { Rectangle } from './rectangle';
+      # Import present, export forgotten.
+      - expect: partial
+        answer: |
+          you write import { Rectangle } from './rectangle'; at the top of
+          index.ts
+      - expect: incorrect
+        answer: |
+          you add a second script tag for rectangle.ts in index.html, then
+          both files are loaded and it works
+
+  - question: import-type
+    answers:
+      - expect: correct
+        answer: |
+          because rect.ts does class Rect extends Shape, so it needs the real
+          class when the code runs. index.ts only writes Shape[] as a type
+          and that gets thrown away when it is built.
+      # Right idea about types, no link to extends.
+      - expect: partial
+        answer: |
+          import type is only allowed if you use the name as a type
+      - expect: incorrect
+        answer: |
+          import type is just the shorter and faster way to write it, both
+          lines do exactly the same

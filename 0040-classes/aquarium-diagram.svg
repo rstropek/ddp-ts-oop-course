@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="712" height="704" class="svgbob">
+  <style>.svgbob line, .svgbob path, .svgbob circle, .svgbob rect, .svgbob polygon {
+  stroke: black;
+  stroke-width: 2;
+  stroke-opacity: 1;
+  fill-opacity: 1;
+  stroke-linecap: round;
+  stroke-linejoin: miter;
+}
+
+.svgbob text {
+  white-space: pre;
+  fill: black;
+  font-family: Iosevka Fixed, monospace;
+  font-size: 14px;
+}
+
+.svgbob rect.backdrop {
+  stroke: none;
+  fill: white;
+}
+
+.svgbob .broken {
+  stroke-dasharray: 8;
+}
+
+.svgbob .filled {
+  fill: black;
+}
+
+.svgbob .bg_filled {
+  fill: white;
+  stroke-width: 1;
+}
+
+.svgbob .nofill {
+  fill: white;
+}
+
+.svgbob .end_marked_arrow {
+  marker-end: url(#arrow);
+}
+
+.svgbob .start_marked_arrow {
+  marker-start: url(#arrow);
+}
+
+.svgbob .end_marked_diamond {
+  marker-end: url(#diamond);
+}
+
+.svgbob .start_marked_diamond {
+  marker-start: url(#diamond);
+}
+
+.svgbob .end_marked_circle {
+  marker-end: url(#circle);
+}
+
+.svgbob .start_marked_circle {
+  marker-start: url(#circle);
+}
+
+.svgbob .end_marked_open_circle {
+  marker-end: url(#open_circle);
+}
+
+.svgbob .start_marked_open_circle {
+  marker-start: url(#open_circle);
+}
+
+.svgbob .end_marked_big_open_circle {
+  marker-end: url(#big_open_circle);
+}
+
+.svgbob .start_marked_big_open_circle {
+  marker-start: url(#big_open_circle);
+}
+
+</style>
+  <defs>
+    <marker id="arrow" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 0,4 4,2 0,0"></polygon>
+    </marker>
+    <marker id="diamond" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,2 2,0 4,2 2,4 0,2"></polygon>
+    </marker>
+    <marker id="circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <circle cx="4" cy="4" r="2" class="filled"></circle>
+    </marker>
+    <marker id="open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <circle cx="4" cy="4" r="2" class="bg_filled"></circle>
+    </marker>
+    <marker id="big_open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <circle cx="4" cy="4" r="3" class="bg_filled"></circle>
+    </marker>
+  </defs>
+  <rect class="backdrop" x="0" y="0" width="712" height="704"></rect>
+  <text x="306" y="28" >FishManager</text>
+  <line x1="356" y1="144" x2="356" y2="180" class="solid"></line>
+  <polygon points="352,180 360,180 356,192" class="filled"></polygon>
+  <text x="58" y="588" >HorizontalFish</text>
+  <text x="298" y="588" >CrissCrossFish</text>
+  <text x="554" y="588" >SinusFish</text>
+  <text x="378" y="172" >has</text>
+  <text x="410" y="172" >many</text>
+  <text x="226" y="60" >-fishes: Fish[]</text>
+  <text x="226" y="76" >-lastTime: number</text>
+  <text x="226" y="108" >+add(fish: Fish): void</text>
+  <text x="226" y="124" >+start(): void</text>
+  <text x="282" y="220" >Fish  (abstract)</text>
+  <text x="226" y="252" >#x: number</text>
+  <text x="226" y="268" >#y: number</text>
+  <text x="226" y="284" >#speedX: number</text>
+  <text x="226" y="300" >#speedY: number</text>
+  <text x="226" y="316" >#width: number</text>
+  <text x="226" y="332" >#height: number</text>
+  <text x="226" y="348" >#aquarium: HTMLElement</text>
+  <text x="226" y="364" >-element: HTMLImageElement</text>
+  <text x="226" y="380" >-loaded: boolean</text>
+  <text x="226" y="412" >+step(delta: number): void</text>
+  <text x="226" y="428" >#update(delta: number): void</text>
+  <text x="226" y="444" >#keepInside(): void</text>
+  <text x="226" y="460" >-draw(): void</text>
+  <text x="18" y="620" >#update(delta: number)</text>
+  <text x="258" y="620" >#update(delta: number)</text>
+  <text x="498" y="620" >-baseY: number</text>
+  <text x="258" y="636" >#keepInside(): void</text>
+  <text x="498" y="636" >-time: number</text>
+  <text x="498" y="668" >#update(delta: number)</text>
+  <g>
+    <line x1="212" y1="8" x2="492" y2="8" class="solid"></line>
+    <line x1="212" y1="8" x2="212" y2="136" class="solid"></line>
+    <line x1="492" y1="8" x2="492" y2="136" class="solid"></line>
+    <line x1="212" y1="40" x2="492" y2="40" class="solid"></line>
+    <line x1="212" y1="88" x2="492" y2="88" class="solid"></line>
+    <line x1="212" y1="136" x2="492" y2="136" class="solid"></line>
+  </g>
+  <g>
+    <line x1="212" y1="200" x2="492" y2="200" class="solid"></line>
+    <line x1="212" y1="200" x2="212" y2="472" class="solid"></line>
+    <line x1="492" y1="200" x2="492" y2="472" class="solid"></line>
+    <line x1="212" y1="232" x2="492" y2="232" class="solid"></line>
+    <line x1="212" y1="392" x2="492" y2="392" class="solid"></line>
+    <line x1="212" y1="472" x2="492" y2="472" class="solid"></line>
+  </g>
+  <g>
+    <line x1="356" y1="480" x2="352" y2="496" class="solid"></line>
+    <line x1="356" y1="480" x2="360" y2="496" class="solid"></line>
+    <line x1="352" y1="496" x2="344" y2="512" class="solid"></line>
+    <line x1="344" y1="512" x2="368" y2="512" class="solid"></line>
+    <line x1="360" y1="496" x2="368" y2="512" class="solid"></line>
+    <line x1="356" y1="512" x2="356" y2="560" class="solid"></line>
+  </g>
+  <g>
+    <line x1="116" y1="536" x2="596" y2="536" class="solid"></line>
+    <line x1="116" y1="536" x2="116" y2="560" class="solid"></line>
+    <line x1="596" y1="536" x2="596" y2="560" class="solid"></line>
+  </g>
+  <g>
+    <line x1="4" y1="568" x2="220" y2="568" class="solid"></line>
+    <line x1="4" y1="568" x2="4" y2="632" class="solid"></line>
+    <line x1="220" y1="568" x2="220" y2="632" class="solid"></line>
+    <line x1="4" y1="600" x2="220" y2="600" class="solid"></line>
+    <line x1="4" y1="632" x2="220" y2="632" class="solid"></line>
+  </g>
+  <g>
+    <line x1="244" y1="568" x2="460" y2="568" class="solid"></line>
+    <line x1="244" y1="568" x2="244" y2="648" class="solid"></line>
+    <line x1="460" y1="568" x2="460" y2="648" class="solid"></line>
+    <line x1="244" y1="600" x2="460" y2="600" class="solid"></line>
+    <line x1="244" y1="648" x2="460" y2="648" class="solid"></line>
+  </g>
+  <g>
+    <line x1="484" y1="568" x2="700" y2="568" class="solid"></line>
+    <line x1="484" y1="568" x2="484" y2="680" class="solid"></line>
+    <line x1="700" y1="568" x2="700" y2="680" class="solid"></line>
+    <line x1="484" y1="600" x2="700" y2="600" class="solid"></line>
+    <line x1="484" y1="648" x2="700" y2="648" class="solid"></line>
+    <line x1="484" y1="680" x2="700" y2="680" class="solid"></line>
+  </g>
+</svg>

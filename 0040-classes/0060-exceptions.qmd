@@ -1,0 +1,382 @@
+---
+title: "Exceptions: when code cannot go on"
+---
+
+Since the calculator chapter, every project of yours opens with the same safety
+line: look up an element, and `throw new Error(...)` when it is not there. You
+have typed that `throw` a dozen times and never watched it fire. This chapter
+fires it, and then teaches the other half of the story, where code further out
+catches what a `throw` sends up.
+
+## Break your own page {#sec-exceptions-experiment}
+
+Create a new app `error-tour` from our template inside `coursework/`. Replace
+`src/index.ts` with this:
+
+```ts
+const header = document.querySelector<HTMLHeadingElement>('#helloWorldHeader');
+if (!header) {
+  throw new Error('Element #helloWorldHeader not found');
+}
+
+header.textContent = 'Nothing broke';
+console.log('the last line of the file');
+```
+
+Run `npm start`, open the page, and press F12 for the developer tools. The
+heading says `Nothing broke` and the console says `the last line of the file`.
+
+Now break it on purpose. In `index.html`, rename the heading's id from
+`helloWorldHeader` to `pageHeader`, and save. The page reloads with the
+heading back at `Hello World`, because the line that sets `textContent` never
+ran. `the last line of the file` is gone from the console too. In its place
+stands a red line with the message you wrote:
+
+```
+Uncaught Error: Element #helloWorldHeader not found
+```
+
+Under it sits the stack: the file and the line number where the `throw`
+happened.
+
+## What throw does to everything above it {#sec-exceptions-throw}
+
+`throw` ends the function it stands in, immediately, and then walks out of
+every function that called it. The value it carries out is called an
+exception, and it leaves through an emergency exit instead of through
+`return`. Put this into `src/index.ts` and reload:
+
+```ts
+const half = (value: number): number => {
+  if (value < 0) {
+    throw new Error(`Cannot halve ${value}`);
+  }
+
+  return value / 2;
+};
+
+const report = (value: number): void => {
+  console.log('report starts');
+  console.log(half(value));
+  console.log('report ends');
+};
+
+report(10);
+report(-4);
+console.log('the last line of the file');
+```
+
+The console:
+
+```
+report starts
+5
+report ends
+report starts
+Uncaught Error: Cannot halve -4
+```
+
+The second `report` printed its first line and then stopped in the middle.
+`report ends` never came, and neither did `the last line of the file`, even
+though that line sits outside every function. The exception walked out of
+`half`, then out of `report`, and the module never got control back either.
+That walk is what the stack under the red line lists, innermost first.
+
+Nobody stopped the exception, so the browser did, and printing a red line is
+the only move the browser has. Anywhere earlier along the way out, your own
+code can step in and say: I know about this one, hand it to me.
+
+## Catching {#sec-exceptions-try}
+
+`try` marks a block of code that might throw, and `catch` marks the block that
+runs when it does. Wrap the call inside `report` in one:
+
+```ts
+const report = (value: number): void => {
+  console.log('report starts');
+  try {
+    console.log(half(value));
+    console.log('still inside try');
+  } catch (error) {
+    console.log('inside catch', error);
+  } finally {
+    console.log('inside finally');
+  }
+
+  console.log('report ends');
+};
+
+report(-4);
+console.log('the last line of the file');
+```
+
+Reload and read the order:
+
+```
+report starts
+inside catch Error: Cannot halve -4
+inside finally
+report ends
+the last line of the file
+```
+
+`still inside try` is missing, because the `throw` jumped straight from the
+middle of `half` into the `catch` block and skipped everything in between.
+The four lines after the `catch` all ran, though. Once an exception is caught,
+the program is healthy again: `report` finishes, the module runs to its last
+line, and nothing red shows up anywhere.
+
+The third block, `finally`, ran after the `catch`. Both exercises below lean
+on the precise rule for when `finally` runs, which is the first question in
+the research box further down.
+
+## The compiler will not let you read the message {#sec-exceptions-unknown}
+
+The `catch` block received the object that `throw` sent up, and that object has
+the message inside it. Try to print just the message:
+
+```ts
+  } catch (error) {
+    console.log('inside catch', error.message);
+  }
+```
+
+The line gets a red squiggle, and `npm run verify` spells it out:
+
+```
+src/index.ts(15,33): error TS18046: 'error' is of type 'unknown'.
+```
+
+`unknown` is TypeScript's way of saying "there is a value here, and I have no
+idea what". It has to say that, because `throw` is allowed to send up any
+value at all, not only an `Error`. So the compiler hands you the value and
+blocks every property until you prove what you are holding.
+
+`instanceof` is the proof. It asks whether an object was built from a given
+class:
+
+```ts
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log('inside catch', error.message);
+    }
+  }
+```
+
+Inside that `if`, TypeScript knows `error` is an `Error`, and `error.message`
+is the text you passed to `new Error(...)`. An `Error` carries two more
+properties next to `message`, and the research box below sends you to look
+them up.
+
+## An error class of your own {#sec-exceptions-custom}
+
+`Error` is a class, and a class can be extended. That is how you tell one kind
+of problem from another. Create `src/validation-error.ts`:
+
+```ts
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+```
+
+`super(message)` hands the text up to `Error`, which stores it in `message`
+for you. The line after it sets `name`, one of the two properties the research
+box asks about.
+
+Now a `catch` block can tell the two apart:
+
+```ts
+} catch (error) {
+  if (error instanceof ValidationError) {
+    errorParagraph.textContent = error.message;
+  } else if (error instanceof Error) {
+    errorParagraph.textContent = 'Something went wrong. Look in the console.';
+    console.error(error);
+  }
+}
+```
+
+The first branch is for a mistake you expected, so the user reads your message.
+The second is for everything else, which means a bug: the user gets a neutral
+line and you get the object in the console, where `console.error` marks it as
+an error.
+
+The order of the two branches is not free. A `ValidationError` is also an
+`Error`, so putting the wide branch first would swallow every validation
+message and turn it into `Something went wrong`. Ask for the narrow kind
+first, always.
+
+## Who throws, and who catches {#sec-exceptions-where}
+
+A class throws when it cannot keep its own rules. A `Rectangle` with a width of
+-5 is not a rectangle, so its constructor refuses to build one. The class has
+no idea whether a web page or a test is using it, so it cannot write into a
+paragraph. Throwing is how it says no without guessing who is listening.
+
+The user interface catches. Your `index.ts` knows there is a red paragraph on
+the page, so it turns the message into something a person reads.
+
+Mistakes you expect from a user often need no throw at all. An empty field in a
+form is normal, and an `if` right next to the input handles it in two lines.
+Check those where the check is simple, and keep the throw behind them for
+everything the check missed.
+
+::: {.callout-warning}
+## Never write an empty catch
+
+```ts
+} catch {
+  // nothing to see here
+}
+```
+
+A `catch` that does nothing turns a loud failure into silence. The page shows a
+stale result and the console stays clean, so the bug waits until someone else
+trips over it. When you catch, do something with what you caught: show it, log
+it, or hand it on with another `throw`.
+:::
+
+::: {.research title="`finally`, and what an `Error` carries"}
+Both exercises below need three details this chapter stops at.
+
+1. Your calculator disables a button at the start of a `try` block and gives it
+   back in `finally`. Name every way out of a `try` block that still runs the
+   `finally` block, and say where you read it.
+2. Next to `message`, an `Error` object carries `name` and `stack`. What does
+   each of the two hold for a plain `new Error('Something broke')`?
+3. `Number('')` and `Number('abc')` do not give you the same thing. What does
+   each one return, and which of the two does `Number.isNaN` catch?
+
+Question 3 decides whether your calculator's check works, and the exam runs
+without internet, so that one has to stick.
+:::
+
+## Exercise A: the calculator, with a model {#sec-exceptions-exercise-calculator}
+
+Your calculator from the chapter on types for elements does its arithmetic
+inside the click listener. Now that arithmetic moves into a class of its own
+that refuses bad input by throwing, and `index.ts` catches what it throws.
+
+Open your calculator project from `homework/`. If it is not there any more,
+build it again: the files below are the ones that chapter shipped, and its
+exercise steps say what `src/index.ts` has to do.
+
+{{< exercise calculator >}}
+
+1. Create `src/validation-error.ts` with the `ValidationError` class from this
+   chapter.
+2. Create `src/calculator.ts` with an exported class `Calculator`. Give it one
+   method, `calculate(left: number, right: number, operator: string): number`,
+   and move the `switch` over the operator into it. The method returns the
+   result and touches no element on the page.
+3. Guard the method. When `left` or `right` is `NaN`, throw a
+   `ValidationError` with the message `Please type a number into both fields.`.
+   When the operator is `/` and `right` is `0`, throw a `ValidationError` with
+   the message `You cannot divide by zero.`. In the `default` branch of the
+   `switch`, throw a plain `Error` that names the operator it does not know.
+4. In `src/index.ts`, import both classes and create one `Calculator` above the
+   click listener.
+5. Rewrite the click listener. Disable the button as its first line. Then open
+   a `try` block that reads both fields, converts them with `Number`, calls
+   `calculator.calculate(...)`, writes the full line such as `3.5 + 2 = 5.5`
+   into the result paragraph, and clears the error paragraph.
+6. Put the empty-field check first inside that `try`. When either input
+   `value` is the empty string, write `Please fill in both fields.` into the
+   error paragraph, clear the result paragraph, and leave the listener with
+   `return`.
+7. Write the `catch` block with the two branches from this chapter: a
+   `ValidationError` puts its own `message` into the error paragraph, any other
+   `Error` puts `Something went wrong. Look in the console.` there and goes to
+   the console. Clear the result paragraph in both cases.
+8. Add the `finally` block that enables the button again.
+9. Run `npm start` and try four inputs in a row: `3.5 + 2` gives the result and
+   no red text, `10 / 0` gives the divide message, `12abc * 2` gives the number
+   message, and an empty first field gives the fill-in message. The button must
+   be clickable after every one of them.
+10. Break it from the HTML. Add `<option value="%">%</option>` to the
+    `<select>` in `index.html`, pick it, and click Calculate. The page shows
+    `Something went wrong. Look in the console.`, and your `default` branch
+    is in the console. Remove the option again.
+11. Run `npm run verify` and fix what it reports.
+
+## Exercise B: shapes that refuse to be wrong {#sec-exceptions-exercise-shapes}
+
+Open your shapes calculator from the chapter on polymorphism, the project with
+`Shape`, `Rectangle`, `Square`, `Ellipse`, `Circle`, and `Line` in six files.
+Its five buttons build shapes from random numbers between 1 and 100, so no bad
+shape can reach a constructor yet. You change that.
+
+1. Copy `src/validation-error.ts` from your calculator into this project.
+2. Guard three constructors. In `Rectangle`, `Ellipse`, and `Line`, right after
+   the `super()` call, throw a `ValidationError` when a width, a height, a
+   radius, or a length is `0` or below. Write a message that names the shape,
+   for example `A rectangle needs a width and a height above 0.`.
+3. `Square` and `Circle` get no check of their own. Follow what `new Square(-3)`
+   does, step by step, until you see why they do not need one.
+4. Give the page a field that can hold a bad number. Above the buttons in
+   `index.html`:
+
+   ```html
+   <p>
+     <label for="sideLength">Side length</label>
+     <input id="sideLength" type="number" value="10">
+   </p>
+   ```
+
+   And under the total line, a place for the message:
+
+   ```html
+   <p id="error" class="error"></p>
+   ```
+
+   Add `.error { color: firebrick; }` to `src/styles.css`.
+5. In `src/index.ts`, fetch `#sideLength` and `#error` the usual way, and add
+   both to the `if` that throws when an element is missing.
+6. Write a helper next to `render`:
+
+   ```ts
+   const showError = (error: unknown): void => {
+     // the two branches from this chapter go here
+   };
+   ```
+
+   In the branch for anything that is not a `ValidationError`, log `error.name`
+   next to the error itself, so the console names the kind and shows where it
+   came from.
+7. Rewrite the listener of `addSquareButton`. Instead of a random number, it
+   builds the `Square` from `sideLengthInput.valueAsNumber` inside a `try`
+   block that then clears the error paragraph and calls `render`. Catch with
+   `showError`.
+8. Test it. `12` adds `Square with side 12` and the total grows by 144. `-3`
+   puts a red line on the page and leaves the list untouched.
+9. Now break a caller on purpose, the way a typo in an id would. Add
+   `<button id="breakButton" type="button">Break it</button>` after the five
+   shape buttons and fetch it. Its listener opens a `try` block that looks up
+   `#thisIdDoesNotExist`, throws
+   `new Error('Element #thisIdDoesNotExist not found')` when the lookup gives
+   `null`, and builds a `Rectangle` from that element below the check. Catch
+   with `showError`.
+10. Click both buttons and compare. The bad side length puts your own sentence
+    on the page. The broken button puts the neutral sentence there and writes
+    the name and the stack into the console. That difference is the whole point
+    of writing an error class of your own.
+11. Run `npm run verify` and fix what it reports.
+
+::: {.callout-tip}
+## When you finish early
+
+The other four buttons still pick numbers between 1 and 100 and can never go
+wrong. Change one of them to `Math.floor(Math.random() * 21) - 10`, wrap its
+listener in the same `try`/`catch`, and click it 20 times. The model refuses
+the sizes below 1 even though no user typed them, which is what the safety net
+behind a form is for.
+:::
+
+## Check your understanding {#sec-exceptions-quiz}
+
+Six questions, the first three of them the research task above.
+
+{{< quiz exceptions title="Exceptions" >}}

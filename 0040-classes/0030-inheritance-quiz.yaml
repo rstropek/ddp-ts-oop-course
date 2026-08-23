@@ -1,0 +1,206 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Inheritance and abstract classes"
+# (0040-classes/0030-inheritance.qmd).
+# The first three questions are the chapter's research box (ids `research-*`):
+# they get the research feedback rule, so the grader names the source instead
+# of the answer. The last three check the chapter's own concepts: protected,
+# abstract members, and one array holding several kinds of ball.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: inheritance-quiz
+name: "Quiz: Inheritance and abstract classes"
+
+title: "Check your understanding: inheritance and abstract classes"
+description: |
+  Six short questions about the chapter *Inheritance and abstract classes*,
+  three of them the research task. Answer in your own words; if you cannot
+  answer a research question yet, look it up and come back. One or two
+  sentences are enough. This quiz is anonymous and is here for you, and
+  answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="class HeavyBall extends Ball { }"
+      scope="after the inheritance chapter of the classes part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "`querySelector<T>` with a null check, events, `textContent`, and `classList`"
+        "SVG built from TypeScript with `createElementNS` and `setAttribute`"
+        "the animation loop with `requestAnimationFrame` and a delta time in seconds"
+        "classes: fields, constructor, methods, `this`, and `new`"
+        "`private`, `readonly`, getters and setters, and parameter properties"
+        "`extends`, the base class and the subclass, and overriding a method"
+        "`super(...)` as the call to the base class constructor"
+        "`protected` for fields a subclass needs"
+        "`abstract` classes, abstract getters, and abstract methods"
+        "one array typed with the base class that holds objects of every subclass")
+      not_yet=(array
+        "the word polymorphism and the comparison with a `switch` over a type field"
+        "ES modules: `export`, `import`, and one class per file"
+        "`instanceof`, `try`/`catch`, `Map`, `Set`, or generics of your own"
+        "interfaces and tests")}}
+
+questions:
+  - id: research-gravity
+    title: "Gravity in a game loop"
+    question: |
+      A game loop keeps a ball's speed in pixels per second and updates it
+      every frame with a delta time in seconds. Which two lines make gravity
+      pull the ball down, one for the speed and one for the position, and in
+      which unit do you give the gravity constant?
+    evaluation: |
+      Expected: `velocityY += GRAVITY * deltaSeconds;` changes the speed and
+      `y += velocityY * deltaSeconds;` changes the position. Gravity is an
+      acceleration, given in pixels per second squared. Bonus for naming the
+      source (an MDN or game-loop article about delta time).
+      Required: (1) gravity is added to the speed, multiplied by the frame
+      length; (2) the speed is added to the position, multiplied by the frame
+      length; (3) the gravity constant is pixels per second squared (per
+      second per second counts).
+      Partial: gets one of the two lines right, or both lines right but the
+      unit wrong or missing.
+      Incorrect: adds gravity straight to the position, or leaves the frame
+      length out of both lines.
+
+  - id: research-filter
+    title: "What filter hands back"
+    question: |
+      `filter` builds an array out of an array. What does the function you
+      hand to `filter` have to return for an item to be kept, and what does
+      `filter` do to the array you called it on?
+    evaluation: |
+      Expected: the function returns `true` for an item that is kept and
+      `false` for one that is dropped. `filter` leaves the original array
+      untouched and returns a new array, so the result has to be stored or
+      assigned. Bonus for naming the MDN page for `Array.prototype.filter`.
+      Required: (1) returning `true` keeps the item; (2) the original array is
+      not changed and a new array comes back.
+      Partial: names the `true`/`false` rule but claims `filter` changes the
+      original array or says nothing about the return value, or the other way
+      round.
+      Incorrect: says the function returns the item itself or the new array,
+      or says `filter` removes the items from the array in place.
+
+  - id: research-fill-opacity
+    title: "Making an SVG shape see-through"
+    question: |
+      SVG can make a shape see-through. Which attribute changes only the
+      inside of a shape and leaves its outline alone, and which two numbers
+      are the ends of that attribute's range?
+    evaluation: |
+      Expected: `fill-opacity`, with 0 for fully see-through and 1 for fully
+      solid. Bonus for naming the MDN page for `fill-opacity`.
+      Required: (1) the attribute `fill-opacity`; (2) the range from 0 to 1.
+      Partial: names `fill-opacity` but gives a wrong range (such as 0 to 100),
+      or names the right range for the wrong attribute.
+      Incorrect: names `opacity`, `stroke-opacity`, `visibility`, or
+      `display`, which do not match "only the inside".
+
+  - id: protected-fix
+    title: "The field the subclass cannot reach"
+    question: |
+      A student writes this:
+
+      ```ts
+      class Ball {
+        private y: number;
+        // ... constructor left out ...
+      }
+
+      class HeavyBall extends Ball {
+        fall(deltaSeconds: number): void {
+          this.y += 300 * deltaSeconds;
+        }
+      }
+      ```
+
+      TypeScript answers
+      `Property 'y' is private and only accessible within class 'Ball'.`
+      What is the smallest change that fixes this, and why does it help?
+    evaluation: |
+      Expected: change `private y` to `protected y` in `Ball`. `protected`
+      opens the field to the class and its subclasses while it stays closed to
+      code outside the family, and `HeavyBall` is a subclass.
+      Required: (1) `private` becomes `protected` in the base class `Ball`;
+      (2) `protected` is readable by subclasses (and still not from outside).
+      Partial: names `protected` without saying what it allows, or explains
+      the idea correctly but changes the wrong class or the wrong line.
+      Incorrect: suggests removing the keyword to make it public, adding a
+      getter, or copying the field into `HeavyBall`.
+
+  - id: abstract-contract
+    title: "What abstract buys you"
+    question: |
+      `Ball` is marked `abstract` and declares
+      `abstract get bounciness(): number;`. Name one thing you can no longer
+      do with `Ball` itself, and one thing the code inside `Ball` can now rely
+      on.
+    evaluation: |
+      Expected: you can no longer create a `Ball` with `new Ball(...)`, since
+      TypeScript reports that you cannot create an instance of an abstract
+      class. Inside `Ball`, code may use `this.bounciness`, because every
+      subclass has to supply it or it does not compile.
+      Required: (1) `new Ball(...)` is refused; (2) every subclass must
+      implement `bounciness`, so the base class can use it.
+      Partial: names only one of the two, or says `Ball` is "only a blueprint"
+      without either consequence.
+      Incorrect: claims an abstract class cannot have normal methods or
+      fields, or claims subclasses may leave `bounciness` out.
+
+  - id: array-of-base
+    title: "Three balls, one loop"
+    question: |
+      Predict the three console lines this prints, and say why.
+
+      ```ts
+      abstract class Ball {
+        abstract get speed(): number;
+
+        fall(): void {
+          console.log(this.speed);
+        }
+      }
+
+      class LightBall extends Ball {
+        get speed(): number {
+          return 100;
+        }
+      }
+
+      class HeavyBall extends Ball {
+        get speed(): number {
+          return 300;
+        }
+      }
+
+      const balls: Ball[] = [new LightBall(), new HeavyBall(), new LightBall()];
+
+      for (const ball of balls) {
+        ball.fall();
+      }
+      ```
+    evaluation: |
+      Expected: 100, 300, 100. `fall` is written once in `Ball`, and
+      `this.speed` reads the getter of the object it runs on, so each ball
+      answers with its own number even though the array is typed `Ball[]`.
+      Required: (1) the three values 100, 300, 100 in that order; (2) each
+      object uses its own `speed` getter, not one belonging to `Ball`.
+      Partial: gives the right three numbers with no reason, or explains the
+      idea correctly but gets the order or a number wrong.
+      Incorrect: says all three lines are the same, that the code does not
+      compile, or that `Ball` decides the speed.

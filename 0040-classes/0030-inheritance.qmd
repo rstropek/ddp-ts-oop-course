@@ -1,0 +1,464 @@
+---
+title: "Inheritance and abstract classes"
+---
+
+Two kinds of ball, two kinds of enemy, two kinds of invoice line. Programs are
+full of things that are almost the same, and the quickest way to get the second
+one is to copy the first class and change what differs. That works until you
+have to fix a bug, and then you have to fix it twice. TypeScript has a better
+answer, and it costs one keyword.
+
+## Two classes, one number apart {#sec-inheritance-copy}
+
+1. Create a new app from our template inside `coursework/`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Falling balls</h1>
+   <svg id="stage" viewBox="0 0 300 300" width="300" height="300" role="img" aria-label="Two falling balls"></svg>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Replace everything in `src/index.ts` with this:
+
+   ```ts
+   const SVG_NS = 'http://www.w3.org/2000/svg';
+
+   const stage = document.querySelector<SVGSVGElement>('#stage');
+   if (!stage) {
+     throw new Error('No element with the id stage');
+   }
+
+   class Ball {
+     private y: number;
+     private circle: SVGCircleElement;
+
+     constructor(stage: SVGSVGElement, x: number, color: string) {
+       this.y = 20;
+       this.circle = document.createElementNS(SVG_NS, 'circle');
+       this.circle.setAttribute('cx', String(x));
+       this.circle.setAttribute('cy', String(this.y));
+       this.circle.setAttribute('r', '20');
+       this.circle.setAttribute('fill', color);
+       stage.append(this.circle);
+     }
+
+     fall(deltaSeconds: number): void {
+       this.y += 100 * deltaSeconds;
+       this.circle.setAttribute('cy', String(this.y));
+     }
+   }
+
+   class HeavyBall {
+     private y: number;
+     private circle: SVGCircleElement;
+
+     constructor(stage: SVGSVGElement, x: number, color: string) {
+       this.y = 20;
+       this.circle = document.createElementNS(SVG_NS, 'circle');
+       this.circle.setAttribute('cx', String(x));
+       this.circle.setAttribute('cy', String(this.y));
+       this.circle.setAttribute('r', '20');
+       this.circle.setAttribute('fill', color);
+       stage.append(this.circle);
+     }
+
+     fall(deltaSeconds: number): void {
+       this.y += 300 * deltaSeconds;
+       this.circle.setAttribute('cy', String(this.y));
+     }
+   }
+
+   const light = new Ball(stage, 100, 'tomato');
+   const heavy = new HeavyBall(stage, 200, 'slateblue');
+
+   let lastTime = 0;
+
+   const tick = (timestamp: number) => {
+     if (lastTime === 0) {
+       lastTime = timestamp;
+     }
+     const deltaSeconds = (timestamp - lastTime) / 1000;
+     lastTime = timestamp;
+
+     light.fall(deltaSeconds);
+     heavy.fall(deltaSeconds);
+
+     requestAnimationFrame(tick);
+   };
+
+   requestAnimationFrame(tick);
+   ```
+
+4. Run `npm start`.
+
+Two circles drop from the top edge. The blue one is three times as fast, both
+slide out at the bottom, and the SVG cuts them off there. Nothing catches them,
+because these two classes know how to fall and nothing else.
+
+Now read the two classes again. Forty lines, and exactly one number is
+different: 100 in one `fall`, 300 in the other.
+
+## One word deletes the copy {#sec-inheritance-extends}
+
+Delete the whole `HeavyBall` class and put this in its place:
+
+```ts
+class HeavyBall extends Ball {
+  fall(deltaSeconds: number): void {
+    this.y += 300 * deltaSeconds;
+    this.circle.setAttribute('cy', String(this.y));
+  }
+}
+```
+
+`extends Ball` says that a `HeavyBall` is a `Ball` with changes. It gets every
+field and every method of `Ball` without repeating a line of them, including
+the constructor, which is why `new HeavyBall(stage, 200, 'slateblue')` still
+takes the same three arguments. `Ball` is the **base class** here and
+`HeavyBall` is the **subclass**.
+
+A subclass may replace a method it inherited by writing a method with the same
+name. That is called **overriding**, and `fall` is overridden above.
+
+VS Code puts a red line under the new class, and `npx tsc --noEmit` says why:
+
+```
+Property 'y' is private and only accessible within class 'Ball'.
+Property 'circle' is private and only accessible within class 'Ball'.
+```
+
+## What `protected` is for {#sec-inheritance-protected}
+
+`private` shuts a field away from everything outside its class, and a subclass
+counts as outside. That is the right setting most of the time, and it is
+exactly wrong here, because `HeavyBall` has to reach the `y` it inherited.
+
+`protected` is the middle setting: the class itself and every subclass can use
+the field, and code outside the family cannot. Change the two field
+declarations in `Ball`:
+
+```ts
+protected y: number;
+protected circle: SVGCircleElement;
+```
+
+The errors disappear and the page animates again. Reach for `protected` when a
+subclass needs the value, and leave everything else `private`, because a field
+that subclasses may touch is a field you cannot rename in peace.
+
+## A subclass constructor calls its base first {#sec-inheritance-super}
+
+A subclass can bring its own constructor. Add a third kind of ball that fixes
+its own color and size:
+
+```ts
+class BigBall extends Ball {
+  constructor(stage: SVGSVGElement, x: number) {
+    super(stage, x, 'gold');
+    this.circle.setAttribute('r', '35');
+  }
+}
+```
+
+`super(...)` calls the constructor of the base class. Leave that line out and
+TypeScript refuses the class with
+`Constructors for derived classes must contain a 'super' call.`, and move it
+below the `setAttribute` line and it says
+`'super' must be called before accessing 'this' in the constructor of a derived class.`
+
+Both messages guard the same thing. `this.circle` is created by the base
+constructor, so until `super(...)` has run there is no circle to set an
+attribute on. First let the base build its part of the object, then add yours.
+
+Nobody creates a `BigBall` yet, so `npx tsc --noEmit` also reports
+`'BigBall' is declared but never used.` The next section gives it a job.
+
+## One array holds every kind {#sec-inheritance-array}
+
+Three balls mean three variables and three calls in `tick`, and the fourth ball
+would mean a fourth of each. Replace the `light` and `heavy` variables with one
+array and let a loop do the work:
+
+```ts
+const balls: Ball[] = [new Ball(stage, 60, 'tomato'), new HeavyBall(stage, 150, 'slateblue'), new BigBall(stage, 240)];
+```
+
+Inside `tick`, replace the two `fall` calls with this:
+
+```ts
+for (const ball of balls) {
+  ball.fall(deltaSeconds);
+}
+```
+
+The array is typed `Ball[]`, and TypeScript accepts a `HeavyBall` and a
+`BigBall` in it, because each of them is a `Ball`. One line calls `fall` on all
+three, and every ball still falls at its own speed: the object knows which
+`fall` belongs to it, and the loop never asks.
+
+What the array type does control is which members you may use. Through a
+`Ball[]` you can call what `Ball` declares. A method that only `BigBall` has is
+not available in that loop.
+
+## A class nobody should build {#sec-inheritance-abstract}
+
+`Ball` now has two jobs, and they fight. It is the blueprint every kind shares,
+and it is also a ball you can create, with a speed of 100 baked into `fall`.
+Give the speed to the subclasses and the base class keeps only the part that
+never changes. Replace everything from `class Ball` down to the `balls` array
+with this:
+
+```ts
+const FLOOR = 260;
+
+abstract class Ball {
+  protected y: number;
+  protected circle: SVGCircleElement;
+  private landed: boolean;
+
+  constructor(stage: SVGSVGElement, x: number, color: string) {
+    this.y = 20;
+    this.landed = false;
+    this.circle = document.createElementNS(SVG_NS, 'circle');
+    this.circle.setAttribute('cx', String(x));
+    this.circle.setAttribute('cy', String(this.y));
+    this.circle.setAttribute('r', '20');
+    this.circle.setAttribute('fill', color);
+    stage.append(this.circle);
+  }
+
+  abstract get speed(): number;
+
+  protected abstract onReachedBottom(): void;
+
+  fall(deltaSeconds: number): void {
+    if (this.landed) {
+      return;
+    }
+
+    this.y += this.speed * deltaSeconds;
+    if (this.y >= FLOOR) {
+      this.y = FLOOR;
+      this.landed = true;
+      this.onReachedBottom();
+    }
+
+    this.circle.setAttribute('cy', String(this.y));
+  }
+}
+
+class LightBall extends Ball {
+  get speed(): number {
+    return 100;
+  }
+
+  protected onReachedBottom(): void {
+    this.circle.setAttribute('fill', 'gold');
+  }
+}
+
+class HeavyBall extends Ball {
+  get speed(): number {
+    return 300;
+  }
+
+  protected onReachedBottom(): void {
+    this.circle.remove();
+  }
+}
+
+const balls: Ball[] = [new LightBall(stage, 100, 'tomato'), new HeavyBall(stage, 200, 'slateblue')];
+```
+
+Both balls stop at the floor now. The red one turns gold when it lands, the
+blue one disappears, and neither subclass contains a line about falling.
+
+`abstract` marks a member that has no body here and must be filled in by every
+subclass. `speed` is an abstract getter, so `this.speed` inside `fall` reads
+whatever the subclass returns. `onReachedBottom` is an abstract method, and the
+base class decides when it runs while the subclass decides what happens. A
+class with an abstract member must be marked `abstract` itself, and such a
+class cannot be created. Try `new Ball(stage, 50, 'green')` and TypeScript
+answers `Cannot create an instance of an abstract class.`
+
+Forget one of the two members in a subclass and the message names it. Delete
+the `speed` getter from `HeavyBall` and TypeScript says:
+
+```
+Non-abstract class 'HeavyBall' does not implement inherited abstract member speed from class 'Ball'.
+```
+
+That is the whole point of an abstract member. It is a promise the compiler
+collects, so `fall` can call `this.onReachedBottom()` and be sure something is
+there.
+
+Notice which fields kept which keyword. `landed` is `private`, because only
+`fall` ever looks at it. `y` and `circle` are `protected`, because the
+subclasses work with them.
+
+::: {.callout-note}
+## Still one file
+
+All of this lives in `src/index.ts`, and the file grows with every kind of
+ball. That is fine for now. The next chapter gives each class a file of its
+own.
+:::
+
+::: {.research title="Gravity, and getting rid of dead balls"}
+The bouncing balls below fall faster the longer they fall, the fragile ones get
+paler with every landing, and the dead ones have to leave the array. This
+chapter shows none of that.
+
+1. A game loop keeps a speed in pixels per second and changes it every frame.
+   Which two lines make gravity pull a ball down, one for the speed and one for
+   the position, and in which unit do you give the gravity constant?
+2. `filter` builds an array out of an array. What does the function you hand to
+   `filter` have to return for an item to be kept, and what does `filter` do to
+   the array you called it on?
+3. SVG can make a shape see-through. Which attribute changes only the inside of
+   a shape and leaves its outline alone, and which two numbers are the ends of
+   that attribute's range?
+
+Question 2 has to work without looking it up, because `filter` turns up in
+every exam task that works with arrays.
+:::
+
+## Exercise: bouncing balls {#sec-inheritance-exercise}
+
+Four kinds of ball share one base class and differ in two members.
+
+{{< exercise bouncing-balls >}}
+
+The `index.html` you copied holds an empty `<svg id="stage">` of 600 by 400 and
+five buttons: `#addGummy`, `#addSteel`, `#addSuper`, `#addFragile`, and
+`#clear`.
+
+1. Create a new app from our template inside `coursework/`.
+2. Replace everything in `src/index.ts` with `import './styles.css';`, the
+   namespace constant `const SVG_NS = 'http://www.w3.org/2000/svg';`, and the
+   numbers the simulation runs on:
+
+   ```ts
+   const STAGE_WIDTH = 600;
+   const STAGE_HEIGHT = 400;
+   const GRAVITY = 900;
+   const MIN_BOUNCE_SPEED = 30;
+   ```
+
+   Run `npm start`. Expected result: an empty box with five buttons under it.
+3. Look up the six elements with `querySelector<SVGSVGElement>` and
+   `querySelector<HTMLButtonElement>`, and cover them with one `if` that
+   throws.
+4. Write `abstract class Ball` with these fields at the top: `protected y`,
+   `protected velocityY`, and `protected radius`, all of type `number`, then
+   `protected circle` of type `SVGCircleElement` and `private resting` of type
+   `boolean`. The constructor takes
+   `(stage: SVGSVGElement, x: number, radius: number, color: string)`,
+   starts `y` at `radius` so the ball touches the top edge, sets `velocityY` to
+   0 and `resting` to `false`, creates the circle with `createElementNS`, gives
+   it `cx`, `cy`, `r`, and `fill`, and appends it to the stage.
+5. Add the two abstract members. `abstract get bounciness(): number;` is the
+   share of the speed a ball keeps when it bounces, so 0.5 means it comes back
+   up half as fast as it went down. The method
+   `protected abstract onReachedBottom(): boolean;` runs on every landing and
+   returns `true` when the ball plays on and `false` when it is finished.
+6. Add a method `remove()` that takes the circle out of the SVG.
+7. Write `update(deltaSeconds: number): boolean`, the method the game loop
+   calls once per frame for every ball. In this order:
+
+   * when `this.resting` is `true`, return `true` and do nothing else;
+   * let gravity change `velocityY` and let `velocityY` change `y`, the two
+     lines from research question 1;
+   * when `this.y` is greater than `STAGE_HEIGHT - this.radius`, the ball has
+     reached the floor: pin `this.y` to that value and turn the speed around
+     with `this.velocityY = -this.velocityY * this.bounciness;`
+   * still inside that floor branch, when `Math.abs(this.velocityY)` is now
+     below `MIN_BOUNCE_SPEED`, the ball has no bounce left in it: set
+     `velocityY` to 0 and `resting` to `true`. Otherwise call
+     `this.onReachedBottom()`, and when that returns `false`, call
+     `this.remove()` and return `false`;
+   * when `this.y` is smaller than `this.radius`, the ball hit the ceiling: pin
+     `this.y` to `this.radius` and turn the speed around the same way;
+   * write the new `cy` and return `true`.
+8. Write `class GummyBall extends Ball`. Its constructor takes
+   `(stage: SVGSVGElement, x: number)` and calls
+   `super(stage, x, 22, 'hsl(0 80% 60%)')`. Give it a `private bounces: number`
+   that starts at 0, a `bounciness` of 0.6, and an `onReachedBottom` that counts
+   the landing, writes
+   `` `hsl(${(this.bounces * 50) % 360} 80% 60%)` `` into `fill`, and returns
+   `true`. In `hsl`, the first number is an angle on the color wheel, so a
+   growing number walks the ball through the rainbow.
+9. Write `class SteelBall extends Ball`: radius 16, color `'#8d99ae'`,
+   `bounciness` 0.85, and an `onReachedBottom` whose whole body is
+   `return true;`. Steel does not care that it landed, and an abstract member
+   still has to be implemented.
+10. Write `class SuperBall extends Ball`: radius 14, color `'#2ecc71'`,
+    `bounciness` 0.9. Its `onReachedBottom` gives the ball an extra kick with
+    `this.velocityY -= 150;`, grows `this.radius` by 2, writes the new radius
+    into the `r` attribute, and returns `this.radius <= 40`, so the ball pops
+    once it has grown too big.
+11. Write `class FragileBall extends Ball`: radius 26, color `'#c4a77d'`,
+    `bounciness` 0.4, and a `private hits: number` that starts at 0. Its
+    `onReachedBottom` counts the hit and makes the ball paler with the
+    attribute from research question 3, using `String(1 - this.hits * 0.3)` as
+    the value. It returns `false` on the third hit.
+12. Build the game loop below the classes:
+
+    ```ts
+    let balls: Ball[] = [];
+    let lastTime = 0;
+
+    const randomX = () => 50 + Math.random() * (STAGE_WIDTH - 100);
+
+    const tick = (timestamp: number) => {
+      if (lastTime === 0) {
+        lastTime = timestamp;
+      }
+      const deltaSeconds = (timestamp - lastTime) / 1000;
+      lastTime = timestamp;
+
+      balls = balls.filter((ball) => ball.update(deltaSeconds));
+
+      requestAnimationFrame(tick);
+    };
+    ```
+
+    That one `filter` line updates every ball and keeps the survivors, because
+    `update` returns exactly what `filter` wants to hear. A ball that dies has
+    already taken its own circle out of the SVG in step 7.
+13. Give each of the four ball buttons a `click` listener that pushes a new
+    ball of its kind at `randomX()` into `balls`. Start the animation with one
+    `requestAnimationFrame(tick);` at the end of the file. Expected result: every
+    button drops a ball, the gummy ball changes color on each landing and comes
+    to rest quickly, the steel ball bounces far longer, the super ball grows
+    until it vanishes, and the fragile ball fades and is gone after three
+    landings.
+14. Wire the `#clear` button: call `remove()` on every ball in the array, then
+    set `balls` to an empty array.
+15. Bonus: add a fifth kind, a `PaintBall` that leaves a small circle behind on
+    every landing. It needs the stage, so make the base class keep it in a
+    `protected` field.
+16. Run `npm run verify` and fix what it reports.
+
+::: {.callout-note}
+## What has to work
+
+* The app starts with `npm start`, the console stays quiet, and
+  `npm run verify` passes.
+* `Ball` is `abstract`, and `bounciness` and `onReachedBottom` are abstract
+  members that every kind fills in.
+* No subclass repeats the physics from `update`.
+* Balls never leave the box, and a ball that dies leaves neither a circle in
+  the SVG nor an entry in the array.
+
+A working `Clear` button and the fifth kind of ball from step 15 are what lift
+this above passing.
+:::
+
+## Check your understanding {#sec-inheritance-quiz}
+
+Six short questions, and the first three are the research questions from above.
+
+{{< quiz inheritance title="Inheritance and abstract classes" >}}

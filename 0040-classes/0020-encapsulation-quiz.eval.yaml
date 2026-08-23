@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the encapsulation chapter quiz
+# (0040-classes/0020-encapsulation.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes, not routinely.
+
+id: encapsulation-quiz-eval
+target: ./0020-encapsulation-quiz.yaml
+
+questions:
+  - question: research-clock-reading
+    answers:
+      - expect: correct
+        answer: |
+          Date.now() counts the milliseconds since 1970, performance.now()
+          since the page started loading. for measuring how long something
+          took you take performance.now(), it never jumps around. mdn says so
+          on the performance.now page.
+      # Both starting points right, no choice made.
+      - expect: partial
+        answer: |
+          one counts from 1970 and the other one from the moment the page was
+          loaded
+      - expect: incorrect
+        answer: |
+          both give you the current time of the computer, so it does not
+          matter which one you use
+
+  - question: research-pad-start
+    answers:
+      - expect: correct
+        answer: |
+          padStart. String(7).padStart(2, '0') gives '07'. first argument is
+          how long the result should be, second is the character it fills up
+          with.
+      # Method right, arguments only half described.
+      - expect: partial
+        answer: |
+          you use padStart and give it a 2
+      - expect: incorrect
+        answer: |
+          padEnd(2, '0'), that puts the zero in front
+
+  - question: research-to-fixed
+    answers:
+      - expect: correct
+        answer: |
+          toFixed(2). the number in the brackets is how many digits after the
+          dot, and you get back a string, not a number.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          man nimmt toFixed(2), die zahl sagt wie viele nachkommastellen man
+          will. das ergebnis ist ein string.
+      # Right method, wrong return type.
+      - expect: partial
+        answer: |
+          toFixed(2) rounds it to two decimals and gives you the number back
+      - expect: incorrect
+        answer: |
+          Math.round(balance * 100) / 100 is the method for that
+
+  - question: research-getter-call
+    answers:
+      - expect: correct
+        answer: |
+          it says the expression is not callable because it is a get accessor
+          and asks if i meant it without the (). so i just remove the brackets
+          and write watch.elapsed.
+      # Error seen, fix not named.
+      - expect: partial
+        answer: |
+          typescript underlines it and says it is not callable
+      - expect: incorrect
+        answer: |
+          it compiles fine, a getter is a normal method so the brackets are
+          allowed
+
+  - question: private-guards-the-rule
+    answers:
+      - expect: correct
+        answer: |
+          put private in front of health. then nothing outside Player can
+          write it and also not read it, you only get at it through hit or a
+          getter you add.
+      # Keyword right, effect on reading wrong.
+      - expect: partial
+        answer: |
+          write private health. reading player.health still works, only
+          writing is blocked.
+      - expect: incorrect
+        answer: |
+          make it readonly health, then the line with -20 is an error
+
+  - question: readonly-and-getter
+    answers:
+      - expect: correct
+        answer: |
+          both are errors. lapNumber is readonly so only the constructor can
+          set it, and time is just a getter with no setter so there is nothing
+          to assign to.
+      # One of the two lines caught.
+      - expect: partial
+        answer: |
+          lap.lapNumber = 4 is not allowed because of readonly. the other line
+          is ok.
+      - expect: incorrect
+        answer: |
+          both lines are fine, lapNumber and time are public so you can write
+          them

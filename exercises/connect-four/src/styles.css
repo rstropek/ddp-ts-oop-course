@@ -1,0 +1,45 @@
+body {
+  font-family: system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  width: min(28rem, 90vw);
+  padding: 0.5rem;
+  background-color: #0d47a1;
+  border-radius: 0.5rem;
+}
+
+/* The cells are buttons, so this switches off the button look. They are still
+   flat: making them round discs is your job in the exercise. */
+.cell {
+  border: none;
+  padding: 0;
+  background-color: white;
+  cursor: pointer;
+}
+
+.cell:hover {
+  background-color: #bbdefb;
+}
+
+.cell.red {
+  background-color: #e53935;
+}
+
+.cell.yellow {
+  background-color: #fdd835;
+}
+
+#status {
+  font-size: 1.2rem;
+  font-weight: bold;
+  min-height: 1.5rem;
+}

@@ -1,0 +1,143 @@
+body {
+  font-family: system-ui, sans-serif;
+  color: #222222;
+  background-color: #e8d0f0;
+  max-width: 26rem;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+/* The green box around the bracelet. */
+#preview {
+  background-color: #d4f0d4;
+  border: 2px solid #999999;
+  border-radius: 8px;
+  padding: 1.25rem;
+  min-height: 7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The items sit in a row. The ::before rule below draws the string. */
+#bracelet {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 50px;
+  padding: 0 30px;
+}
+
+#bracelet::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  background-color: #c8a0d0;
+  transform: translateY(-50%);
+}
+
+/* One letter cube. Your LetterCube.render() creates a div with this class. */
+.cube {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-color: #f0eef8;
+  border: 2px solid #555555;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* One spacer bead. Your SpacerBead.render() creates a div with this class
+   and sets its background color. */
+.bead {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #999999;
+  border-radius: 50%;
+}
+
+#message {
+  min-height: 1.5rem;
+  margin: 0;
+  text-align: center;
+  font-weight: bold;
+  color: #cc0000;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 8px;
+  background-color: #ffffff;
+  border: 2px solid #999999;
+  border-radius: 4px;
+}
+
+.grid button {
+  height: 40px;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #f8f8f8;
+  border: 2px solid #555555;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.grid button:hover {
+  background-color: #dddddd;
+}
+
+.color-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  background-color: #ffffff;
+  border: 2px solid #999999;
+  border-radius: 4px;
+}
+
+.color-row button {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #999999;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.color-row button:hover {
+  transform: scale(1.15);
+}
+
+.undo-button {
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #f0c8c8;
+  border: 2px solid #999999;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.undo-button:hover {
+  background-color: #e0a0a0;
+}

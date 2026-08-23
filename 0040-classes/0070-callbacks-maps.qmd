@@ -1,0 +1,494 @@
+---
+title: "Objects talking to each other: callbacks and Maps"
+---
+
+A `ToolSelection` object owns the tool buttons and knows which tool the user
+picked. A `StatusLine` object writes that tool onto the page. The two have to
+agree, and how you connect them decides whether the page does a few clicks of
+work or sixty checks a second.
+
+## A status line that keeps asking {#sec-callbacks-maps-experiment}
+
+1. Create a new app from our template inside `coursework/`.
+2. In `index.html`, replace everything between `<body>` and `</body>` with
+   this:
+
+   ```html
+   <h1>Tool selection</h1>
+   <button id="circleTool" type="button">Circle</button>
+   <button id="rectTool" type="button">Rectangle</button>
+   <p id="statusLine"></p>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Create `src/tool-selection.ts`:
+
+   ```ts
+   export type ToolType = 'circle' | 'rect';
+
+   export class ToolSelection {
+     private currentToolValue: ToolType = 'circle';
+
+     constructor() {
+       const circleButton = document.querySelector<HTMLButtonElement>('#circleTool');
+       const rectButton = document.querySelector<HTMLButtonElement>('#rectTool');
+       if (!circleButton || !rectButton) {
+         throw new Error('A tool button is missing');
+       }
+
+       circleButton.addEventListener('click', () => {
+         this.currentToolValue = 'circle';
+       });
+       rectButton.addEventListener('click', () => {
+         this.currentToolValue = 'rect';
+       });
+     }
+
+     get currentTool(): ToolType {
+       return this.currentToolValue;
+     }
+   }
+   ```
+
+4. Create `src/status-line.ts`:
+
+   ```ts
+   import type { ToolType } from './tool-selection';
+
+   export class StatusLine {
+     private paragraph: HTMLParagraphElement;
+     private updates = 0;
+
+     constructor() {
+       const paragraph = document.querySelector<HTMLParagraphElement>('#statusLine');
+       if (!paragraph) {
+         throw new Error('No element with the id statusLine');
+       }
+       this.paragraph = paragraph;
+     }
+
+     show(tool: ToolType): void {
+       this.updates += 1;
+       this.paragraph.textContent = `Tool: ${tool} (updated ${this.updates} times)`;
+     }
+   }
+   ```
+
+   `ToolType` is a type, not a class, so the import gets the word `type` in
+   front of the braces. That says out loud that nothing from this line
+   survives into the finished JavaScript. Leave the `type` out and `npm run
+   check` asks you for it.
+
+5. Replace everything in `src/index.ts` with this:
+
+   ```ts
+   import { StatusLine } from './status-line';
+   import { ToolSelection } from './tool-selection';
+
+   const toolSelection = new ToolSelection();
+   const statusLine = new StatusLine();
+
+   const tick = () => {
+     statusLine.show(toolSelection.currentTool);
+     requestAnimationFrame(tick);
+   };
+   requestAnimationFrame(tick);
+   ```
+
+6. Run `npm start` and watch the paragraph.
+
+The tool name is right, and it changes the instant you click. The counter is
+the problem. It climbs by roughly 60 a second, so it is in the hundreds before
+your first click, and every one of those updates asked a question whose answer
+had not changed. Asking over and over like this is called polling, and it is
+the crude way to connect two objects.
+
+Now let the `ToolSelection` speak instead. In `src/tool-selection.ts`, add
+this line above the class:
+
+```ts
+export type ToolChangeCallback = (tool: ToolType) => void;
+```
+
+Add the field next to `currentToolValue` and the two methods to the class.
+Both click listeners now call `this.selectTool('circle')` and
+`this.selectTool('rect')` instead of assigning the field directly:
+
+```ts
+private toolChangeCallback: ToolChangeCallback | undefined = undefined;
+
+onToolChange(callback: ToolChangeCallback): void {
+  this.toolChangeCallback = callback;
+}
+
+private selectTool(tool: ToolType): void {
+  this.currentToolValue = tool;
+  if (this.toolChangeCallback) {
+    this.toolChangeCallback(tool);
+  }
+}
+```
+
+Then throw the animation loop out of `src/index.ts` and hand a function over
+instead:
+
+```ts
+toolSelection.onToolChange((tool) => {
+  statusLine.show(tool);
+});
+```
+
+Reload. The paragraph starts empty, because nothing has happened yet. Click
+Rectangle and it reads `Tool: rect (updated 1 times)`. Click again and the
+counter goes to 2. Two updates for two clicks, where the loop did hundreds for
+none.
+
+## A function you hand over {#sec-callbacks-maps-callback}
+
+The function you passed to `onToolChange` is a **callback**: you give another
+object a function, that object keeps it, and it calls the function back when
+it has something to say. You have been handing out callbacks since Part 2,
+because the arrow function inside `addEventListener('click', ...)` is exactly
+that. What is new here is that you write the receiving side yourself.
+
+The type says the whole story in one line:
+
+```ts
+export type ToolChangeCallback = (tool: ToolType) => void;
+```
+
+Read it out loud as "a function that takes a `ToolType` and gives nothing
+back". Any function of that shape fits, so the caller decides what actually
+happens and `ToolSelection` never learns that a status line exists. The button
+owner announces, the receiver reacts, and neither one imports the other.
+
+The field is `ToolChangeCallback | undefined` because nobody may have
+registered yet, which is why `selectTool` checks before it calls. Registering
+twice replaces the first function, so this class serves one listener. That is
+enough for every app in this book.
+
+Whoever registers a callback still learns nothing until the first click, which
+is why the status line sits empty on a fresh page. Fix that where the
+knowledge lives, by calling the new callback once with the current value:
+
+```ts
+onToolChange(callback: ToolChangeCallback): void {
+  this.toolChangeCallback = callback;
+  callback(this.currentToolValue);
+}
+```
+
+## Properties that may be missing {#sec-callbacks-maps-optional}
+
+Three tool buttons need a label each, and some deserve a tooltip that explains
+what the tool does. A question mark after a property name says "this one may
+be absent":
+
+```ts
+type ToolInfo = {
+  kind: ToolType;
+  label: string;
+  hint?: string;
+};
+
+const toolInfos: ToolInfo[] = [
+  { kind: 'pointer', label: 'Pointer', hint: 'Click a shape to select it' },
+  { kind: 'circle', label: 'Circle' },
+];
+```
+
+Both entries compile. Reading `info.hint` gives you `string | undefined`, so
+TypeScript makes you check before you use it, the same way it does after a
+`querySelector`:
+
+```ts
+if (info.hint) {
+  button.title = info.hint;
+}
+```
+
+Skip the check and the compiler says `Type 'string | undefined' is not
+assignable to type 'string'`.
+
+::: {.callout-note}
+## A missing property is not a property set to undefined
+
+The starter's `tsconfig.json` switches on `exactOptionalPropertyTypes`, so
+writing `{ kind: 'circle', label: 'Circle', hint: undefined }` is refused: with
+a `?` the property is either there or it is not, and there is no third state.
+When a **field** of a class has to be emptied again later, drop the `?` and
+declare it as `private drawing: DrawingState | undefined = undefined;`. Then
+assigning `undefined` back to it is fine.
+:::
+
+## A Map is a lookup table {#sec-callbacks-maps-map}
+
+When a third tool button arrives, `ToolSelection` has to un-highlight the
+other two whenever one is picked, and one field per button gets old fast. A
+`Map` holds pairs, so one field carries all three:
+
+```ts
+private buttons: Map<ToolType, HTMLButtonElement> = new Map();
+```
+
+The two types in the brackets say what the keys are and what the values are,
+just like `querySelector<HTMLButtonElement>` says what comes back. Part 6
+shows how to write brackets like these on your own classes; until then, read
+them and use them.
+
+You put a pair in with `set`, ask for one with `get`, ask whether a key exists
+with `has`, throw a pair out with `delete`, and count with `size`:
+
+```ts
+this.buttons.set(info.kind, button);
+
+const activeButton = this.buttons.get(tool);
+if (activeButton) {
+  activeButton.classList.add('active');
+}
+```
+
+That `if` is not optional. `get` gives back `HTMLButtonElement | undefined`,
+because no map can promise that a key is in it. Looping goes over the values,
+the keys, or both, and a `Map` keeps the order you inserted the pairs in:
+
+```ts
+for (const button of this.buttons.values()) {
+  button.classList.remove('active');
+}
+```
+
+The [MDN page about
+Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)
+lists far more than you need today, so look up what a task asks for.
+
+## A Set holds each value once {#sec-callbacks-maps-set}
+
+Give the `ToolSelection` of your experiment one more field:
+
+```ts
+private usedTools: Set<ToolType> = new Set();
+```
+
+Then put two more lines at the top of `selectTool`, reload, and click around
+with the console open:
+
+```ts
+this.usedTools.add(tool);
+console.log(`${this.usedTools.size} of 2 tools tried`);
+```
+
+Ten clicks on Circle, and the size stays at 1. A `Set` is a bag of values
+where each value fits in only once, so `add` on something already in there
+changes nothing. It answers `has`, drops a value with `delete`, counts with
+`size`, and iterates with `for...of` in insertion order.
+
+The method worth the switch is `delete`. Pulling one shape out of an array
+means finding its index first, while a `Set` takes the shape itself. Paint
+keeps its shapes in a `Set` for that reason, and its buttons in a `Map`
+because a button does have a name you look it up by.
+
+## enum or union literal type {#sec-callbacks-maps-enum}
+
+TypeScript has a second way to write a small fixed list of choices:
+
+```ts
+enum ToolType {
+  CIRCLE,
+  RECT,
+  POINTER,
+}
+```
+
+`ToolType.CIRCLE` then behaves like a value you can pass around, and
+`console.log(ToolType.CIRCLE)` prints `0`, because the members are numbered
+from zero unless you spell out something else. That number is what lands in
+your log and in anything you save, so debugging means translating `2` back
+into `POINTER` in your head.
+
+This course uses union literal types instead:
+
+```ts
+type ToolType = 'pointer' | 'circle' | 'rect';
+```
+
+The value is the string, so `console.log(tool)` prints `pointer`, a class name
+or an attribute takes it unchanged, and the compiler still refuses `'pointr'`.
+An `enum` also leaves a real object behind in the compiled JavaScript, while a
+union literal type vanishes completely. Read `enum` when you meet it in other
+people's code, and write union literal types in yours.
+
+::: {.research title="Pointers, capture, and dashes"}
+Paint draws while you drag, keeps drawing when the mouse wanders off the
+canvas, and shows the shape you are dragging with a dashed outline. The
+chapter covers none of the three.
+
+1. The browser fires `mousedown` and it fires `pointerdown`. What does the
+   pointer family handle that the mouse family does not, and which three
+   pointer events does one drag need from press to release?
+2. `element.setPointerCapture(...)` wants one number. Where do you get that
+   number, and what changes about the events after the call?
+3. In CSS, `stroke-dasharray` turns a solid outline into a dashed one. What do
+   the two numbers in a value such as `6 4` mean?
+
+Question 1 is exam material. Every draw-by-dragging task starts with picking
+the right event family, and the exam has no internet and no AI.
+:::
+
+## Exercise: Paint {#sec-callbacks-maps-exercise}
+
+A toolbar picks a tool, dragging on the canvas draws a circle or a rectangle,
+the pointer tool selects a shape, and a button deletes it. This is the biggest
+app of the part, so it comes in three rounds that each end with something you
+can run.
+
+{{< exercise paint >}}
+
+### Round 1: the toolbar and its callback {#sec-callbacks-maps-round1}
+
+1. Open `index.html` and read it. The `<div id="toolButtons">` is empty
+   because your code fills it, the **Delete selected** button starts out
+   `disabled`, the `<svg id="canvas">` has a `viewBox` of `0 0 600 400`, and a
+   `<p id="statusLine">` sits under everything.
+2. Create `src/tool-selection.ts`. Export
+   `type ToolType = 'pointer' | 'circle' | 'rect';` and the
+   `ToolChangeCallback` type from this chapter.
+3. In the same file, add the `ToolInfo` type with `kind`, `label`, and an
+   optional `hint`, and a `const toolInfos: ToolInfo[]` holding the three
+   tools. Give Pointer and Rectangle a hint and leave Circle without one.
+4. Write and export `class ToolSelection` with three fields: a
+   `Map<ToolType, HTMLButtonElement>`, the current tool starting at
+   `'pointer'`, and the callback field.
+5. The constructor takes a `container: HTMLElement`. Loop over `toolInfos`
+   and for each one create a `button`, set its `type` to `'button'` and its
+   `textContent` to the label, set `button.title` only when the hint is there,
+   add a click listener that calls `this.selectTool(info.kind)`, put the
+   button into the map under `info.kind`, and append it to the container. End
+   the constructor with `this.selectTool('pointer')`.
+6. Write the private method `selectTool(tool: ToolType)`. It stores the tool,
+   removes the class `active` from every button in the map, adds `active` to
+   the button the map has for this tool, and calls the callback if one is
+   registered.
+7. Write `onToolChange(callback: ToolChangeCallback)`. It stores the callback
+   and calls it once with the current tool.
+8. Create `src/index.ts`. Import `./styles.css`, look up `#toolButtons` with
+   `querySelector<HTMLDivElement>` and throw when it is missing, then build a
+   `ToolSelection` around it and register a callback that logs the tool with
+   `console.log`.
+9. Run `npm start`. Expected result: three buttons, Pointer highlighted, and
+   the console shows the tool name once on load and once per click. Hover a
+   button and the hint appears; hover Circle and nothing appears.
+
+### Round 2: drawing circles and rectangles {#sec-callbacks-maps-round2}
+
+1. Create `src/point.ts` with
+   `export type Point = { x: number; y: number; };`. Every other file imports
+   it with `import type { Point } from './point';`, the type-only import from
+   the polymorphism chapter, because `Point` is a type and not a class.
+2. Create `src/shape.ts`. Put `const SVG_NS = 'http://www.w3.org/2000/svg';`
+   at the top and export an `abstract class Shape` with a
+   `protected element: SVGElement`. Its constructor takes
+   `(canvas: SVGSVGElement, tagName: string)`, creates the element with
+   `createElementNS`, and appends it to the canvas.
+3. Give `Shape` three abstract members: `resize(start: Point, end: Point)`,
+   `containsPoint(point: Point): boolean`, and a getter
+   `isTooSmall: boolean`.
+4. Give `Shape` four normal members: a setter `preview` that adds or removes
+   the class `preview`, `select()` and `deselect()` that add and remove the
+   class `selected`, and `remove()` that calls `remove()` on the element.
+5. Create `src/circle.ts` with `class Circle extends Shape`, whose
+   constructor passes `'circle'` to `super`. It stores a center and a radius.
+   `resize` puts the center at `start`, takes the distance from `start` to
+   `end` as the radius, and writes `cx`, `cy`, and `r` with `setAttribute`.
+   `containsPoint` compares the distance to the radius, and `isTooSmall` is
+   true below radius 3.
+6. Create `src/rect.ts` the same way with `'rect'`. `resize` uses the smaller
+   `x` and the smaller `y` as the corner and the absolute differences as
+   `width` and `height`, `containsPoint` checks both ranges, and `isTooSmall`
+   is true when either side is under 3.
+7. Create `src/shape-manager.ts` and export `class ShapeManager`. It needs
+   four fields: the canvas, `shapes: Set<Shape>`, the current tool starting at
+   `'pointer'`, and `drawing: DrawingState | undefined` with this type in the
+   same file:
+
+    ```ts
+    type DrawingState = {
+      shape: Shape;
+      start: Point;
+    };
+    ```
+
+    Add a public `setTool(tool: ToolType)` that stores the tool.
+8. In the constructor, listen on the canvas for the three pointer events from
+   the research box, each handler a private method.
+9. Write a private `positionOf(event: PointerEvent): Point` that turns
+   `event.clientX` and `event.clientY` into canvas coordinates with the
+   `getBoundingClientRect` subtraction you used for SVG drawings. The `<svg>`
+   is 600 pixels wide and 600 viewBox units wide, so the numbers match one to
+   one.
+10. On press, work out the position with `positionOf` first, then leave at
+    once while the tool is `'pointer'`. Otherwise capture the pointer with the
+    method from the research box, build a `Circle` or a `Rect`, set its
+    `preview` to `true`, call `resize(point, point)`, and store the drawing
+    state.
+11. On move: leave when nothing is being drawn, otherwise call `resize` with
+    the stored start point and the current position.
+12. On release: leave when nothing is being drawn. Otherwise clear the drawing
+    state, take the shape off the canvas again when it `isTooSmall`, and
+    otherwise set `preview` to `false` and add it to the set.
+13. Add a rule for `#canvas .preview` to `src/styles.css` that gives the
+    outline the dashed pattern from the research box, plus a
+    `fill-opacity: 0.3;` so you can see through the shape while you drag.
+14. In `src/index.ts`, look up `#canvas` as an `SVGSVGElement` in the same
+    `if` as the toolbar, build a `ShapeManager` around it, and change the tool
+    callback so it calls `shapeManager.setTool(tool)`.
+15. Run the app. Expected result: with Circle picked, dragging draws a dashed
+    circle that grows with the mouse and turns solid blue when you let go.
+    Rectangle does the same in red. Drag past the edge of the canvas and the
+    shape keeps following the mouse. A single click with no drag leaves
+    nothing behind. Pointer draws nothing yet.
+
+### Round 3: selecting and deleting {#sec-callbacks-maps-round3}
+
+1. In `src/shape-manager.ts`, add a field `selected: Shape | undefined`, a
+   second callback type, and a field that holds one of them:
+
+   ```ts
+   export type ShapesChangedCallback = (shapeCount: number, hasSelection: boolean) => void;
+   ```
+2. Add `onShapesChanged(callback: ShapesChangedCallback)`. Like
+   `onToolChange`, it stores the callback and calls it once, with
+   `this.shapes.size` and whether something is selected.
+3. Add a private `reportChange()` that calls the stored callback with those
+   same two values when one is registered, and call it at the end of the
+   release handler.
+4. Add a private `selectAt(point: Point)`. It deselects every shape in the
+   set and clears `selected`, then walks the set and remembers the last shape
+   whose `containsPoint(point)` is true. Select that shape when there is one,
+   and call `reportChange()` either way. The last match wins because a `Set`
+   keeps insertion order, so the shape drawn last sits on top.
+5. In the press handler, replace the early return for the pointer tool with a
+   call to `selectAt(point)`.
+6. Add a public `deleteSelected()`. It does nothing when nothing is selected.
+   Otherwise it calls `remove()` on the shape, deletes it from the set, clears
+   the selection, and calls `reportChange()`.
+7. In `src/index.ts`, add `#deleteButton` and `#statusLine` to the lookup and
+   to the `if`. Register a callback on the shape manager that sets
+   `deleteButton.disabled` from `hasSelection` and writes
+   `` `${shapeCount} shapes on the canvas` `` into the status line. Give the
+   button a click listener that calls `shapeManager.deleteSelected()`.
+8. Run `npm run verify`, fix what it reports, then run the app. Expected
+   result: the page starts with `0 shapes on the canvas` and a grayed-out
+   Delete button, and drawing raises the count. With Pointer picked, clicking
+   a shape gives it a yellow outline and enables Delete, while clicking empty
+   space clears the selection and disables Delete again. Delete takes the
+   shape away and the count drops.
+9. Bonus: keep a `Set<ToolType>` of the tools that were used and show
+   `2 of 3 tools tried` in the status line next to the shape count.
+
+## Check your understanding {#sec-callbacks-maps-quiz}
+
+Six short questions, and the first three are the research questions from
+above.
+
+{{< quiz callbacks-maps title="Callbacks and Maps" >}}

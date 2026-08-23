@@ -1,0 +1,352 @@
+---
+title: "From object literals to classes"
+---
+
+Year one gave you two tools for building your own data: a `type` that names the
+fields, and an object literal that fills them in. A function that works on such
+an object takes it as a parameter. That carries you a long way, and it creaks
+once six functions all belong to the same kind of object and nothing in the code
+says so. A class says so. Type the small version and watch what moves.
+
+::: {.callout-note}
+## New part, new buddy code
+
+Part 4 has its own coding buddy, and this one knows classes. Your teacher hands
+out the code for it, and you put it into `~/.pi/agent/auth.json` in place of the
+Part 3 code. The setup chapter in Part 1 shows that file.
+:::
+
+## Two counters, the year-one way {#sec-classes-literal}
+
+1. Create a new app from our template inside `coursework/`.
+2. Replace everything in `src/index.ts` with this:
+
+   ```ts
+   type Counter = {
+     count: number;
+     step: number;
+   };
+
+   const increase = (counter: Counter): void => {
+     counter.count += counter.step;
+   };
+
+   const clicks: Counter = { count: 0, step: 1 };
+   const score: Counter = { count: 0, step: 10 };
+
+   increase(clicks);
+   increase(score);
+   increase(score);
+
+   console.log(clicks.count, score.count);
+   ```
+
+3. Run `npm start` and open the console with F12.
+
+The console shows `1 20`. Two objects of the same shape, each with its own two
+numbers, and one function that works on either of them. `increase(clicks)`
+changes the real `clicks` because the object travels into the function as a
+reference, the way year one described it.
+
+Now look at the shape of the code instead of the result. The type sits in one
+place and the function in another, and the only tie between them is the
+parameter type of `increase`. Add `reset` and `decrease` and that tie gets
+thinner with every function.
+
+## The same two counters as a class {#sec-classes-class}
+
+Replace everything in `src/index.ts` again:
+
+```ts
+class Counter {
+  count: number;
+  step: number;
+
+  constructor(step: number) {
+    this.count = 0;
+    this.step = step;
+  }
+
+  increase(): void {
+    this.count += this.step;
+  }
+}
+
+const clicks = new Counter(1);
+const score = new Counter(10);
+
+clicks.increase();
+score.increase();
+score.increase();
+
+console.log(clicks.count, score.count);
+```
+
+The console shows `1 20` again. Same two counters, same result, and the function
+that changes them now lives inside the braces of the class. The call turned from
+`increase(clicks)` into `clicks.increase()`, which is how you have been calling
+`button.addEventListener` and `list.append` since Part 2.
+
+## What the parts of a class are called {#sec-classes-parts}
+
+A class is a blueprint. `class Counter { ... }` says what every counter has and
+what every counter can do, and it holds no numbers of its own. Class names are
+written in PascalCase, so `Counter` and never `counter`.
+
+`count` and `step` are **fields**, the data each counter carries. Declare them
+at the top with their types, and a reader knows after four lines what a counter
+is made of. The **constructor** below them runs once for each new object and
+puts the fields into a sensible starting state, here with `step` arriving as a
+parameter and `count` starting at zero. `increase` is a **method**, a function
+that belongs to the class, and methods come after the constructor.
+
+`new Counter(10)` builds one object from the blueprint. It reserves a fresh
+`count` and a fresh `step`, runs the constructor with `10`, and hands the
+finished object back. Two calls to `new` give two objects that share nothing,
+which is why `score.increase()` leaves `clicks` untouched.
+
+`this` is the object the method was called on. In `clicks.increase()` the body
+runs with `this` being `clicks`, and the same body runs with `this` being
+`score` for the other counter. Delete that word once, so that `increase` reads
+`count += this.step;`, and TypeScript answers:
+
+```
+error TS2663: Cannot find name 'count'. Did you mean the instance member 'this.count'?
+```
+
+Inside a method, a bare `count` means a variable of that method. A field needs
+`this.` in front of it, every single time.
+
+## You have been making objects from classes all year {#sec-classes-dom}
+
+Add two lines at the end of `src/index.ts` and save:
+
+```ts
+const button = document.createElement('button');
+console.log(button.constructor.name);
+console.log(clicks.constructor.name);
+```
+
+The console prints `HTMLButtonElement` and `Counter`. Every object remembers the
+class it was built from, and `constructor.name` asks it for that name, the same
+way it told you `SVGCircleElement` back in Part 3.
+
+`HTMLButtonElement` is a class the browser makers wrote. `disabled` is one of
+its fields, `addEventListener` one of its methods, and
+`document.createElement('button')` looks up that blueprint and runs its
+constructor for you. Your program has been full of objects made from classes
+since Part 2, and the only new part today is that the blueprint is yours.
+
+## A type with exactly two values {#sec-classes-union}
+
+Connect Four has two players. Storing the current one as a `string` lets
+`'blue'` and `'ylelow'` through without a word from TypeScript. Write the
+allowed values as the type instead:
+
+```ts
+type Player = 'red' | 'yellow';
+type Cell = Player | 'empty';
+```
+
+The `|` is the same "one of these" bar you met in `HTMLElement | null` in Part 2,
+this time between two fixed pieces of text. A variable of type `Player` holds
+`'red'` or `'yellow'`, VS Code offers you both while you type, and a typo gets
+caught:
+
+```
+error TS2322: Type '"blue"' is not assignable to type 'Player'.
+```
+
+`Cell` shows that a union can build on another union: a cell holds a player's
+disc or the word `'empty'`. Other languages call such a small fixed set of
+values an enum, and Part 4 comes back to that word later.
+
+## A field can hold a whole board {#sec-classes-board}
+
+A field is a variable that belongs to the object, so it can hold an array, and
+an array of arrays:
+
+```ts
+class MiniBoard {
+  cells: Cell[][] = [
+    ['empty', 'empty', 'empty'],
+    ['empty', 'empty', 'empty'],
+  ];
+
+  put(row: number, column: number, player: Player): void {
+    const line = this.cells[row];
+    if (line === undefined) {
+      return;
+    }
+    line[column] = player;
+  }
+}
+```
+
+`cells` is a `Cell[][]`, an array of rows where each row is an array of cells,
+which is the 2D array from year one with a much stricter type. A field whose
+starting value is written right there needs no constructor.
+
+The two lines around `line` are what `noUncheckedIndexedAccess` in your
+`tsconfig.json` asks of you. `this.cells[row]` has the type
+`Cell[] | undefined`, because TypeScript cannot know that `row` is inside the
+array, so you check instead of reaching for `!`. Pull that check into one small
+method and the rest of the class stays readable.
+
+## Listeners and the `this` trap {#sec-classes-listener}
+
+A class that draws a board also reacts to clicks, and the listener needs a way
+back to the object:
+
+```ts
+cell.addEventListener('click', () => {
+  this.dropDisc(column);
+});
+```
+
+An arrow function has no `this` of its own. It borrows the `this` of the code
+around it, which here is the method that created the listener, so the click
+reaches your object. Hand `addEventListener` a plain function instead and the
+browser calls it with `this` set to the clicked element, and a button has no
+`dropDisc` on it. So the rule for the rest of this book is that a listener which
+needs the object is written as an arrow function.
+
+::: {.research title="Filling an array, and drawing a round disc"}
+The board in the exercise is six rows of seven cells, and `Array.from` builds it
+in one line as long as you know which one-liner is a trap. The discs are buttons
+in a CSS Grid, and a button stays a flat rectangle until your stylesheet says
+otherwise.
+
+1. `Array.from({ length: 7 }, () => 'empty')` gives you an array. What is the
+   second argument for, and what is in the array afterwards?
+2. Compare `new Array(6).fill([])` with `Array.from({ length: 6 }, () => [])`.
+   One of them gives six separate inner arrays, the other gives six names for
+   one and the same array. Which is which, and what would the second one do to a
+   game board?
+3. Which CSS property turns a square box into a circle, and which one keeps a
+   grid cell exactly as tall as it is wide without naming a pixel size?
+
+Question 2 is exam material: the exam runs without internet and without AI next
+to you.
+:::
+
+## Exercise: Connect Four {#sec-classes-exercise}
+
+Two players drop discs into a board of seven columns and six rows, and a disc
+falls to the lowest free cell of its column. Four discs of one color in a row, a
+column, or a diagonal win the game, and a full board with no such line is a
+draw. One class holds the board, the rules, and the buttons on screen.
+
+{{< exercise connect-four >}}
+
+The page is ready: an empty `<div id="board">`, an empty `<p id="status">`, and
+a button `restartButton`. The stylesheet lays the board out as a grid of seven
+columns on a blue background and paints a cell white, red, or yellow, and it
+leaves one job to you that step 5 names. You write `src/index.ts` from nothing.
+
+1. Delete both lines the template put into `src/index.ts` and start the file
+   with `import './styles.css';`. Under it go the two types
+   `type Player = 'red' | 'yellow';` and `type Cell = Player | 'empty';`, then
+   the two constants `const ROWS = 6;` and `const COLUMNS = 7;`.
+2. Open `class ConnectFourGame` and declare seven fields at the top, each with
+   its type: `board: Cell[][]`, `cells: HTMLButtonElement[][]`,
+   `currentPlayer: Player`, `gameOver: boolean`, `discCount: number`,
+   `boardElement: HTMLDivElement`, and `statusElement: HTMLParagraphElement`.
+   `board` is the game in memory and `cells` the game on screen, in the same row
+   and column order.
+3. Write the constructor, without parameters. Fetch `#board`, `#status`, and
+   `#restartButton` with `querySelector<...>`, throw one error when any of the
+   three is missing, and store the board and the status paragraph in their
+   fields. Give `board` and `cells` an empty array, `currentPlayer` the value
+   `'red'`, `gameOver` the value `false`, and `discCount` the value `0`.
+4. Write the method `buildCells(): void`. Two nested loops over `ROWS` and
+   `COLUMNS` create one `button` element per cell, set its `type` to `'button'`,
+   add the class `cell` to it, and append it to `this.boardElement`. Collect the
+   buttons of one row in an array and push that array into `this.cells`. Call
+   `this.buildCells()` at the end of the constructor, and put
+   `new ConnectFourGame();` as the last line of the file. No variable has to
+   hold that object, because everything from here on happens in its listeners.
+   Run `npm start`. Expected result: a thin blue bar, because all 42 buttons are
+   in the grid with no height yet.
+5. Give the cells their shape. Add two properties to the `.cell` rule in
+   `src/styles.css`, one that rounds a box into a circle and one that keeps each
+   cell as tall as it is wide. Expected result: 42 white discs in six rows of
+   seven on a blue board, each one turning light blue under the mouse pointer.
+6. Write `start(): void`, the method that begins a round. It fills `this.board`
+   with `ROWS` rows of `COLUMNS` cells, all `'empty'`, using `Array.from`. Write
+   the return type on both arrow functions, `Cell[]` outside and `Cell` inside,
+   so the result is a `Cell[][]` and not an array of plain strings. Then set
+   `currentPlayer` back to `'red'`, `gameOver` to `false`, and `discCount` to
+   `0`, clear the classes `red` and `yellow` off every button in `this.cells`
+   with two `for...of` loops, and put `Red starts.` into the status paragraph.
+   Call `this.start()` as the last line of the constructor. Expected result: the
+   line under the board reads `Red starts.`
+7. Write two reading helpers. `cellAt(row: number, column: number): Cell` looks
+   up `this.board[row]` and then the cell, and answers `'empty'` whenever one of
+   the two is `undefined`. Answering `'empty'` for a place outside the board is
+   a decision that pays off in step 10.
+   `freeRowIn(column: number): number` walks from `ROWS - 1` up to `0` and
+   returns the first row whose `cellAt` is `'empty'`, or `-1` for a full
+   column.
+8. Write three tiny helpers. `paintCell(row, column, player)` reaches the button
+   through `this.cells`, checking for `undefined` the way `cellAt` does, and
+   adds the player's word as a class to it. `switchPlayer()` flips
+   `currentPlayer` between the two values. `nameOf(player: Player): string`
+   returns `Red` or `Yellow` for the status line.
+9. Write `dropDisc(column: number): void`. Return right away when
+   `this.gameOver` is `true`. Ask `freeRowIn` for the row, and when it answers
+   `-1`, put `That column is full. Pick another one.` into the status paragraph
+   and return. Otherwise write `this.currentPlayer` into `this.board` at that
+   place, call `paintCell` for the same place, and add one to `discCount`.
+   Finish with `this.switchPlayer()` and a status line such as `Yellow is next.`
+   Now wire the board up: in `buildCells`, give every button a `click` listener
+   that is an arrow function calling `this.dropDisc(column)`. Expected result: a
+   click anywhere in a column drops a disc onto its lowest free cell, and the
+   colors alternate.
+10. Find a winning line with three methods.
+    `countInDirection(row, column, rowStep, columnStep, player)` starts one step
+    away from the new disc and walks on while `cellAt` keeps answering with that
+    player, counting as it goes. It needs no border check, because `cellAt`
+    answers `'empty'` outside the board. `countLine` returns `1` plus that count
+    plus the count in the opposite direction, which you get by passing
+    `-rowStep` and `-columnStep`, so it measures the whole line through the new
+    disc. `isWin(row, column, player)` returns `true` when `countLine` reaches 4
+    or more in any of the directions `(0, 1)`, `(1, 0)`, `(1, 1)`, and
+    `(1, -1)`. Those four cover all eight, because every line is measured both
+    ways.
+11. End the game. In `dropDisc`, right after counting the disc, ask `isWin`.
+    When it says yes, set `gameOver` to `true`, put a line such as `Red wins!`
+    into the status paragraph, and return. Otherwise, when `discCount` has
+    reached `ROWS * COLUMNS`, set `gameOver` to `true`, write
+    `The board is full. Nobody wins.`, and return. The player switches only
+    after those two checks. Expected result: four in a row stops the game, and
+    further clicks change nothing.
+12. Make the restart button work. In the constructor, add a `click` listener to
+    the restart button that calls `this.start()` from an arrow function.
+    Expected result: the board empties, the status line says `Red starts.`, and
+    a new game runs.
+13. Run `npm run verify` and fix what it reports.
+
+Two extras if you finish early. Switch the six buttons of a full column to
+`disabled` instead of writing a message about it. Count the games each player
+has won in two more fields and show both numbers next to the status line.
+
+::: {.callout-note}
+## What has to work
+
+* The app starts with `npm start`, the console stays clean, and `npm run verify`
+  passes.
+* The board shows six rows of seven round cells, and a click drops a disc to the
+  lowest free cell of its column.
+* Four in a row horizontally, vertically, or diagonally ends the game and names
+  the winner.
+* The restart button starts a fresh game at any time.
+
+Diagonal wins and the draw are what lift this above passing.
+:::
+
+## Check your understanding {#sec-classes-quiz}
+
+Six short questions, and the first three are the research questions from above.
+
+{{< quiz classes title="From object literals to classes" >}}

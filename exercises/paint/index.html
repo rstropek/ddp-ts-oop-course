@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paint</title>
+  </head>
+  <body>
+    <h1>Paint</h1>
+    <div class="app">
+      <div class="toolbar">
+        <div id="toolButtons" class="tool-buttons"></div>
+        <button id="deleteButton" type="button" disabled>Delete selected</button>
+      </div>
+      <svg id="canvas" viewBox="0 0 600 400" width="600" role="img" aria-label="Drawing area for the shapes you paint"></svg>
+    </div>
+    <p id="statusLine"></p>
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

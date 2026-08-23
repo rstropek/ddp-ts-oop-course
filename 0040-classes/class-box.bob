@@ -1,0 +1,10 @@
+                     +------------------------------------+
+    class name ----> |         "Ball  (abstract)"         |
+                     +------------------------------------+
+                     | "#y: number"                       |
+        fields ----> | "#velocityY: number"               |
+                     | "#radius: number"                  |
+                     +------------------------------------+
+                     | "+update(delta: number): boolean"  |
+       methods ----> | "#onReachedBottom(): boolean"      |
+                     +------------------------------------+

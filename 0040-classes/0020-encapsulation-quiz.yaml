@@ -1,0 +1,200 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Encapsulation: what a class keeps to itself"
+# (0040-classes/0020-encapsulation.qmd).
+# The first four questions are the chapter's research box (ids `research-*`):
+# they get the research feedback rule, so the grader names the source instead
+# of the answer. The last two check the chapter's own concepts, `private` as
+# the guard of an invariant and what `readonly` and a getter refuse.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: encapsulation-quiz
+name: "Quiz: Encapsulation"
+
+title: "Check your understanding: encapsulation"
+description: |
+  Six short questions about the chapter *Encapsulation*, four of them the
+  research task. Answer in your own words; if you cannot answer a research
+  question yet, look it up and come back. One or two sentences are enough.
+  This quiz is anonymous and is here for you, and answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="private points: number = 0;"
+      scope="after the encapsulation chapter of the classes part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector<T>` with a null check, `textContent`, `addEventListener`, `classList`, and forms with `valueAsNumber`"
+        "SVG from TypeScript and `requestAnimationFrame` with delta time"
+        "`class`, constructor, fields, methods, `this`, and `new` from the previous chapter"
+        "union literal types as small enums, such as `type Player = 'red' | 'yellow'`"
+        "`private` fields and methods, and that TypeScript checks the rule while you write"
+        "`readonly` fields, filled where they are declared or in the constructor"
+        "getters and setters, read and written like a field"
+        "parameter properties: `constructor(private readonly width: number)`"
+        "that `protected` exists and belongs to the next chapter")
+      not_yet=(array
+        "`extends`, `super`, overriding, or `abstract` classes"
+        "`export` and `import` of your own files: everything is still in `src/index.ts`"
+        "`try`/`catch`, or `throw` beyond the `throw new Error` of a missing element"
+        "`Map`, `Set`, callback types, or `enum`"
+        "`#private` fields: this course uses the `private` keyword"
+        "tests, type parameters of your own, `async`, or `fetch`")}}
+
+questions:
+  - id: research-clock-reading
+    title: "Two clocks"
+    question: |
+      Both `Date.now()` and `performance.now()` hand you a number of
+      milliseconds. What does each of them count from, and which one is the
+      better choice for measuring how long something took?
+    evaluation: |
+      Expected: `Date.now()` counts from 1 January 1970 and follows the
+      computer's clock. `performance.now()` counts from the moment the page
+      started loading and only ever moves forward, which makes it the better
+      one for measuring a duration. Bonus for naming MDN's `performance.now()`
+      page as the source.
+      Required: (1) `Date.now()` counts from 1970 or from the system clock;
+      (2) `performance.now()` counts from when the page started loading;
+      (3) `performance.now()` is the better choice for measuring a duration.
+      Partial: both starting points are right but the wrong function is
+      chosen, or `performance.now()` is chosen without saying what the two
+      count from.
+      Incorrect: the two starting points are swapped, or both are said to
+      count from the same moment.
+
+  - id: research-pad-start
+    title: "Making 7 look like 07"
+    question: |
+      Your stopwatch has to show `07` seconds, not `7`. Which string method
+      pads a short string out to a fixed length, and what do its two arguments
+      mean?
+    evaluation: |
+      Expected: `padStart`, called on a string, as in
+      `String(7).padStart(2, '0')`. The first argument is the length the
+      result should reach, the second is the text used to fill up the
+      difference. Bonus for naming MDN's `String.prototype.padStart` page.
+      Required: (1) the method is `padStart`; (2) the first argument is the
+      target length and the second is the filler text.
+      Partial: names `padStart` but describes only one of the two arguments,
+      or gets one of them wrong.
+      Incorrect: names `padEnd`, which pads the wrong side, or claims the two
+      arguments are a start and an end position.
+
+  - id: research-to-fixed
+    title: "Two decimal places"
+    question: |
+      A balance of `90.3` has to appear as `90.30`. Which method of a number
+      does that, and what kind of value does it give back?
+    evaluation: |
+      Expected: `toFixed`, as in `(90.3).toFixed(2)`. The argument is the
+      number of decimal places, and the result is a string. Bonus for naming
+      MDN's `Number.prototype.toFixed` page.
+      Required: (1) the method is `toFixed` and its argument is the number of
+      decimal places; (2) it gives back a string.
+      Partial: names `toFixed` but says it gives back a number, or leaves out
+      what the argument means.
+      Incorrect: names `Math.round` or `parseFloat`, or claims the method
+      changes the number itself.
+
+  - id: research-getter-call
+    title: "A getter with parentheses"
+    question: |
+      A getter is read without parentheses. Write `watch.elapsed()` with
+      parentheses anyway and let TypeScript answer. What does the error say,
+      and what does it suggest?
+    evaluation: |
+      Expected: TypeScript reports that the expression is not callable because
+      it is a `get` accessor, and asks whether it was meant to be used without
+      `()`. The fix is to drop the parentheses and write `watch.elapsed`.
+      Naming the error number TS6234 is a bonus, not a requirement.
+      Required: (1) the message says the expression cannot be called because
+      it is a getter; (2) the suggested fix is leaving the parentheses away.
+      Partial: reports the error but not the suggested fix, or names the fix
+      without what the message says.
+      Incorrect: claims the line compiles, that the page only fails at
+      runtime, or that the getter has to be rewritten as a method.
+
+  - id: private-guards-the-rule
+    title: "Health that goes negative"
+    question: |
+      ```ts
+      class Player {
+        health: number = 100;
+
+        hit(damage: number) {
+          this.health -= damage;
+          if (this.health < 0) {
+            this.health = 0;
+          }
+        }
+      }
+      ```
+
+      `hit` makes sure the health never drops below zero, but somewhere else
+      in the app one line reads `player.health = -20;` and the compiler accepts
+      it. Which single word repairs this, and what can code outside the class
+      still do afterwards?
+    evaluation: |
+      Expected: write `private` in front of the field, so
+      `private health: number = 100;`. Code outside `Player` can then only
+      call `hit`, which keeps the rule. Reading `player.health` from outside
+      stops working too and needs a getter or a method.
+      Required: (1) the word is `private` and it goes in front of the field
+      declaration; (2) outside code can only go through the class's methods,
+      and reading the field from outside is closed as well.
+      Partial: names `private` but claims the outside can still read the
+      field, or describes the effect correctly without naming the keyword.
+      Incorrect: names `readonly` (which would stop `hit` from working too),
+      `const`, or `protected`, or wants the field removed.
+
+  - id: readonly-and-getter
+    title: "Two lines the compiler refuses"
+    question: |
+      ```ts
+      class Lap {
+        readonly lapNumber: number;
+        private seconds: number = 0;
+
+        constructor(lapNumber: number) {
+          this.lapNumber = lapNumber;
+        }
+
+        get time(): number {
+          return this.seconds;
+        }
+      }
+
+      const lap = new Lap(3);
+      lap.lapNumber = 4;
+      lap.time = 12;
+      ```
+
+      Which of the last two lines does TypeScript reject, and why?
+    evaluation: |
+      Expected: both of them. `lapNumber` is `readonly`, so only the
+      declaration or the constructor may fill it. `time` is a getter with no
+      setter, so there is nothing to assign to. TypeScript calls both a
+      read-only property.
+      Required: (1) both lines are rejected; (2) `lapNumber` is readonly and
+      can only be set in the constructor; (3) `time` has only a getter and no
+      setter.
+      Partial: catches one of the two lines with the right reason and lets the
+      other one pass.
+      Incorrect: says both lines compile, or blames the private field
+      `seconds` for the `lap.time` line.
