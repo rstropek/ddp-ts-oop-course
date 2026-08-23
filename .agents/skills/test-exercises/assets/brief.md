@@ -75,6 +75,13 @@ whether each question was answerable from one MDN page or one focused search.
 question. Otherwise, WebFetch is allowed only where the book sends you to
 MDN. No other web research.
 
+You have no `pi` coding agent and no Novedu account. A chapter (or a step)
+that needs one of them cannot be executed: read it as carefully as the rest,
+judge whether the instructions are complete and in order, mark those steps
+`not-verified`, and note in the report that the step needs the agent. Steps
+you can do without the agent (editing files, running the app, reading code
+the chapter prints) you still do.
+
 ## How to work
 
 Follow every numbered step and every "Try it" in order. Before each step,
