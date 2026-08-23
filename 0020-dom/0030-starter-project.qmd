@@ -122,8 +122,9 @@ Read `tsconfig.json` as a list of promises. Each option is you telling the
 TypeScript compiler "hold me to this", and the compiler complains the moment
 you break one. These four are the ones you will meet this year.
 
-* `strict` switches on the whole strict family at once. The one you already
-  know from year one is that a variable of type `string` never holds `null`.
+* `strict` switches on the whole strict family at once. Its best-known member
+  says that a variable of type `string` holds a string and never "nothing";
+  the next chapter shows what that rule does for you.
 * `noUnusedLocals` and `noUnusedParameters` turn a variable or a parameter that
   nobody reads into an error. Half-finished code stops being invisible.
 * `noImplicitReturns` says that if one path through a function returns a value,
