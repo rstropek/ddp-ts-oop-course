@@ -349,14 +349,15 @@ Six classes, six files. Build them in this order:
    `Rectangle` unchanged.
 
 4. **`src/ellipse.ts`.** `Ellipse extends Shape` with `radiusX` and `radiusY`.
-   Its area is `Math.PI * radiusX * radiusY`.
+   `description` returns text like `Ellipse with radii 40 and 25`, and its
+   area is `Math.PI * radiusX * radiusY`.
 
 5. **`src/circle.ts`.** `Circle extends Ellipse`, one radius handed to `super`
    twice, `description` overridden.
 
-6. **`src/line.ts`.** `Line extends Shape` with a length. Write no `area()`
-   here at all. The one in `Shape` already returns `0`, and that is the right
-   answer for a line.
+6. **`src/line.ts`.** `Line extends Shape` with a length, and `description`
+   returns text like `Line of length 60`. Write no `area()` here at all. The
+   one in `Shape` already returns `0`, and that is the right answer for a line.
 
 7. **`src/index.ts`.** Import `./styles.css` first, then the five classes you
    create objects from, and `Shape` with `import type`. Fetch the seven
@@ -414,7 +415,8 @@ create a car: `carButton` with nobody along, `carOneButton` with one, and
 
 3. **`src/motorcycle.ts`.** `Motorcycle extends Travel`. It needs no
    constructor of its own, because the one in `Travel` already takes exactly
-   the distance.
+   the distance. Its `description` is the plain word `Motorcycle`, and
+   `Bicycle` and `Walk` below follow that pattern with their own names.
 
 4. **`src/bicycle.ts`.** `Bicycle extends Motorcycle`, because above 1 km the
    money is the same. Override `reimbursement()` to return `0` for a distance

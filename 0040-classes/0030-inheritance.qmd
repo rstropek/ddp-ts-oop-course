@@ -122,11 +122,13 @@ takes the same three arguments. `Ball` is the **base class** here and
 A subclass may replace a method it inherited by writing a method with the same
 name. That is called **overriding**, and `fall` is overridden above.
 
-VS Code puts a red line under the new class, and `npx tsc --noEmit` says why:
+VS Code puts a red line under the new class, and `npx tsc --noEmit` says why,
+once for every place that touches a private member:
 
 ```
 Property 'y' is private and only accessible within class 'Ball'.
 Property 'circle' is private and only accessible within class 'Ball'.
+Property 'y' is private and only accessible within class 'Ball'.
 ```
 
 ## What `protected` is for {#sec-inheritance-protected}
@@ -163,9 +165,9 @@ class BigBall extends Ball {
 ```
 
 `super(...)` calls the constructor of the base class. Leave that line out and
-TypeScript refuses the class with
-`Constructors for derived classes must contain a 'super' call.`, and move it
-below the `setAttribute` line and it says
+TypeScript refuses the class, and the first error reads
+`Constructors for derived classes must contain a 'super' call.`; move the line
+below the `setAttribute` line instead and it says
 `'super' must be called before accessing 'this' in the constructor of a derived class.`
 
 Both messages guard the same thing. `this.circle` is created by the base
@@ -439,7 +441,8 @@ five buttons: `#addGummy`, `#addSteel`, `#addSuper`, `#addFragile`, and
     set `balls` to an empty array.
 15. Bonus: add a fifth kind, a `PaintBall` that leaves a small circle behind on
     every landing. It needs the stage, so make the base class keep it in a
-    `protected` field.
+    `protected` field. Give it a sixth button in `index.html`, next to the
+    other four, and wire it up the same way.
 16. Run `npm run verify` and fix what it reports.
 
 ::: {.callout-note}
