@@ -94,8 +94,8 @@ is fine), it drifts into praise, and it rates a step `done` that it never
 verified. The `transfer` column is its most honest signal: `invented` rows
 mark where a real student has to think.
 
-Sonnet is the default worker because of a head-to-head on the same
-chapters: Haiku (~80k tokens, six minutes) skipped the browser almost
+Sonnet is the default worker because of how the two behaved on
+neighboring chapters of Part 2: Haiku (~80k tokens, six minutes) skipped the browser almost
 entirely and reported only research-box questions as gaps; Sonnet (~105k
 tokens, ten minutes) ran 80 browser commands, reproduced a compiler error in
 an isolated file before reporting it, and found the one real gap (a
