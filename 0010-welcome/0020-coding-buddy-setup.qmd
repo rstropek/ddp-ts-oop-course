@@ -25,27 +25,13 @@ a run that goes wrong either, so a bad answer costs you one retry.
 
 ## Install pi {#sec-buddy-setup-install}
 
-You already have Node.js and npm from the starter project, and npm installs
-`pi` too. Open a terminal and run this line, which is the same on Windows,
-macOS, and Linux:
-
-```bash
-npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-```
-
-Keep the `--ignore-scripts` flag; it is the install command
-[pi.dev](https://pi.dev) recommends. Then close the terminal, open a fresh one,
-and check that the program is there:
-
-```bash
-pi --version
-```
-
-It answers with a version number such as `0.84.2`. If the terminal instead says
-that `pi` is an unknown command, the folder npm installs global programs into
-is not on your `PATH`. A new terminal window fixes that most of the time; when
-it does not, [pi.dev](https://pi.dev) also offers a one-line installer script
-for each operating system.
+The installation is your first research task of the year. Open
+[pi.dev](https://pi.dev), find the install instructions for your operating
+system, and follow them. Install commands change faster than a book can be
+reprinted, which is why this page does not copy them. Then open a fresh
+terminal and check that `pi` starts. If the terminal does not know the
+command, the documentation on pi.dev has a section for that too, and so does
+any search engine.
 
 ## Tell pi where the model is {#sec-buddy-setup-models}
 

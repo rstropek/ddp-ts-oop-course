@@ -28,7 +28,7 @@ Two things never change:
 ## First run {#sec-buddy-first-run}
 
 Open a terminal in your to-do list project from the previous chapters and
-start the agent. If `pi --version` fails, go back to the setup chapter in
+start the agent. If `pi` does not start, go back to the setup chapter in
 Part 1 before you read on.
 
 ```bash
