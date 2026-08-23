@@ -246,7 +246,8 @@ and commit messages someone else can understand.
 ::: {.research title="How do you write a commit message?"}
 In the exercise below you write one commit message per project, and messages
 like "stuff" and "asdf" will not do. Programmers have argued about this for
-years and written the results down.
+years and written the results down. MDN has nothing on git, so this box is
+one for the search engine.
 
 1. Find two named conventions for commit messages. What does each one ask you
    to write, and where did you find it?
@@ -277,9 +278,10 @@ have written so far into it.
    untracked.
 4. Create the folders `coursework`, `homework`, and `projects`. Git says
    nothing about empty folders, so `git status` does not change yet.
-5. Move each project you have built so far into
+5. Move each exercise project you have built so far into
    `coursework/YYYY-MM-DD-short-name/`, using the date of the lesson it
    belongs to. Anything you did as homework goes under `homework/` instead.
+   The small experiments from the chapter openings can stay where they are.
 6. Delete the `node_modules` folder in every moved project. You are deleting
    downloads, not work: `npm install` brings it back whenever you want to run
    that project again. Expected result: your course folder shrinks by a few
