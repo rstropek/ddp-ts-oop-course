@@ -15,8 +15,10 @@ comes first, and its tests come before it.
 1. Create a new app from our tests template inside `homework/`, in a folder
    called `undo-counter`.
 
-2. Delete `src/math.ts` and `src/math.test.ts`. The page you copied in has no
-   `add` line on it any more.
+2. Delete `src/math.ts` and `src/math.test.ts`, and empty `src/index.ts` down
+   to its first line, `import './styles.css';`. The page you copied in has no
+   `add` line on it any more, and the exercise below rebuilds `index.ts` from
+   scratch anyway.
 
 3. Create `src/undo-stack.test.ts` and write the first sentence about a class
    that does not exist:
@@ -88,6 +90,7 @@ cannot even load counts as a **failed suite** rather than a failed test.
 
    ```text
    src/undo-stack.test.ts(13,11): error TS2339: Property 'push' does not exist on type 'UndoStack<string>'.
+   src/undo-stack.test.ts(15,18): error TS2339: Property 'pop' does not exist on type 'UndoStack<string>'.
    ```
 
    Vitest does not type-check, so it runs the file anyway and hits the same

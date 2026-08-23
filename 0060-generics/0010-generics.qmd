@@ -238,6 +238,10 @@ of this message:
 error TS2339: Property 'describe' does not exist on type 'T'.
 ```
 
+Two more complaints come with it, saying that `Rect` and `describeAll` are
+never used. Both are true right now and both disappear as soon as the call
+below exists, so read past them here.
+
 TypeScript is right. `T` is whatever the caller picks, and a `T` that turns out
 to be `number` has no `describe`. So say what the function needs from `T`,
 without asking for a whole class:
@@ -337,8 +341,10 @@ shape somewhere on the canvas.
    export type ShapeKind = 'circle' | 'rect';
    ```
 
-5. Write the test file `src/pair.test.ts` before the class it tests. One
-   `describe('Pair', ...)` with three `it`s, each of them building its pair
+5. Write the test file `src/pair.test.ts` before the class it tests. As with
+   the bracelet rules in the Vitest chapter, the list below describes the
+   tests and the code is yours to write. One `describe('Pair', ...)` with
+   three `it`s, each of them building its pair
    with `new Pair<string, number>('circle', 3)`:
 
    * the pair keeps `'circle'` in `first` and `3` in `second`;
@@ -406,7 +412,14 @@ shape somewhere on the canvas.
    helper from `./random` instead. Run `npm start`. Expected result: the
    toolbar works as it did before, and **Surprise me** does nothing yet.
 
-10. Look up the new button with the others, take it into the same `if` that
+10. The helper that adds one shape still decides the kind and the color by
+    reading `shapeKind.value` and `shapeColor.value` inside. Give it two more
+    parameters, `kind: string` and `color: string`, and use them in place of
+    the two `.value` reads. The **Add shape** listener now passes
+    `shapeKind.value` and `shapeColor.value` in. Run `npm start`. Expected
+    result: the toolbar behaves exactly as before.
+
+11. Look up the new button with the others, take it into the same `if` that
     throws, and put the presets under the element lookups:
 
     ```ts
@@ -420,11 +433,11 @@ shape somewhere on the canvas.
 
     Listen for a click on the **Surprise me** button. Pick one preset with
     `pickRandom`, leave the handler at once when the result is `undefined`, and
-    otherwise add a shape of kind `preset.first` in the color `preset.second`
-    at a random position. Expected result: every click drops one shape, and its
+    otherwise call your helper with `preset.first`, `preset.second`, and a
+    random position. Expected result: every click drops one shape, and its
     kind and its color always come from the same preset.
 
-11. Add the `verify` script to `package.json` as in every new app, run
+12. Add the `verify` script to `package.json` as in every new app, run
     `npm run verify`, fix what it reports, and commit.
 
 ## Check your understanding {#sec-generics-quiz}
