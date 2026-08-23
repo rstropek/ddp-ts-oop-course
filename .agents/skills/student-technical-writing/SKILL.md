@@ -131,6 +131,13 @@ expected a fact.
   run as one sentence rather than two. "The agent did not skip the check, the
   harness ran it whether the agent wanted to or not" teaches something. The same
   content chopped into two clipped fragments only adds drama.
+- **Open a section with its first fact, not a trailer for it.** "One app, three
+  things that answer the user." and "A party needs a guest list, and a guest
+  list needs rules." announce that content is coming and carry none themselves.
+  Delete the line, or replace it with the sentence it was teasing: "Build a
+  page with a button that counts clicks, a box that reacts to the mouse, and a
+  line that shows the last key you pressed." Quiz openers that say how many
+  questions and which of them are the research task do carry content and stay.
 - **Reserve the one-sentence paragraph** for an instruction the reader acts on or
   a result they just produced. Parking a short abstract sentence alone is a
   keynote drumroll, using whitespace to supply emphasis the words did not earn.
@@ -237,3 +244,5 @@ Each of these has a fix. Apply the fix, do not just delete the symptom.
   become the stronger verb or the measured number.
 - **Generic endings** ("the future looks bright") become the next concrete step,
   or what the reader now has working.
+- **Trailer openers** ("One app, three things that answer the user.") become
+  the first real sentence of the section, or go.

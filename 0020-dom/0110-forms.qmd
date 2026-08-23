@@ -198,8 +198,8 @@ and no AI next to you.
 
 ## Exercise: the guest list {#sec-forms-exercise}
 
-A party needs a guest list, and a guest list needs rules. No empty names, no
-name twice, and no age of 700.
+Build a form that collects guests for a party and rejects bad entries: no
+empty names, no name twice, and no age of 700.
 
 {{< exercise guest-list >}}
 

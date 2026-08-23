@@ -176,8 +176,9 @@ use every week belong in your head.
 
 ## Exercise: a page that reacts {#sec-events-exercise}
 
-One app, three things that answer the user. Work through the steps in order and
-check the result of each one in the browser before you go on.
+Build a page with a button that counts clicks, a box that reacts to the
+mouse, and a line that shows the last key you pressed. Work through the steps in order and check the result of each one in the
+browser before you go on.
 
 1. Create a new app from our template and open the
    folder in VS Code.
