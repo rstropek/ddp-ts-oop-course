@@ -71,8 +71,11 @@ questions:
       (3) names the source (Vitest docs, vitest.dev, the `expect` API page).
       Partial: names `toBeUndefined` only, or names both matchers but no
       source.
-      Incorrect: names `toBeNull`, `toBeFalsy`, or `toBe(undefined)` as the
-      matcher that Vitest offers for this.
+      Incorrect: the first matcher named is not `toBeUndefined`. `toBeNull`,
+      `toBeFalsy`, `toBeTruthy`, or `toBe(undefined)` in its place is
+      incorrect, never partial, whatever else the answer says. The verdict
+      must match the feedback: when the feedback says the matchers are wrong,
+      grade `incorrect`.
 
   - id: research-length-matcher
     title: "Counting without .length"
@@ -88,9 +91,10 @@ questions:
       Required: (1) `toHaveLength`; (2) it also works on strings (or: on any
       value with a `length` property).
       Partial: names `toHaveLength` but the second part is missing or wrong.
-      Incorrect: names `toContain`, `toHaveProperty`, or writes
-      `expect(items.length).toBe(2)` as the answer, which is exactly what the
-      question asks to replace.
+      Incorrect: the matcher named is anything other than `toHaveLength`.
+      `toContain`, `toHaveProperty`, `toEqual`, or `expect(items.length).toBe(2)`
+      are incorrect even when the answer describes passing a number to them;
+      the matcher name is the whole point, so a wrong name never earns partial.
 
   - id: research-close-numbers
     title: "Money that is almost right"
@@ -122,10 +126,12 @@ questions:
       example `Tests  10 passed | 1 todo (11)`. It never turns the run red.
       Required: (1) it marks a planned test and runs nothing; (2) it appears
       as `todo` in the summary and does not count as passed or failed.
-      Partial: says it is a placeholder but claims it counts as passed, or
-      says it shows up as skipped without naming todo.
-      Incorrect: says the test fails, or that `it.todo` runs the test body
-      anyway.
+      Partial: says it is a placeholder or reminder but claims it counts as
+      one of the passed tests, or says it shows up as skipped without naming
+      todo. "Counts as passed" is always at most partial, never correct.
+      Incorrect: says the test runs, or that it fails, or that a red run is
+      how you see it; any answer in which code runs or the run turns red is
+      incorrect, never partial, even when it also calls it a reminder.
 
   - id: tobe-vs-toequal-array
     title: "Two empty arrays"
@@ -176,7 +182,9 @@ questions:
       `toThrow` calls the arrow function itself and catches what comes out.
       Required: (1) the call runs (and throws) before `expect` gets it;
       (2) the fixed line wraps the call in an arrow function.
-      Partial: gives the arrow-function line without the reason, or the
+      Partial: gives the arrow-function line without saying why the original
+      fails; a correct fixed line alone is partial, never correct, because the
+      question asks for the reason too. Also partial: the
       reason without a correct fixed line.
       Incorrect: blames `RuleError` (says `toThrow` cannot take an error
       class), or proposes `try`/`catch` inside the `it` as the way Vitest
