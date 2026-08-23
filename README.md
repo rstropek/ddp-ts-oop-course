@@ -1,4 +1,4 @@
-# Creative Coding 2 — course book
+# Creative Coding 2: course book
 
 The source of **Creative Coding 2**, the second-year course that follows
 [Creative Coding](https://github.com/rstropek/ddp-ts-p5-beginner-course). Year one
@@ -23,17 +23,18 @@ mechanics in detail; this one only lists what is here.
 | `book-structure.md` | The planned outline of parts and chapters |
 | `_quarto.yml` | Book definition: chapter order, output formats, Novedu and exercises base URLs |
 | `index.qmd` | The preface |
-| `0010-welcome/`, `0020-dom/`, ... | Book parts. Numbered folders and files: a chapter `.qmd` next to its `<chapter>-quiz.yaml` and images, plus the part's `*-tutor.yaml` |
+| `AGENTS.md` | The writing contract for anyone (human or agent) who edits a chapter: audience, research-box rules, exercise rules, coding-buddy rules. `CLAUDE.md` is a symlink to it |
+| `0010-welcome/`, `0020-dom/`, ... | Book parts. Numbered folders and files: a chapter `.qmd` next to its `<chapter>-quiz.yaml` (the chapter's one quiz, research questions first) and `<chapter>-quiz.eval.yaml` (golden-answer regression cases, teacher-only), a `<chapter>-writing.yaml` where a chapter has a writing activity, and svgbob diagrams as `.bob` plus rendered `.svg` |
 | `exercises/<name>/` | Files an exercise needs beyond the general starter (HTML, CSS, base classes, tests). `{{< exercise <name> >}}` lists them; students copy them into a fresh starter-based app |
-| `_extensions/` | Quarto extensions: the `quiz`, `tutor`, and `exercise` shortcodes, and the `research` filter that renders `::: {.research}` divs as "Research task" callouts |
-| `ddp-activities.yaml` | The Novedu activity registry: every quiz and tutor under a stable key. Hand-written |
+| `_extensions/` | Quarto extensions: the `quiz`, `tutor`, `writing`, and `exercise` shortcodes, and the `research` filter that renders `::: {.research}` divs as "Research task" callouts |
+| `ddp-activities.yaml` | The Novedu activity registry: every quiz, writing activity, and coding activity under a stable key (the `tutors` group is empty; this book has no chapter tutors). Hand-written |
 | `ddp-activities.lock.yaml` | Generated key → activity code map. Regenerate with `npx @novedu/cli codes sync ddp-activities.yaml`; do not edit |
 | `ddp-quiz-fragments.yaml` | Shared Novedu prompt fragments used by every chapter quiz |
-| `ddp-tutor-fragments.yaml` | Novedu prompt fragments shared by two or more tutors or the coding buddy (today: the teenager-safety rule) |
-| `ddp-coding-buddy.yaml` | The one Novedu **coding activity** of the year: the endpoint students point the `pi` agent at. Validate with `npx @novedu/cli validate ddp-coding-buddy.yaml --kind coding` |
+| `ddp-tutor-fragments.yaml` | Novedu prompt fragments shared by two or more AI activities, mostly the text the seven coding buddies have in common |
+| `ddp-coding-buddy-<part>.yaml` | One Novedu **coding activity** per part (`-dom`, `-svg`, `-classes`, `-tests`, `-generics`, `-data-structures`, `-e2e`): the endpoint students point the `pi` agent at. Each names what its part has taught and forbids what comes later. Validate with `npx @novedu/cli validate <file> --kind coding` |
 | `models.json` | The `pi` provider config students copy to `~/.pi/agent/models.json`; included verbatim in the coding-buddy chapter |
 | `emoji-pdf.lua`, `pdf-compact.tex`, `styles.css` | PDF emoji substitution, compact print layout, HTML tweaks |
-| `.agents/skills/` | Authoring skills for AI agents (`student-technical-writing`, `writing-quizzes`, `svgbob`, ...). `.claude` is a symlink to it |
+| `.agents/skills/` | Skills for AI agents: `student-technical-writing`, `writing-quizzes`, `svgbob`, `test-exercises` (a small model works through a chapter as a student in a real browser and reports gaps), `delegate-to-pi`, `writing-for-agents`, `skill-creator`. `.claude` is a symlink to it |
 | `.github/workflows/` | CI: renders the book and uploads the PDF and the zipped website |
 | `_output/`, `.quarto/` | Build output. Git-ignored |
 
@@ -63,6 +64,16 @@ PDF, and `rsvg-convert` so SVG diagrams survive the LaTeX pass.
 * The `base-url` in `ddp-activities.yaml` must point at this repository's public URL
   before the first Novedu activity is minted: `codes sync` fetches each activity file
   from that URL and fails with `FETCH_FAILED` until the repo is pushed.
-* One coding activity (`ddp-coding-buddy.yaml`) serves the whole year. Its code is an
-  API key, so the book ships the setup (`models.json`, the shape of `auth.json`) and the
-  teacher hands the code out in class; the code never appears in a chapter.
+* There are no chapter tutors. Each chapter has one quiz, and the first questions of
+  that quiz are the chapter's research-box questions, so the quiz drives the research
+  task. One chapter (the research guide) has a `writing` activity instead: the student
+  drafts a text next to an AI coach that reads but never edits.
+* One coding activity per part (`ddp-coding-buddy-<part>.yaml`) replaces the
+  single tutor endpoint, so generated code never runs ahead of the book. The code is
+  an API key: the book ships the setup (`models.json`, the shape of `auth.json`) and
+  the teacher hands out a new code at the start of every part; a code never appears
+  in a chapter.
+* `.agents/skills/test-exercises/` is the "smaller LLM" test from the point above,
+  packaged: `/test-exercises 4.3` stages the chapter and its exercise files into a
+  workspace outside the repo, lets a Sonnet agent build it as a student with
+  `playwright-cli`, and returns a report per chapter.
