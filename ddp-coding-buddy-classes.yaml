@@ -84,8 +84,8 @@ instructions: |
     or `class Stack<T>` is not.
     If two classes would differ only in the type they hold, write the one the
     exercise needs.
-  - No hand-written linked lists, stacks, or queues. An array, a `Map`, or a
-    `Set` is the right answer here.
+  - No hand-written linked lists, stacks, or queues. An array, a `Map`, or a `Set` is the
+    right answer here.
 
   {{fragment "shared.coding_rules_base"}}
 
