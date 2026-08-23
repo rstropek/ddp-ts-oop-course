@@ -62,12 +62,15 @@ and look at the console tab:
 Uncaught TypeError: Cannot set properties of null (setting 'textContent')
 ```
 
-Firefox words it differently (`can't access property "textContent", header is
-null`), but it is the same crash. The element still does not exist. `as` is a
-sentence you say to the compiler, and the compiler believes you. The browser
-never hears it. Nothing about `as` is checked while your program runs, which is
-why the error moved from your editor, where you could see it, into the console,
-where your user meets it.
+Firefox words it differently, but it is the same crash. The element still does 
+not exist. `as` is a sentence you say to the compiler, and the compiler 
+believes you. The browser never hears it. Nothing about `as` is checked 
+while your program runs, which is why the error moved from your editor, 
+where you could see it, into the console, where your user meets it.
+
+This is the kind of red line the console is for. A blank page, a heading that
+keeps its old text, a click that does nothing: from now on, every one of them
+starts with F12, and most of them end there too.
 
 ## Two things at once: `HTMLElement | null` {#sec-types-for-elements-union}
 

@@ -33,6 +33,18 @@ the **Console** tab. Every browser has one.
 The console shows `Two variables, one heading`. That is the text you never
 wrote through `sameHeading`.
 
+::: {.callout-important}
+## The console is where you look first
+
+Whenever your page does something you did not expect, a blank page, a button
+that does nothing, a text that stays the same, open the console before you do
+anything else. In most cases a red error message is waiting there, and it
+names the file, the line, and what went wrong. A page that looks broken and a
+console that you have not read is not a question for your teacher yet. Make
+F12 the first key you press when something is off, and keep the console open
+while you work.
+:::
+
 ## The elements panel shows the same page {#sec-elements-are-objects-devtools}
 
 Stay in the developer tools and switch to the **Elements** tab (Firefox calls
