@@ -159,7 +159,9 @@ the same compiler, but only for the files you have open.
 ## biome.json, one tool for two jobs {#sec-starter-project-biome}
 
 Biome is the formatter and the linter of this course, and you met both jobs
-last year. `biome.json` is where this project decides what they do. The
+last year: the formatter rewrites the layout of your code, and the linter
+points at code the language allows but the project's rules do not.
+`biome.json` is where this project decides what they do. The
 formatter section sets two-space indentation and a line width of 150
 characters, and the JavaScript part below it pins the style rules you have been
 following by hand: single quotes, semicolons always, trailing commas. The
