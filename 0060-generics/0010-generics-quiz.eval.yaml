@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the generics chapter quiz
+# (0060-generics/0010-generics.qmd). One correct, one partial, one incorrect
+# per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: generics-quiz-eval
+target: ./0010-generics-quiz.yaml
+
+questions:
+  - question: research-random-range
+    answers:
+      - expect: correct
+        answer: |
+          it goes from 0 up to 1 but 1 is never reached, 0 can happen. so if
+          you multiply something under 1 with items.length you always stay
+          under items.length. read it on the mdn page for Math.random
+      # Range right, nothing about the product, no source.
+      - expect: partial
+        answer: |
+          it gives a number between 0 and 1
+      - expect: incorrect
+        answer: |
+          Math.random() gives a whole number between 1 and items.length, so it
+          is already an index
+
+  - question: research-floor-vs-round
+    answers:
+      - expect: correct
+        answer: |
+          floor(2.7) is 2 and floor(2.2) is 2, round(2.7) is 3 and round(2.2)
+          is 2. floor always goes down so it never gets bigger. mdn Math.floor
+      # German correct answer.
+      - expect: correct
+        answer: |
+          Math.floor(2.7) ist 2, Math.floor(2.2) ist 2, Math.round(2.7) ist 3
+          und Math.round(2.2) ist 2. floor rundet immer ab, also wird die zahl
+          nie groesser. steht auf mdn bei Math.floor.
+      # Values right, never says which one cannot go up.
+      - expect: partial
+        answer: |
+          floor gives 2 and 2, round gives 3 and 2
+      - expect: incorrect
+        answer: |
+          both give 3 for 2.7 and 2 for 2.2, they are the same thing, and
+          round is the one that never goes up
+
+  - question: research-contains-matcher
+    answers:
+      - expect: correct
+        answer: |
+          expect(colors).toContain(pickRandom(colors)). with a string it checks
+          that the string has that piece in it, like
+          expect('circle').toContain('irc'). from the expect page on vitest.dev
+      # Matcher and source, string half missing.
+      - expect: partial
+        answer: |
+          toContain, i found it in the vitest docs on the expect page
+      - expect: incorrect
+        answer: |
+          you use toEqual and give it the array, then it checks that the value
+          is somewhere inside
+
+  - question: pop-type
+    answers:
+      - expect: correct
+        answer: |
+          value is number | undefined. pop always says T | undefined because
+          the stack could be empty, and typescript only looks at that, not at
+          the push one line before.
+      # Right type, no usable reason.
+      - expect: partial
+        answer: |
+          it is number | undefined
+      - expect: incorrect
+        answer: |
+          it is just number, because we pushed 4 right before so typescript
+          knows there is something in there
+
+  - question: inference-vs-explicit
+    answers:
+      - expect: correct
+        answer: |
+          in the first one typescript sees that you gave it numbers so it sets
+          T to number by itself. the second array is empty so there is nothing
+          to look at and you have to write <string> yourself.
+      # Inference named, empty array not explained.
+      - expect: partial
+        answer: |
+          the first one typescript can figure out on its own
+      - expect: incorrect
+        answer: |
+          the angle brackets are optional, both lines do exactly the same, it
+          is just a style thing
+
+  - question: constraint-missing
+    answers:
+      - expect: correct
+        answer: |
+          T can be anything the caller wants, also a number, and a number has
+          no describe(). so you have to promise it first:
+          const describeAll = <T extends { describe(): string }>(items: T[]): string[] => {
+      # Constraint written, reason missing.
+      - expect: partial
+        answer: |
+          write <T extends { describe(): string }> instead of <T>
+      - expect: incorrect
+        answer: |
+          the loop is the problem, take a normal for loop with an index and
+          then item.describe() works

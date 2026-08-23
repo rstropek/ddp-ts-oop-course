@@ -140,3 +140,9 @@ activities:
     verify-ci:
       file: 0050-testing/0030-verify-and-ci-quiz.yaml
       note: "Creative Coding 2 book: Verify before you commit, and let GitHub verify too (0030) — GitHub-hosted"
+    generics:
+      file: 0060-generics/0010-generics-quiz.yaml
+      note: "Creative Coding 2 book: The same container for any type (0010) — GitHub-hosted"
+    undo:
+      file: 0060-generics/0020-undo-quiz.yaml
+      note: "Creative Coding 2 book: Commands you can take back (0020) — GitHub-hosted"

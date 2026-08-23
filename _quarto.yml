@@ -62,6 +62,10 @@ book:
         - 0050-testing/0010-why-test.qmd
         - 0050-testing/0020-vitest.qmd
         - 0050-testing/0030-verify-and-ci.qmd
+    - part: "Generics"
+      chapters:
+        - 0060-generics/0010-generics.qmd
+        - 0060-generics/0020-undo.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

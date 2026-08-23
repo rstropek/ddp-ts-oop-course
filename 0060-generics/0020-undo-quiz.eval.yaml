@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the undo chapter quiz
+# (0060-generics/0020-undo.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: undo-quiz-eval
+target: ./0020-undo-quiz.yaml
+
+questions:
+  - question: research-output-element
+    answers:
+      - expect: correct
+        answer: |
+          output shows a result the page worked out, and the type is
+          HTMLOutputElement. read it on the mdn page about the output element
+      # Type right, purpose and source missing.
+      - expect: partial
+        answer: |
+          you write querySelector<HTMLOutputElement>('#value')
+      - expect: incorrect
+        answer: |
+          it is just a box for text like a span, so you take
+          HTMLSpanElement for it
+
+  - question: research-number-input-limits
+    answers:
+      - expect: correct
+        answer: |
+          valueAsNumber gives you 2.5 anyway. min and step only make the
+          input invalid and stop a form from sending, they do not change the
+          value your code reads. mdn says that on the number input page.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          man bekommt 2.5 trotzdem. min und step sind nur validierung, das
+          feld wird ungueltig markiert und ein form wird nicht abgeschickt,
+          aber valueAsNumber liest den wert wie er ist. steht auf mdn bei
+          input type number.
+      # Right outcome, no reason and no source.
+      - expect: partial
+        answer: |
+          you still get 2.5 in the listener
+      - expect: incorrect
+        answer: |
+          the browser does not let that through, step="1" makes it round to
+          2 before your code sees it
+
+  - question: research-whole-number
+    answers:
+      - expect: correct
+        answer: |
+          Number.isInteger(). for the string '2' it gives false because it
+          does not convert anything first. mdn, Number.isInteger page
+      # Function right, string case wrong.
+      - expect: partial
+        answer: |
+          Number.isInteger, and for '2' it gives true because 2 is a whole
+          number
+      - expect: incorrect
+        answer: |
+          you use Math.round and compare it with the value, there is no
+          function for that
+
+  - question: generic-container
+    answers:
+      - expect: correct
+        answer: |
+          the test file breaks, it makes new UndoStack<string>() and pushes
+          strings and that is not allowed any more. and the class can only
+          hold commands now so you can never use it in another app.
+      # Reuse point only, nothing about the tests.
+      - expect: partial
+        answer: |
+          it is not generic any more so you cannot reuse it for other types
+      - expect: incorrect
+        answer: |
+          nothing really breaks, the type parameter was only there to make
+          the code faster
+
+  - question: undo-missing-assignment
+    answers:
+      - expect: correct
+        answer: |
+          the value still says 3 but the history line is gone and undo is
+          gray. undo gives back the new number and nobody saves it, it has
+          to be value = command.undo(value);
+      # The fix, but no word on what the page shows.
+      - expect: partial
+        answer: |
+          the line has to be value = command.undo(value);
+      - expect: incorrect
+        answer: |
+          the page shows 0 already, the only problem is that the command is
+          still on the stack because pop is missing

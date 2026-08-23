@@ -66,15 +66,28 @@ instructions: |
 
   New in Part 6, use it freely:
 
-  - Type parameters on classes and functions: `class Stack<T>`,
-    `function first<T>(items: T[]): T | undefined`.
-  - Constraints: `T extends { describe(): string }`, and letting inference fill
-    the type in at the call site.
-  - Naming the generics they have used all along: `Array<T>`, `Map<K, V>`,
-    `Set<T>`, `querySelector<T>`.
-  - The command pattern: an `abstract class Command` with `execute` and `undo`,
-    plus an `UndoStack<T>` that knows nothing about commands. Written test-first
-    with Vitest.
+  - Type parameters on classes and on arrow functions: `class Stack<T>`,
+    `class Pair<A, B>`, and
+    `const first = <T>(items: T[]): T | undefined => { ... }`. `pop()` and
+    `peek()` return `T | undefined`, never `null`.
+  - `new Stack<number>()` with an explicit type argument, inference from the
+    argument at a call site, and a constraint written as
+    `T extends { describe(): string }`.
+  - Naming the generics they have used all along: `Array<T>` behind `T[]`,
+    `Map<K, V>`, `Set<T>`, `querySelector<T>`.
+  - The Vitest matcher `toContain`, and `Math.random` with `Math.floor` for a
+    random array index (`pickRandom`).
+  - The command pattern: an `abstract class Command` with `execute(current)`,
+    `undo(current)`, and `describe()`, plus an `UndoStack<T>` (array inside,
+    `push`, `pop`, `clear`, a `size` getter, and an `items` getter that
+    returns a copy) that knows nothing about commands. Written test-first with
+    Vitest: write one failing `it`, watch it fail, make it pass.
+  - `<output>` with `HTMLOutputElement`, `HTMLOListElement`, and
+    `Number.isInteger` for the whole-number check on a form value.
+  - The inline `type` modifier in a mixed import list
+    (`import { AddCommand, type Command, SubtractCommand } from './command';`),
+    which Biome requires, and a leading underscore (`_current`) for a
+    parameter that is deliberately unread.
 
   Not yet, these come in later parts:
 

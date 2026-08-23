@@ -1,0 +1,434 @@
+---
+title: "The same container for any type"
+---
+
+Every class you have written so far knows exactly what it holds. Write one that
+keeps a pile of numbers and you have solved the problem for numbers, and for
+nothing else. The day you need the same pile for strings you have two options:
+copy the file, or leave the type open. TypeScript has the second one, and you
+have been using it since Part 2 without a name for it.
+
+::: {.callout-note}
+## New part, new buddy code
+
+Part 6 has its own coding buddy, and this one knows generics. Your teacher
+hands out the code for it, and you put it into `~/.pi/agent/auth.json` in place
+of the Part 5 code. The setup chapter in Part 1 shows that file.
+:::
+
+## Two stacks, one difference {#sec-generics-experiment}
+
+A **stack** is a pile. You put a value on top, and the value you take off is
+the one you put on last. Undo buttons work that way, and so does the back
+button of your browser.
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `generics`. Delete `src/math.test.ts`.
+
+2. Write `src/number-stack.ts`:
+
+   ```ts
+   export class NumberStack {
+     private items: number[] = [];
+
+     push(item: number): void {
+       this.items.push(item);
+     }
+
+     pop(): number | undefined {
+       return this.items.pop();
+     }
+
+     peek(): number | undefined {
+       return this.items[this.items.length - 1];
+     }
+
+     get size(): number {
+       return this.items.length;
+     }
+   }
+   ```
+
+3. Next to it, write `src/number-stack.test.ts`:
+
+   ```ts
+   import { describe, expect, it } from 'vitest';
+   import { NumberStack } from './number-stack';
+
+   describe('NumberStack', () => {
+     it('starts empty', () => {
+       const stack = new NumberStack();
+
+       expect(stack.size).toBe(0);
+     });
+
+     it('gives the last pushed value back first', () => {
+       const stack = new NumberStack();
+       stack.push(1);
+       stack.push(2);
+
+       expect(stack.pop()).toBe(2);
+       expect(stack.pop()).toBe(1);
+     });
+
+     it('pops undefined when it is empty', () => {
+       const stack = new NumberStack();
+
+       expect(stack.pop()).toBeUndefined();
+     });
+   });
+   ```
+
+4. Run `npm test`:
+
+   ```text
+    Test Files  1 passed (1)
+         Tests  3 passed (3)
+   ```
+
+5. Now the app needs the same pile for strings. Copy `src/number-stack.ts` to
+   `src/string-stack.ts`, rename the class to `StringStack`, and replace every
+   `number` that describes the content with `string`.
+
+Count the edits in the copy. There are four: the field, the parameter of
+`push`, and the return types of `pop` and `peek`. The getter stays `number`,
+because it counts items instead of holding them. Every other line, all the
+logic, is character for character the same. And the test file needs the same
+treatment, another copy with another handful of renames.
+
+Two files that differ in four words are two files that drift apart. Fix a bug
+in one, forget the other. Throw both away and write one file that leaves the
+content type open.
+
+6. Write `src/stack.ts`:
+
+   ```ts
+   export class Stack<T> {
+     private items: T[] = [];
+
+     push(item: T): void {
+       this.items.push(item);
+     }
+
+     pop(): T | undefined {
+       return this.items.pop();
+     }
+
+     peek(): T | undefined {
+       return this.items[this.items.length - 1];
+     }
+
+     get size(): number {
+       return this.items.length;
+     }
+   }
+   ```
+
+7. Delete `src/number-stack.ts` and `src/string-stack.ts`. Rename the test file
+   to `src/stack.test.ts`, change its import line to
+
+   ```ts
+   import { Stack } from './stack';
+   ```
+
+   and replace every `new NumberStack()` with `new Stack<number>()`. Shorten
+   the `describe` title to `'Stack'` while you are there. Everything else, the
+   calls and the expected values, stays as it is.
+
+8. Run `npm test`:
+
+   ```text
+    Test Files  1 passed (1)
+         Tests  3 passed (3)
+   ```
+
+## One class with a hole in it {#sec-generics-type-parameter}
+
+`<T>` after the class name of `Stack` declares a **type parameter**. It is a
+name for a type that the class does not pick, so the class is a blueprint with
+one hole in it, and the caller fills the hole. `new Stack<number>()` fills `T` with
+`number` for that one object, `new Stack<string>()` fills it with `string`, and
+`new Stack<Shape>()` would give you a pile of shapes. The `T` is just a name,
+the way `item` is a name for a parameter.
+
+The checking is real. Open `src/index.ts`, replace everything in it with these
+lines, and run `npx tsc --noEmit`:
+
+```ts
+import { Stack } from './stack';
+
+const numbers = new Stack<number>();
+numbers.push(7);
+numbers.push('seven');
+```
+
+```text
+src/index.ts(5,14): error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+```
+
+Inside the class, `push` takes a `T`. At this call site `T` is `number`, so
+`'seven'` is refused, exactly as it was in `NumberStack`. Delete the last line.
+
+Leave the angle brackets off completely and `new Stack()` still compiles, but
+`T` becomes `unknown`, the type you met in a `catch`, and every check you
+wanted is gone. This class has no constructor argument, so TypeScript has
+nothing to read the type from. Put it in the angle brackets every time.
+
+One detail about the two `| undefined`. `pop` gets it from `Array.pop()`, which
+has nothing to hand back when the array is empty. `peek` gets it from
+`noUncheckedIndexedAccess` in `tsconfig.json`, the setting that treats every
+array index as possibly past the end. Neither of them is ever `null`.
+
+## Functions get type parameters too {#sec-generics-functions}
+
+A function can leave a type open too, the same way `Stack` does. In an arrow
+function the `<T>` goes in front of the parameter list. Add this to
+`src/index.ts`, run `npm start`, and open the browser console with F12:
+
+```ts
+const first = <T>(items: T[]): T | undefined => {
+  return items[0];
+};
+
+console.log(first([3, 1, 2]));
+console.log(first<string>([]));
+```
+
+The console shows `3` and then `undefined`.
+
+The first call has no angle brackets at all. TypeScript read the argument, saw
+a `number[]`, and filled `T` with `number` by itself; hover over the call in VS
+Code and it tells you the result is `number | undefined`. That is **inference**,
+and it is why `push` has been guarding your arrays since year one without you
+ever naming a type.
+
+The second call hands over an empty array, and an empty array says nothing
+about what belongs in it. There is nothing to read, so you say it yourself.
+
+## A type parameter with a promise attached {#sec-generics-constraints}
+
+Say you want one line of text per item, from anything that can describe itself.
+Add a small class and a second function to `src/index.ts`:
+
+```ts
+class Rect {
+  constructor(
+    private width: number,
+    private height: number,
+  ) {}
+
+  describe(): string {
+    return `Rectangle ${this.width} by ${this.height}`;
+  }
+}
+
+const describeAll = <T>(items: T[]): string[] => {
+  const lines: string[] = [];
+  for (const item of items) {
+    lines.push(item.describe());
+  }
+  return lines;
+};
+```
+
+Run `npx tsc --noEmit` and it refuses, printing the file and the line in front
+of this message:
+
+```text
+error TS2339: Property 'describe' does not exist on type 'T'.
+```
+
+TypeScript is right. `T` is whatever the caller picks, and a `T` that turns out
+to be `number` has no `describe`. So say what the function needs from `T`,
+without asking for a whole class:
+
+```ts
+const describeAll = <T extends { describe(): string }>(items: T[]): string[] => {
+```
+
+`extends` in angle brackets is a **constraint** rather than a base class. It
+means "at least this shape": any type with a `describe()` method that returns a
+string may fill `T`, and TypeScript checks that at every call. Inside the
+function you may now call `describe()` and nothing else, because that is the
+whole promise.
+
+Call it and watch the console:
+
+```ts
+for (const line of describeAll([new Rect(30, 20), new Rect(10, 10)])) {
+  console.log(line);
+}
+```
+
+```text
+Rectangle 30 by 20
+Rectangle 10 by 10
+```
+
+The `Shape` classes from Part 4 fit this constraint without a single change,
+because the abstract `Shape` promises `describe()` to everyone who extends it.
+
+## The generics you already use {#sec-generics-known}
+
+Angle brackets have been in your code since Part 2, and every one of them was a
+type parameter getting filled in.
+
+`number[]` is the short spelling of `Array<number>`. The array class leaves its
+content type open, and you fill it in every time you write a type annotation.
+
+`new Map<string, number>()` from Part 4 fills two holes, one for the keys and
+one for the values, and `new Set<string>()` fills one. A class may have as many
+type parameters as it needs, separated by commas, which is what the exercise
+below builds.
+
+`document.querySelector<HTMLButtonElement>('#addShape')` is a generic function.
+Nothing in the text `'#addShape'` tells TypeScript what kind of element comes
+back, so you fill the hole yourself, exactly as `first<string>([])` does.
+
+One more is waiting for you. `Promise<T>` is what code hands back while it is
+still busy fetching something, and you meet it when this course starts loading
+data from the network.
+
+::: {.research title="Three things this chapter leaves to you"}
+The exercise below picks a random item out of an array, and one of its tests
+checks that the picked item really came from that array. Two of the answers
+live on MDN, on the pages for
+[`Math.random()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
+and [`Math.floor()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor);
+the third is on the
+[`expect` page of the Vitest documentation](https://vitest.dev/api/expect).
+
+1. Which is the smallest number `Math.random()` can return, which is the
+   largest, and which of those two ends can actually come out? Then say why
+   `Math.random() * items.length` never reaches `items.length`.
+2. `Math.floor` and `Math.round` both turn a number with decimals into a whole
+   number. What does each of them give for `2.7` and for `2.2`, and which of
+   the two never answers with a larger whole number than it was handed?
+3. Which Vitest matcher checks that an array contains a given value, and what
+   does the same matcher check when you hand it a string instead of an array?
+
+Questions 1 and 2 are exam material. Picking a random item out of an array
+shows up in almost every task, and the exam has no internet and no AI.
+:::
+
+## Exercise: random shapes {#sec-generics-exercise}
+
+The shape generator from @sec-svg-dom-exercise gets a **Surprise me** button.
+One click picks a shape kind and a color that belong together, then drops that
+shape somewhere on the canvas.
+
+{{< exercise shape-generator tests=true >}}
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `random-shapes`.
+
+2. Delete `src/math.ts` and `src/math.test.ts`. The `index.html` you copied in
+   has no place for `add` any more.
+
+3. In `index.html`, add a third button right after **Clear all**:
+
+   ```html
+   <button id="surpriseButton" type="button">Surprise me</button>
+   ```
+
+4. Create `src/shape-kind.ts` with one line:
+
+   ```ts
+   export type ShapeKind = 'circle' | 'rect';
+   ```
+
+5. Write the test file `src/pair.test.ts` before the class it tests. One
+   `describe('Pair', ...)` with three `it`s, each of them building its pair
+   with `new Pair<string, number>('circle', 3)`:
+
+   * the pair keeps `'circle'` in `first` and `3` in `second`;
+   * `swap()` gives back a pair whose `first` is `3` and whose `second` is
+     `'circle'`;
+   * the original pair still has `'circle'` in `first` after a `swap()`.
+
+6. Write `src/pair.ts`. A class may declare more than one type parameter, and
+   `Pair` needs two:
+
+   ```ts
+   export class Pair<A, B> {
+     constructor(
+       readonly first: A,
+       readonly second: B,
+     ) {}
+
+     // swap() goes here
+   }
+   ```
+
+   Add a `swap()` method whose return type is `Pair<B, A>`, a new pair holding
+   the same two values the other way round. Run `npm test`. Expected result:
+
+   ```text
+    Tests  3 passed (3)
+   ```
+
+7. Write `src/random.ts` with two exported helpers. `randomBetween(min, max)`
+   is the one you wrote in the shape generator chapter, unchanged. The second
+   one is new:
+
+   ```ts
+   export const pickRandom = <T>(items: T[]): T | undefined => {
+     // one line: read items at a random whole index
+   };
+   ```
+
+   The research box has both pieces you need to build that index, and the
+   reason it never points past the end of the array.
+
+8. Write `src/random.test.ts` with four `it`s for `pickRandom`: an empty array
+   gives `undefined`; `['circle']` gives `'circle'`; a pick out of
+   `['red', 'green', 'blue']` is one of those three, checked with the matcher
+   from the research box; and the type survives the pick, which these two lines
+   show:
+
+   ```ts
+   const kinds: ShapeKind[] = ['circle', 'rect'];
+   const kind: ShapeKind | undefined = pickRandom(kinds);
+   ```
+
+   The second line only compiles because `pickRandom` hands back the same type
+   it was given. Check with the same matcher that `kind` is one of the two
+   kinds. Run `npm test`. Expected result:
+
+   ```text
+    Test Files  2 passed (2)
+         Tests  7 passed (7)
+   ```
+
+9. Write `src/index.ts`. Copy it from your own shape generator project in
+   `coursework/`, or build it again from steps 2 to 9 of
+   @sec-svg-dom-exercise. Then delete its local `randomBetween` and import that
+   helper from `./random` instead. Run `npm start`. Expected result: the
+   toolbar works as it did before, and **Surprise me** does nothing yet.
+
+10. Look up the new button with the others, take it into the same `if` that
+    throws, and put the presets under the element lookups:
+
+    ```ts
+    const presets: Pair<ShapeKind, string>[] = [
+      new Pair('circle', '#e63946'),
+      new Pair('rect', '#457b9d'),
+      new Pair('circle', '#f4a261'),
+      new Pair('rect', '#2a9d8f'),
+    ];
+    ```
+
+    Listen for a click on the **Surprise me** button. Pick one preset with
+    `pickRandom`, leave the handler at once when the result is `undefined`, and
+    otherwise add a shape of kind `preset.first` in the color `preset.second`
+    at a random position. Expected result: every click drops one shape, and its
+    kind and its color always come from the same preset.
+
+11. Add the `verify` script to `package.json` as in every new app, run
+    `npm run verify`, fix what it reports, and commit.
+
+## Check your understanding {#sec-generics-quiz}
+
+Six short questions, and the first three are the research questions from above.
+
+{{< quiz generics title="Generics" >}}

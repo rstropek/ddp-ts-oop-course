@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter with undo</title>
+  </head>
+  <body>
+    <h1>Counter with undo</h1>
+
+    <p class="value-line">Current value: <output id="value">0</output></p>
+
+    <p class="controls">
+      <label for="delta">Change by</label>
+      <input id="delta" type="number" min="1" step="1" value="1">
+      <button id="addButton" type="button">Add</button>
+      <button id="subtractButton" type="button">Subtract</button>
+    </p>
+
+    <p class="controls">
+      <button id="undoButton" type="button" disabled>Undo</button>
+    </p>
+
+    <p id="message" class="message"></p>
+
+    <h2>History</h2>
+    <ol id="history"></ol>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

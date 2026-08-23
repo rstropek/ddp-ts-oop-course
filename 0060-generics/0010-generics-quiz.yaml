@@ -1,0 +1,204 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "The same container for any type"
+# (0060-generics/0010-generics.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point to MDN or vitest.dev, never the answer). The
+# last three cover the chapter's own points: the `T | undefined` of `pop`,
+# inference against an explicit type argument, and the constraint that a
+# generic function needs before it may call a method.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: generics-quiz
+name: "Quiz: Generics"
+
+title: "Check your understanding: generics"
+description: |
+  Six short questions about the chapter *The same container for any type*,
+  three of them the research task. Answer in your own words; if you cannot
+  answer a research question yet, look it up on MDN or on vitest.dev and come
+  back. One or two sentences are enough. This quiz is anonymous and is here
+  for you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const numbers = new Stack<number>();"
+      scope="after the first chapter of the generics part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, SVG with `createElementNS`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, parameter properties, `extends`, `super`, and `abstract`"
+        "ES modules with one class per file, `export`, `import`, and `import type`"
+        "`throw`, `try`/`catch`, `instanceof`, own error classes, `Map`, `Set`, and callback types"
+        "unit tests with Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `toBeUndefined`, `beforeEach`, `npm test`, and `npm run verify`"
+        "a type parameter `<T>` on a class such as `Stack<T>` and on an arrow function, `new Stack<number>()`, inference from an argument, and a constraint written as `T extends { describe(): string }`")
+      not_yet=(array
+        "what `Math.random()` can return, what `Math.floor` does that `Math.round` does not, and which matcher checks that an array contains a value (those are the research tasks right now)"
+        "the command pattern and an `UndoStack<T>` written test-first"
+        "hand-written linked lists with nodes and pointers"
+        "`interface`, `keyof`, mapped and conditional types, `any`, and default type parameters"
+        "Playwright and end-to-end tests, `async`, and `fetch`")}}
+
+questions:
+  - id: research-random-range
+    title: "What Math.random() can hand you"
+    question: |
+      Your `pickRandom` turns `Math.random()` into an index into `items`.
+      Which is the smallest number `Math.random()` can return, which is the
+      largest, and which of those two ends can actually come out? Then say why
+      `Math.random() * items.length` never reaches `items.length`. Say where
+      you read it.
+    evaluation: |
+      Expected: `Math.random()` returns a number from 0 up to but not
+      including 1, so 0 can come out and 1 never can. Multiplying a number
+      below 1 by `items.length` always stays below `items.length`. Source is
+      the `Math.random()` page on MDN.
+      Required: (1) the range is 0 to 1 with 0 possible and 1 impossible;
+      (2) the product stays below `items.length` because the factor is always
+      below 1; (3) names the source (MDN, the `Math.random()` page).
+      Partial: gives the range but no reason for the product, or the reason
+      without saying which end is excluded, or both without a source.
+      Incorrect: says 1 can come out, or says the range is 1 to
+      `items.length`, or says `Math.random()` gives whole numbers.
+
+  - id: research-floor-vs-round
+    title: "Two ways to lose the decimals"
+    question: |
+      `Math.floor` and `Math.round` both turn a number with decimals into a
+      whole number. What does each of them give for `2.7` and for `2.2`, and
+      which of the two never answers with a larger whole number than it was
+      handed? Say where you read it.
+    evaluation: |
+      Expected: `Math.floor(2.7)` is 2 and `Math.floor(2.2)` is 2;
+      `Math.round(2.7)` is 3 and `Math.round(2.2)` is 2. `Math.floor` always
+      goes down, so it never answers with a larger whole number. Source is the
+      `Math.floor()` page on MDN (or the `Math.round()` page next to it).
+      Required: (1) the four values, or at least `floor(2.7)` as 2 against
+      `round(2.7)` as 3; (2) `Math.floor` is the one that never goes up;
+      (3) names the source (MDN).
+      Partial: the values are right but the answer does not say which function
+      never goes up, or the rule is right with a wrong value, or no source.
+      Incorrect: says `Math.floor(2.7)` is 3, or swaps the two functions, or
+      claims both give the same answer for `2.7`.
+
+  - id: research-contains-matcher
+    title: "Is it really one of them?"
+    question: |
+      A test hands `pickRandom` the array `['red', 'green', 'blue']` and has to
+      check that whatever comes back is one of those three. Which Vitest
+      matcher does that in one line, and what does the same matcher check when
+      you hand it a string instead of an array? Say where you read it.
+    evaluation: |
+      Expected: `expect(colors).toContain(pickRandom(colors))`. Handed a
+      string, `toContain` checks that the string contains the given text as a
+      part of it, for example `expect('circle').toContain('irc')`. Source is
+      the `expect` page of the Vitest documentation (vitest.dev).
+      Required: (1) `toContain`; (2) on a string it checks for a substring;
+      (3) names the source (Vitest docs, vitest.dev, the `expect` page).
+      Partial: names `toContain` but says nothing usable about strings, or
+      names it with the string part but no source. `toContainEqual` in place
+      of `toContain` is at most partial.
+      Incorrect: the matcher named is `toEqual`, `toBe`, `toHaveProperty`,
+      `toInclude`, or anything else that is not `toContain`; a wrong matcher
+      name is never partial, whatever else the answer says.
+
+  - id: pop-type
+    title: "A value you just pushed"
+    question: |
+      `Stack<T>` declares `pop(): T | undefined`. Here it is at work:
+
+      ```ts
+      const stack = new Stack<number>();
+      stack.push(4);
+
+      const value = stack.pop();
+      ```
+
+      What type does TypeScript give `value`, and why is `undefined` part of it
+      even though the line above pushed a number?
+    evaluation: |
+      Expected: `value` is `number | undefined`, because `T` is `number` at
+      this call. The `| undefined` is in the declared type of `pop` for the
+      case of an empty stack, and TypeScript goes by the declared type, not by
+      what the previous line happened to do.
+      Required: (1) the type is `number | undefined`; (2) the `undefined` is
+      there for the empty-stack case (or: it is part of what `pop` promises,
+      and TypeScript does not trace the earlier `push`).
+      Partial: names `number | undefined` with no usable reason, or explains
+      the empty-stack reason but says the type is plain `number`.
+      Incorrect: says the type is `number`, or `T`, or `any`, or claims the
+      `undefined` comes from `null` being possible.
+
+  - id: inference-vs-explicit
+    title: "One call names the type, the other does not"
+    question: |
+      Both lines call the same function:
+
+      ```ts
+      const first = <T>(items: T[]): T | undefined => {
+        return items[0];
+      };
+
+      console.log(first([3, 1, 2]));
+      console.log(first<string>([]));
+      ```
+
+      The first call names no type and the second one does. Explain why.
+    evaluation: |
+      Expected: in the first call TypeScript reads the argument, sees a
+      `number[]`, and fills `T` with `number` by itself. The second call hands
+      over an empty array, which says nothing about what belongs in it, so
+      there is nothing to read and the caller writes `<string>`.
+      Required: (1) the first call is inferred from the argument's type;
+      (2) an empty array carries no element type, so the second call has to
+      state it.
+      Partial: says the first is inferred but gives no reason for the second,
+      or names the empty array without mentioning inference.
+      Incorrect: says the angle brackets are optional and both calls behave
+      the same, or that `<string>` converts the array, or that the second call
+      needs them because it is inside `console.log`.
+
+  - id: constraint-missing
+    title: "T cannot describe itself"
+    question: |
+      TypeScript refuses this function with
+      `Property 'describe' does not exist on type 'T'.`
+
+      ```ts
+      const describeAll = <T>(items: T[]): string[] => {
+        const lines: string[] = [];
+        for (const item of items) {
+          lines.push(item.describe());
+        }
+        return lines;
+      };
+      ```
+
+      Say why refusing it is the right answer, and write the change that makes
+      it compile.
+    evaluation: |
+      Expected: `T` is whatever the caller picks, and a caller may pick
+      `number` or `string`, which have no `describe`, so the call is not safe.
+      The fix is a constraint on the type parameter:
+      `const describeAll = <T extends { describe(): string }>(items: T[]): string[] => {`.
+      Required: (1) `T` stands for any type the caller chooses, and not every
+      type has a `describe` method; (2) the fixed first line adds
+      `T extends { describe(): string }`.
+      Partial: only the reason, or only a correct constraint with no reason.
+      Incorrect: forces the call through with `as`, or says the fix is to drop
+      the type parameter and take `Rect[]`, or blames the `for...of` loop.

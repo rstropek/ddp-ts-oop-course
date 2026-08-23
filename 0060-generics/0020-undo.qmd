@@ -1,0 +1,403 @@
+---
+title: "Commands you can take back"
+---
+
+Ctrl+Z is the most forgiving key on your keyboard, and an app can only offer it
+when every action it performs knows how to reverse itself. This chapter builds a
+counter with multi-level undo: click Add a few times, click Undo the same number
+of times, and the counter is back at zero. The class that remembers the history
+comes first, and its tests come before it.
+
+## Red before green {#sec-undo-experiment}
+
+{{< exercise undo-counter tests=true >}}
+
+1. Create a new app from our tests template inside `homework/`, in a folder
+   called `undo-counter`.
+
+2. Delete `src/math.ts` and `src/math.test.ts`. The page you copied in has no
+   `add` line on it any more.
+
+3. Create `src/undo-stack.test.ts` and write the first sentence about a class
+   that does not exist:
+
+   ```ts
+   import { describe, expect, it } from 'vitest';
+   import { UndoStack } from './undo-stack';
+
+   describe('UndoStack', () => {
+     it('starts empty', () => {
+       const stack = new UndoStack<string>();
+
+       expect(stack.size).toBe(0);
+     });
+   });
+   ```
+
+4. Run `npm test`:
+
+   ```text
+    ❯ src/undo-stack.test.ts (0 test)
+
+   ⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+    FAIL  src/undo-stack.test.ts [ src/undo-stack.test.ts ]
+   Error: Cannot find module './undo-stack' imported from
+   /home/you/creative-coding-2/homework/undo-counter/src/undo-stack.test.ts
+    ❯ src/undo-stack.test.ts:2:1
+         1| import { describe, expect, it } from 'vitest';
+         2| import { UndoStack } from './undo-stack';
+          | ^
+
+    Test Files  1 failed (1)
+         Tests  no tests
+   ```
+
+Read the count at the bottom: `Tests  no tests`. Vitest never reached your `it`,
+because the import at the top of the file had nowhere to go, and a file that
+cannot even load counts as a **failed suite** rather than a failed test.
+
+5. Now write the smallest class that answers that one test, in
+   `src/undo-stack.ts`:
+
+   ```ts
+   export class UndoStack<T> {
+     private itemList: T[] = [];
+
+     get size(): number {
+       return this.itemList.length;
+     }
+   }
+   ```
+
+   `npm test` turns green: `Tests  1 passed (1)`.
+
+6. Add the second sentence below the first `it`, and save:
+
+   ```ts
+     it('gives back the item that was pushed last', () => {
+       const stack = new UndoStack<string>();
+       stack.push('a');
+
+       expect(stack.pop()).toBe('a');
+     });
+   ```
+
+   VS Code underlines `push` and `pop` in red before you run anything, and
+   `npx tsc --noEmit` says why:
+
+   ```text
+   src/undo-stack.test.ts(13,11): error TS2339: Property 'push' does not exist on type 'UndoStack<string>'.
+   ```
+
+   Vitest does not type-check, so it runs the file anyway and hits the same
+   wall a moment later:
+
+   ```text
+    FAIL  src/undo-stack.test.ts > UndoStack > gives back the item that was pushed last
+   TypeError: stack.push is not a function
+   ```
+
+7. Give the class a `push` and a `pop`, and watch both tests go green.
+
+## Write the sentence, then make it true {#sec-undo-test-first}
+
+Writing a test that cannot pass yet has a name: **test-first** work. The test is
+a sentence about what the class should do, you watch it fail, and then you write
+just enough code to make the sentence true. The failing run is the step people
+skip, and it is the one that proves the test is really watching.
+
+A test written after the code has a habit of describing whatever the code
+happens to do, bugs included. You already know the answer while you type the
+expectation, so you type that answer in.
+
+Keep the loop small: one `it`, watch it fail, make it pass, next `it`.
+`npm run test:watch` in a second terminal shows the failure on every save.
+
+## A stack that never heard of commands {#sec-undo-generic}
+
+Your class pushes and pops, and it can report its size. Five more sentences
+finish it, and you write them the same way, one at a time:
+
+* `pop()` on an empty stack gives back `undefined`
+* three pushed items come back newest first
+* `clear()` leaves the size at 0
+* `items` lists two pushed items with the newest last
+* pushing onto the array that `items` handed out leaves `size` unchanged
+
+The first two already pass on the code you have, which is fine: they pin that
+behavior down for later. The last three ask for two new members, and here is the
+class once all five are green:
+
+```ts
+export class UndoStack<T> {
+  private itemList: T[] = [];
+
+  push(item: T): void {
+    this.itemList.push(item);
+  }
+
+  pop(): T | undefined {
+    return this.itemList.pop();
+  }
+
+  clear(): void {
+    this.itemList = [];
+  }
+
+  get size(): number {
+    return this.itemList.length;
+  }
+
+  get items(): T[] {
+    return this.itemList.slice();
+  }
+}
+```
+
+That is the `Stack<T>` of the last chapter without `peek`, plus `clear` and
+`items`. The private array is named `itemList` here so that the getter can take
+the name `items`, the same trick the bracelet used. That getter hands out a
+copy, so nobody can push into the history behind the class's back, and it comes
+with the newest item last, which is the order the page lists them in.
+
+With seven `it` blocks in one `describe`, move
+`const stack = new UndoStack<string>();` into a `beforeEach` above them and
+declare `let stack: UndoStack<string>;` next to it. Expected result:
+
+```text
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+```
+
+This app stores nothing but commands in the stack, so why not write
+`push(item: Command)` and be done with the angle brackets? Because a container
+that names its content can only ever be used by one app. The moment `UndoStack`
+mentions `Command`, a chat app cannot use it for messages and your own tests
+cannot use it for strings. Nothing inside the class calls a method on its items,
+so `T` needs no constraint either.
+
+Your test file is the proof. Every test in `src/undo-stack.test.ts` uses
+`new UndoStack<string>()`, and strings know nothing about counters. Keep it
+that way. In the next part you will pull the array out of this class and put
+hand-built nodes in its place, and every test you write today has to stay green
+afterwards.
+
+## An action that knows how to undo itself {#sec-undo-command}
+
+The counter has one number in it. Adding 3 means `value + 3`, and taking that
+back means `value - 3`, so the stack has to remember enough to run the second
+line. A number alone does not say whether it was added or subtracted.
+
+Wrap each action in an object instead. The **command pattern** gives every
+action a class that carries what it needs and knows both directions. Write
+`src/command.ts`:
+
+```ts
+export abstract class Command {
+  abstract execute(current: number): number;
+  abstract undo(current: number): number;
+  abstract describe(): string;
+}
+```
+
+Each method takes the current value and returns the new one. `describe()` gives
+the short text the history list shows.
+
+Test first again, in `src/command.test.ts`:
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { AddCommand } from './command';
+
+describe('AddCommand', () => {
+  it('adds its delta to the current value', () => {
+    const command = new AddCommand(3);
+
+    expect(command.execute(5)).toBe(8);
+  });
+});
+```
+
+Then the class that makes it true, in the same `src/command.ts`:
+
+```ts
+export class AddCommand extends Command {
+  constructor(private readonly delta: number) {
+    super();
+  }
+
+  execute(current: number): number {
+    return current + this.delta;
+  }
+
+  undo(current: number): number {
+    return current - this.delta;
+  }
+
+  describe(): string {
+    return `+ ${this.delta}`;
+  }
+}
+```
+
+The delta is private and `readonly`. Once a command is built it is a record of
+something that happened, and nobody gets to edit it.
+
+Add two more tests for `AddCommand`, one for `undo(8)` giving `5` and one for
+`describe()` giving `'+ 3'`. Then repeat the round for `SubtractCommand`. Its
+`execute` subtracts and its `undo` adds, and `describe()` gives `'- 2'` for a
+delta of 2. Six tests in that file, and this is what both files together
+report:
+
+```text
+ Test Files  2 passed (2)
+      Tests  13 passed (13)
+```
+
+Since the polymorphism chapter the rule has been one class per file. These three
+share `src/command.ts` as an exception: they are one family of tiny classes that
+is never useful apart, and the file carries the family name.
+
+::: {.callout-tip}
+## From last year's exam sheet
+
+"Yes, you could do it with a signed delta. Don't. The point is the pattern:
+every command carries its own undo."
+
+For a counter, one class holding `-2` really would do the job. The pattern earns
+its keep as soon as the actions stop being arithmetic: in a drawing app one
+command adds a circle and another changes a color, with no single number to
+flip. Each of them knows how to take itself back, and the undo stack never
+changes.
+:::
+
+::: {.research title="Three things the wiring needs"}
+The page you copied in shows the counter in an element you have not met yet, and
+it hands your click listener whatever the user typed into the delta field. MDN
+answers all three questions.
+
+1. The value sits in `<output id="value">0</output>`. What is the `<output>`
+   element meant for, and which type name goes into
+   `document.querySelector<...>('#value')` for it?
+2. The delta field is `<input type="number" min="1" step="1">`. Does the browser
+   keep a value like `2.5` away from your click listener, or does
+   `valueAsNumber` hand it to you anyway?
+3. `Number.isNaN` catches the empty field and says nothing about `2.5`. Which
+   `Number` function answers whether a value is a whole number, and what does it
+   give back for the string `'2'`?
+
+For the exam, the whole-number check has to be in your head: reading a number
+out of a form and refusing the bad ones turns up in every second exercise.
+:::
+
+## Exercise: a counter that forgets nothing {#sec-undo-exercise}
+
+Both modules are tested, and no class in them has ever seen the page.
+Everything below happens in `src/index.ts`, the only file in this project that
+touches the DOM.
+
+1. Open the `index.html` you copied in and find the seven elements the next
+   steps use: the `<output>` with the value, the delta input, the Add and
+   Subtract buttons, the Undo button, the paragraph with `id="message"`, and the
+   empty `<ol id="history">`.
+
+2. Replace `src/index.ts`. It starts with the imports:
+
+   ```ts
+   import './styles.css';
+   import { AddCommand, type Command, SubtractCommand } from './command';
+   import { UndoStack } from './undo-stack';
+   ```
+
+   `Command` is used only as a type here, never with `new`, and Biome wants the
+   `type` keyword right in front of such a name. `npm run check:fix` puts it
+   there.
+
+3. Look up all seven elements with `querySelector`, using the type name for
+   `<output>` from the research task, and stop the app with one `if` and a
+   `throw new Error(...)` when any of them is missing.
+
+4. The whole state of this app is two lines:
+
+   ```ts
+   const undoStack = new UndoStack<Command>();
+   let value = 0;
+   ```
+
+   `UndoStack<Command>` fills the hole in the class with your own type, so
+   `pop()` hands back a `Command | undefined` and TypeScript knows that
+   `describe()` and `undo()` exist on it.
+
+5. Write a `render()` helper that draws everything the state says:
+
+   * the value goes into the output element as text
+   * the Undo button is disabled while `undoStack.size` is 0
+   * the history list is emptied with `replaceChildren()` and refilled with one
+     `<li>` per item of `undoStack.items`, each showing that command's
+     `describe()`
+
+   The oldest command is the top line of the list, and the bottom line is the
+   one Undo takes back next.
+
+6. Write a `readDelta()` helper that returns `number | undefined`. It reads
+   `valueAsNumber` from the delta input, and when that is not a whole number of
+   at least 1 it writes `'Please enter a whole number of at least 1.'` into the
+   message paragraph and returns `undefined`. Otherwise it clears the message
+   and returns the number. Use the check from the research task here.
+
+7. Write a `run(command: Command)` helper with the three lines every new action
+   needs: hand the current value to `execute` and keep what comes back, push the
+   command onto the undo stack, call `render()`.
+
+8. Give the Add button a `click` listener that calls `readDelta()`, returns
+   right away when the answer is `undefined`, and otherwise calls
+   `run(new AddCommand(delta))`. The Subtract button gets the same listener with
+   `SubtractCommand`.
+
+9. Give the Undo button a `click` listener that pops the stack, does nothing
+   when the stack was empty, and otherwise hands the current value to that
+   command's `undo` and keeps what comes back. Then `render()`.
+
+10. Call `render()` once at the end of the file, so the fresh page shows 0 and a
+    disabled Undo button.
+
+11. Run `npm start` and check all of it. Expected results:
+
+    * Add with a delta of 3, twice: the value shows 6 and the history has two
+      lines reading `+ 3`
+    * Subtract with a delta of 2: the value shows 4 and a third line reads `- 2`
+    * Undo three times: 6, then 3, then 0, with the history shrinking line by
+      line and the Undo button going gray at the end
+    * a delta of `2.5` or an empty field: the message appears, the value stays,
+      and no line joins the history
+
+12. Run `npm test` and expect `Tests  13 passed (13)`. Add the `verify` script
+    with its three checks to `package.json` as in every new app, run
+    `npm run verify`, fix what it reports, and commit.
+
+::: {.callout-tip}
+## When you finish early
+
+**Redo.** Keep a second `UndoStack<Command>` next to the first one. The Undo
+listener pushes the command it popped onto the redo stack, and a Redo button
+pops from there, runs `execute` again, and pushes the command back onto the undo
+stack. Any new Add or Subtract calls `clear()` on the redo stack, because the
+history just took a different turn. Add a Redo button to `index.html` and
+disable it while the redo stack is empty.
+
+**ResetCommand.** A third subclass in `src/command.ts` that sets the value to 0.
+It cannot know in advance what it is replacing, so `execute` stores the value it
+was handed in a private field and `undo` gives that value back. Write the test
+first: `execute(7)` is `0`, and `undo(0)` right after that is `7`. Its `undo`
+never looks at the number it is handed, and TypeScript refuses a parameter that
+is never read, so name that one `_current`: an underscore in front says you left
+it out on purpose. Then add a Reset button to the page and send the new command
+through the same `run` helper.
+:::
+
+## Check your understanding {#sec-undo-quiz}
+
+Five questions, the first three of them the research task.
+
+{{< quiz undo title="Commands you can take back" >}}

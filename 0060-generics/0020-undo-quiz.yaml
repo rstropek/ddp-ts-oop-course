@@ -1,0 +1,186 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Commands you can take back"
+# (0060-generics/0020-undo.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point at MDN, never the answer). The last two cover
+# the chapter's own points: why the undo stack stays generic, and the command
+# whose return value nobody stores.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: undo-quiz
+name: "Quiz: Commands you can take back"
+
+title: "Check your understanding: commands you can take back"
+description: |
+  Five short questions about the chapter *Commands you can take back*, three
+  of them the research task. Answer in your own words; if you cannot answer a
+  research question yet, look it up on MDN and come back. One or two sentences
+  are enough. This quiz is anonymous and is here for you. Answering in German
+  is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const undoStack = new UndoStack<Command>();"
+      scope="after the undo chapter of the generics part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `toBeUndefined`, `beforeEach`, and `npm test`"
+        "generics: a type parameter `T`, `class Stack<T>`, generic functions, and a constraint such as `T extends { describe(): string }`"
+        "the command pattern with an abstract `Command` that has `execute`, `undo`, and `describe`")
+      not_yet=(array
+        "what `<output>` is for, which type name it has in `querySelector`, what `min` and `step` really guard, and how to test for a whole number (those are the research tasks right now)"
+        "hand-built nodes and linked lists, which replace the array inside the undo stack in the next part"
+        "`interface`, `keyof`, mapped types, and default type parameters"
+        "Playwright and end-to-end tests"
+        "`async`, `fetch`, and `localStorage`")}}
+
+questions:
+  - id: research-output-element
+    title: "The element that shows the value"
+    question: |
+      The counter page shows its value in `<output id="value">0</output>`.
+      What is the `<output>` element meant for, and which type name goes
+      into `document.querySelector<...>('#value')` for it? Say where you
+      read it.
+    evaluation: |
+      Expected: `<output>` marks the result of a calculation or of a user
+      action on the page, and the type is `HTMLOutputElement`, so
+      `document.querySelector<HTMLOutputElement>('#value')`. Source is the
+      MDN page for the `<output>` element.
+      Required: (1) it is for showing a result the page calculated;
+      (2) `HTMLOutputElement`; (3) names the source (MDN, the `<output>`
+      page).
+      Partial: gives `HTMLOutputElement` but describes the purpose wrongly or
+      not at all, or describes the purpose and names no type or no source.
+      Incorrect: the type named is not `HTMLOutputElement`. `HTMLElement`,
+      `HTMLSpanElement`, or `HTMLParagraphElement` in its place is incorrect,
+      whatever else the answer says.
+
+  - id: research-number-input-limits
+    title: "What min and step really guard"
+    question: |
+      The delta field of the counter is
+      `<input type="number" min="1" step="1">`, and a click listener reads
+      `deltaInput.valueAsNumber`. The user types `2.5` and clicks Add. Does
+      the browser keep that value away from your listener, or does
+      `valueAsNumber` hand you `2.5` anyway? Say where you read it.
+    evaluation: |
+      Expected: `valueAsNumber` hands over `2.5`. `min` and `step` are
+      validation constraints: they mark the input as invalid and stop a form
+      from being submitted, and they never change what your code reads from
+      the field. So the listener has to check the number itself. Source is
+      the MDN page for `<input type="number">` (or MDN's client-side form
+      validation page).
+      Required: (1) the value reaches the listener, `valueAsNumber` is `2.5`;
+      (2) `min` and `step` only mark the field invalid or block form
+      submission, they do not filter the value; (3) names the source.
+      Partial: says the value arrives but gives no reason, or explains
+      validation correctly but no source.
+      Incorrect: says the browser blocks the value, or that `valueAsNumber`
+      rounds it to `2` or `3`, or that it gives `NaN` for `2.5`.
+
+  - id: research-whole-number
+    title: "Is that a whole number?"
+    question: |
+      `Number.isNaN` catches the empty delta field and says nothing about
+      `2.5`. Which `Number` function answers whether a value is a whole
+      number, and what does it give back for the string `'2'`? Say where you
+      read it.
+    evaluation: |
+      Expected: `Number.isInteger(value)`. `Number.isInteger('2')` is
+      `false`, because the function converts nothing: a value that is not of
+      type number is never an integer. Source is the MDN page for
+      `Number.isInteger`.
+      Required: (1) `Number.isInteger`; (2) `false` for the string `'2'`;
+      (3) names the source.
+      Partial: names `Number.isInteger` but gets the string case wrong or
+      leaves it out, or describes the check without naming the function.
+      Incorrect: the function named is anything other than `Number.isInteger`
+      (`Number.isSafeInteger` in its place, `parseInt`, `Math.round`, or a
+      `%` check), even when the rest of the answer is right.
+
+  - id: generic-container
+    title: "A stack that knows too much"
+    question: |
+      A classmate rewrites the head of the undo stack like this, and the
+      counter app still works:
+
+      ```ts
+      export class UndoStack {
+        private itemList: Command[] = [];
+
+        push(item: Command): void {
+          this.itemList.push(item);
+        }
+      ```
+
+      Name one thing in the project that stops working, and say what the
+      class has lost.
+    evaluation: |
+      Expected: `src/undo-stack.test.ts` stops compiling, because every test
+      in it builds a `new UndoStack<string>()` and pushes strings, and
+      neither the type parameter nor a string is allowed any more. The class
+      has lost its reuse: it can now hold commands and nothing else, so no
+      other app and no other type can use it.
+      Required: (1) names the test file (or the tests with strings) as what
+      breaks; (2) says the class can only ever hold commands now, so it
+      cannot be reused for another type.
+      Partial: only one of the two, for example "it is not generic any more"
+      with no consequence named, or the broken tests with no word about
+      reuse.
+      Incorrect: says nothing breaks, says the change is only about speed or
+      memory, or claims `new UndoStack<string>()` still compiles.
+
+  - id: undo-missing-assignment
+    title: "The undo that changes nothing"
+    question: |
+      The counter shows 0. You set the delta to 3, click Add once, then click
+      Undo, and this is the Undo listener:
+
+      ```ts
+      undoButton.addEventListener('click', () => {
+        const command = undoStack.pop();
+        if (!command) {
+          return;
+        }
+
+        command.undo(value);
+        render();
+      });
+      ```
+
+      What does the page show after that Undo click, and what is missing from
+      the listener?
+    evaluation: |
+      Expected: the value still shows 3, while the history line disappears
+      and the Undo button turns gray, because the command was popped and the
+      page was redrawn. `undo` gives the new value back and nobody stores it.
+      The missing line is `value = command.undo(value);`.
+      Required: (1) the value on the page stays 3 (unchanged) although the
+      history empties; (2) the result of `command.undo(value)` has to be
+      assigned to `value`.
+      Partial: gives the missing assignment without saying what the page
+      shows, or describes the page correctly with no usable cause.
+      Incorrect: says the page shows 0, says nothing happens at all, says the
+      bug is the missing `pop`, or claims `undo` should change the value
+      inside the command object.
