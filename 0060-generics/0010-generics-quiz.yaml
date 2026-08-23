@@ -94,7 +94,9 @@ questions:
       Partial: the values are right but the answer does not say which function
       never goes up, or the rule is right with a wrong value, or no source.
       Incorrect: says `Math.floor(2.7)` is 3, or swaps the two functions, or
-      claims both give the same answer for `2.7`.
+      claims both give the same answer for `2.7`, or names `Math.round` as the
+      one that never goes up. Such an answer is incorrect, never partial,
+      whatever else it gets right.
 
   - id: research-contains-matcher
     title: "Is it really one of them?"
@@ -112,7 +114,8 @@ questions:
       (3) names the source (Vitest docs, vitest.dev, the `expect` page).
       Partial: names `toContain` but says nothing usable about strings, or
       names it with the string part but no source. `toContainEqual` in place
-      of `toContain` is at most partial.
+      of `toContain` is at most partial. Never grade code punctuation: a
+      missing semicolon or missing backticks change nothing.
       Incorrect: the matcher named is `toEqual`, `toBe`, `toHaveProperty`,
       `toInclude`, or anything else that is not `toContain`; a wrong matcher
       name is never partial, whatever else the answer says.
@@ -201,4 +204,6 @@ questions:
       `T extends { describe(): string }`.
       Partial: only the reason, or only a correct constraint with no reason.
       Incorrect: forces the call through with `as`, or says the fix is to drop
-      the type parameter and take `Rect[]`, or blames the `for...of` loop.
+      the type parameter and take `Rect[]`, or blames the `for...of` loop or
+      proposes a different kind of loop as the fix. A wrong fix is incorrect,
+      never partial, even when the reason it gives mentions types.
