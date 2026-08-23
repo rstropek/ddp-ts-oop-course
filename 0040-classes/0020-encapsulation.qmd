@@ -329,7 +329,7 @@ the time as `mm:ss.t` and never touches those numbers.
 Give `Stopwatch` a getter `get isRunning(): boolean`, then set
 `startButton.disabled = watch.isRunning;` and
 `stopButton.disabled = !watch.isRunning;` inside the animation loop. The
-buttons grey themselves out, and the page reads the flag without ever being
+buttons gray themselves out, and the page reads the flag without ever being
 able to change it.
 
 ## Exercise: an account that refuses to go negative {#sec-encapsulation-bank}
