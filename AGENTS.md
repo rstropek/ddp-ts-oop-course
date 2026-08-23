@@ -136,13 +136,23 @@ drafts next to an AI coach that reads but never edits; it is not anonymous.
 
 ## The coding buddy
 
-Students use the `pi` coding agent all year, connected to the novedu coding
-activity `ddp-coding-buddy.yaml`. Its instructions carry the course coding rules
-and a "ladder" of book parts so generated code stays at the student's level.
-When a chapter introduces a construct or changes a convention, update the
-ladder or the rules in that file in the same edit, then validate it with
-`npx @novedu/cli validate ddp-coding-buddy.yaml --kind coding`. The activity code
-is an API key and is never printed in a chapter.
+Students use the `pi` coding agent all year, connected to one novedu coding
+activity **per part**, so generated code never runs ahead of the book:
+`ddp-coding-buddy-dom.yaml` (Part 2), `-svg` (Part 3), `-classes` (Part 4),
+`-tests` (Part 5), `-generics` (Part 6), `-data-structures` (Part 7), and `-e2e`
+(Part 8). Text that two or more of them share lives in
+`ddp-tutor-fragments.yaml`. Each level file names the cumulative toolbox the
+student has and an explicit "not yet" list of what the later parts teach; the
+model never detects the level and never asks which part the student is in.
+
+When a chapter introduces a construct or changes a convention, update that
+part's level file in the same edit (the fragment instead, when the rule is
+shared), then validate with `npx @novedu/cli validate <file> --kind coding`.
+Every chapter that opens a part from Part 3 on carries a short
+`callout-note` titled "New part, new buddy code" right after the intro
+paragraph, two or three sentences telling the student to put the new code into
+`~/.pi/agent/auth.json`; the setup procedure itself stays in 2.7. The activity
+code is an API key and is never printed in a chapter.
 
 ## Related skills
 

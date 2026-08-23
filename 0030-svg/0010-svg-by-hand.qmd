@@ -7,6 +7,15 @@ painted pixels onto a canvas. The browser can draw too, and it does it in a way
 that looks strange for about five minutes: the picture is written as tags,
 inside your HTML, where you can read it. Type one and see.
 
+::: {.callout-note}
+## New part, new buddy code
+
+Part 3 has its own coding buddy, which knows SVG the way the earlier one knew
+the DOM. Your teacher hands out the code for it, and you put it into
+`~/.pi/agent/auth.json` in place of the Part 2 code. The chapter on your coding
+buddy shows that file.
+:::
+
 ## A circle you can read {#sec-svg-by-hand-circle}
 
 1. Create a new app `svg-experiment` from our template inside `coursework/`.

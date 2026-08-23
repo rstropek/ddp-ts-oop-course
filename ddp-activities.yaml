@@ -18,13 +18,33 @@
 base-url: "https://raw.githubusercontent.com/rstropek/ddp-ts-oop-course/refs/heads/main/"
 
 activities:
-  # The one coding activity of the year: the endpoint students point the `pi`
-  # coding agent at, from the first chapter on. The code IS the API key, so
-  # the book explains the setup and the teacher hands the code out in class.
+  # One coding activity per part of the book: the endpoint students point the
+  # `pi` coding agent at. Each level's prompt names what that part has taught
+  # and forbids what comes later; there is no level detection. The code IS the
+  # API key, so the teacher hands out a new code at the start of every part
+  # and the student swaps it into ~/.pi/agent/auth.json.
   coding:
-    coding-buddy:
-      file: ddp-coding-buddy.yaml
-      note: "Creative Coding 2 book: coding buddy with the course coding guidelines built in (whole year) — GitHub-hosted"
+    coding-buddy-dom:
+      file: ddp-coding-buddy-dom.yaml
+      note: "Creative Coding 2 book: coding buddy, Part 2 The DOM — GitHub-hosted"
+    coding-buddy-svg:
+      file: ddp-coding-buddy-svg.yaml
+      note: "Creative Coding 2 book: coding buddy, Part 3 SVG — GitHub-hosted"
+    coding-buddy-classes:
+      file: ddp-coding-buddy-classes.yaml
+      note: "Creative Coding 2 book: coding buddy, Part 4 Classes — GitHub-hosted"
+    coding-buddy-tests:
+      file: ddp-coding-buddy-tests.yaml
+      note: "Creative Coding 2 book: coding buddy, Part 5 Testing — GitHub-hosted"
+    coding-buddy-generics:
+      file: ddp-coding-buddy-generics.yaml
+      note: "Creative Coding 2 book: coding buddy, Part 6 Generics — GitHub-hosted"
+    coding-buddy-data-structures:
+      file: ddp-coding-buddy-data-structures.yaml
+      note: "Creative Coding 2 book: coding buddy, Part 7 Data structures — GitHub-hosted"
+    coding-buddy-e2e:
+      file: ddp-coding-buddy-e2e.yaml
+      note: "Creative Coding 2 book: coding buddy, Part 8 End-to-end testing — GitHub-hosted"
 
   tutors: {}
 
