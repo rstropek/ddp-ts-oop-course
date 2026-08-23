@@ -28,7 +28,7 @@ already know with a test runner added.
    "create a new app from our tests template" and means this one.
 
 2. Run `npm test`. The terminal answers like this (your path and the times
-   differ):
+   differ, and Vitest prints a few more lines than this book quotes):
 
    ```text
     RUN  v4.1.11 /home/you/creative-coding-2/coursework/first-test

@@ -196,8 +196,8 @@ file does not build anywhere but on your own laptop.
 ## The rule your buddy follows {#sec-verify-ci-agents}
 
 Your coding buddy can run commands, and `AGENTS.md` is where you tell it which
-ones matter. Open `AGENTS.md` in `homework/bracelet-tests` and make sure this
-line is in it, in your own words:
+ones matter. Open `AGENTS.md` in `homework/bracelet-tests`, or create it when
+the project has none yet, and make sure this line is in it, in your own words:
 
 > Run `npm run verify` before you report that you are done, and fix everything
 > it finds.
@@ -249,8 +249,8 @@ because a check you have never seen fail is a check you do not trust yet.
    `npm run verify` on its own and reports what it printed. If it does not,
    tell it to.
 
-8. Commit the new test and push. Expected result: green again, with one test
-   more in the log than in step 4.
+8. Commit the new test together with `AGENTS.md`, and push. Expected result:
+   green again, with one test more in the log than in step 4.
 
 ::: {.callout-tip}
 ## When you finish early: a second project

@@ -222,9 +222,10 @@ exam.
 ::: {.research title="Four things this chapter leaves to you"}
 The two exercises below check a value that is `undefined`, count the items on a
 bracelet, compare two euro amounts that do not match to the last digit, and park
-one test you have not written yet. All four live on the `expect` page of the
-[Vitest documentation](https://vitest.dev/api/expect), and vitest.dev is the
-site to search here, not MDN.
+one test you have not written yet. The first three live on the `expect` page
+of the [Vitest documentation](https://vitest.dev/api/expect), the fourth on its
+[Test API page](https://vitest.dev/api/), and vitest.dev is the site to search
+here, not MDN.
 
 1. `addSpacer` returns `undefined` when it has nothing to warn about. Which
    matcher checks exactly that, and which matcher checks the opposite?
@@ -336,7 +337,8 @@ them easy to test.
          Tests  10 passed | 1 todo (11)
    ```
 
-10. Run `npm run verify`, fix what it reports, and commit.
+10. Add the `verify` script to `package.json` as in every new app, run
+    `npm run verify`, fix what it reports, and commit.
 
 ::: {.callout-tip}
 ## When you finish early
