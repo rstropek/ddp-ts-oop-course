@@ -28,6 +28,12 @@ helloButton.addEventListener('click', (event) => {
 });
 ```
 
+The first line is the starter's own pattern: `as HTMLButtonElement` tells
+TypeScript which kind of element the id stands for. Every kind has such a
+name, `HTMLDivElement` for a `div`, `HTMLParagraphElement` for a `p`, and VS
+Code offers them as you type. The chapter on types for elements replaces this
+line with something better; copy it as it is until then.
+
 Start the app with `npm start`, open the page, and open the developer tools
 with `F12`. Switch to the Console tab and click the button a few times.
 
@@ -176,9 +182,23 @@ use every week belong in your head.
 
 ## Exercise: a page that reacts {#sec-events-exercise}
 
+::: {.callout-note}
+## When a step does not make sense
+
+The exercises grow with every chapter, and sooner or later a step description
+will not make sense to you. Get as far as you can on your own first. In
+school, ask your teacher. At home, ask an AI: paste your code and the step
+you do not understand, and say what you tried. A few chapters from now you set
+up a coding buddy that knows this course; until then, the AI chat from last
+year does. Asking well is not cheating. Describing a problem so precisely that
+an AI can help is a skill every developer needs today, and every stuck step
+is a chance to practice it.
+:::
+
 Build a page with a button that counts clicks, a box that reacts to the
-mouse, and a line that shows the last key you pressed. Work through the steps in order and check the result of each one in the
-browser before you go on.
+mouse, and a line that shows the last key you pressed. Work through the 
+steps in order and check the result of each one in the browser before you 
+go on.
 
 1. Create a new app from our template and open the
    folder in VS Code.
@@ -194,8 +214,7 @@ browser before you go on.
    ```
 
    Run `npm start`. The page shows a button, a line of text, and a second line
-   of text. Without a stylesheet the `div` takes the full width of the window,
-   so its background color will later paint a stripe across the page.
+   of text.
 
 3. Delete the contents of `src/index.ts` and get the three elements:
 
@@ -214,20 +233,12 @@ browser before you go on.
    chapter again, this time without the `onclick` attribute in the HTML.
    Clicking now raises the number in the button by one.
 
-5. Above the listeners, declare an array named `colors` with at least four CSS
-   color names, and a `let` variable named `colorIndex` for the position in
-   that array. Add a click listener to `colorBox` that steps to the next
-   color, sets `colorBox.style.backgroundColor`, and starts at the first color
-   again after the last one. Clicking the box now walks through your colors
-   and wraps around.
-
-   ::: {.callout-note}
-   ## TypeScript is careful with array positions
-
-   The compiler cannot prove that your position variable stays inside the
-   array, so it treats `colors[colorIndex]` as a value that might be missing
-   and refuses the direct assignment. Store it in a `const` first and let an
-   `if` prove that it is there:
+5. Under the three `const` lines, declare an array named `colors` with at
+   least four CSS color names, and a `let` variable named `colorIndex` that
+   starts at `0`. Then add a click listener to `colorBox` that paints the box
+   with the color at `colorIndex` and adds one to `colorIndex`. Write the
+   painting as two lines, because TypeScript cannot prove that `colorIndex`
+   stays inside the array and refuses the direct assignment:
 
    ```ts
    const nextColor = colors[colorIndex];
@@ -236,29 +247,37 @@ browser before you go on.
    }
    ```
 
-   The chapter on types for elements comes back to values that might be
-   missing.
-   :::
+   The first click paints the whole stripe across the page, since a `div`
+   without a stylesheet takes the full width of the window. The fourth click
+   is the last one that changes anything: after that, `colorIndex` points past
+   the end of the array, `nextColor` is `undefined`, and the `if` skips the
+   assignment. The chapter on types for elements comes back to values that
+   might be missing.
 
-6. Give `colorBox` two more listeners, so that its text reads `Ready` while the
+6. Make the colors wrap around. When `colorIndex` reaches the length of the
+   array, set it back to `0`. An `if` does it, and so does the `%` operator
+   from last year. Clicking now walks through your colors and starts over
+   after the last one.
+
+7. Give `colorBox` two more listeners, so that its text reads `Ready` while the
    pointer is on the box and `Hover me, click me` again once the pointer has
    left. Your research task has the two event names. Moving the mouse across
    the box now swaps the text back and forth, and the background color stays
    whatever your clicks made it.
 
-7. Add a listener to `document` that writes the key the user just pressed into
+8. Add a listener to `document` that writes the key the user just pressed into
    `keyEcho`, in the form `You pressed: a`. The paragraph must update while the
    key is still down, not when it comes back up, and your research task says
    which of the two events that is. Press `a` and the paragraph reads
    `You pressed: a`. Every key fires the event, the modifier keys included, so
    try a few and watch what comes out.
 
-8. Add one `if` to that listener: when the user presses the Enter key, write
+9. Add one `if` to that listener: when the user presses the Enter key, write
    `Press any key` into the paragraph instead. Your research task says what
    `event.key` holds for that key. After Enter, the paragraph looks like it did
    when the page loaded.
 
-9. Run `npm run check` and fix what Biome reports.
+10. Run `npm run check` and fix what Biome reports.
 
 ::: {.callout-tip}
 ## Stuck on an event name?
