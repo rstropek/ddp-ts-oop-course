@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 AGENTS.md promises that every exercise is fully specified from the chapter and
 its `exercises/<name>/` files alone, "tested by letting a smaller LLM work
-through it". This skill is that test. A Haiku subagent plays the student,
+through it". This skill is that test. A Sonnet subagent plays the student,
 builds each project in a workspace outside the repo, checks every promise the
 chapter makes ("it reads `Clicks: 3`") in headless Chrome through
 `playwright-cli`, and writes one report per chapter. You are the coordinator
@@ -41,8 +41,8 @@ exist.
 
 ## 2. Launch the student
 
-Spawn one `Agent` with `model: "haiku"` and wait for it (`run_in_background:
-false`; a chapter takes five to seven minutes and ~80k tokens). The prompt:
+Spawn one `Agent` with `model: "sonnet"` and wait for it (`run_in_background:
+false`; a chapter takes about ten minutes and ~100k tokens). The prompt:
 
 ```
 Read the file <repo>/.agents/skills/test-exercises/assets/brief.md and follow
@@ -88,14 +88,20 @@ report is correct about what the student *did* and unreliable about what it
   file the shortcode does not list, wording two readings fit. These are the
   bugs the test exists for.
 
-Three things the student is bad at: it under-reports (a clean "yes" on a
+Three things a student model is bad at: it under-reports (a clean "yes" on a
 chapter you know is hard means the reporter missed it, not that the chapter
 is fine), it drifts into praise, and it rates a step `done` that it never
 verified. The `transfer` column is its most honest signal: `invented` rows
 mark where a real student has to think.
 
-When a chapter you know to be hard comes back spotless, rerun it with
-`model: "sonnet"` once to calibrate; keep Haiku as the default worker.
+Sonnet is the default worker because of a head-to-head on the same
+chapters: Haiku (~80k tokens, six minutes) skipped the browser almost
+entirely and reported only research-box questions as gaps; Sonnet (~105k
+tokens, ten minutes) ran 80 browser commands, reproduced a compiler error in
+an isolated file before reporting it, and found the one real gap (a
+`switch` that needs a `default` branch). The 25 % extra cost buys the
+report you can act on. Haiku remains the cheaper proxy when the question is
+only "can a weak reader follow the steps", not "is the chapter complete".
 
 ## 4. Fix and record
 

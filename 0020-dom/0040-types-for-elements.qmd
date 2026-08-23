@@ -80,7 +80,8 @@ object or `null`, the value that stands for "nothing here". `getElementById`
 returns that type because a search can fail, and TypeScript makes you deal with
 both outcomes before you touch the result.
 
-Dealing with it takes one `if`:
+Dealing with it takes one `if`. Put this into `src/index.ts` in place of
+the cast version:
 
 ```ts
 const header = document.getElementById('mainHeader');
@@ -110,7 +111,9 @@ same, and the chapters after this one use the short form.
 
 `getElementById` promises an `HTMLElement`, and that is the general kind of
 element. It has what every element has, including `textContent`. Ask an
-`HTMLElement` for the text a user typed and you get a second error:
+`HTMLElement` for the text a user typed and you get a second error. Type it
+in and run the build; the id does not have to exist on your page for the
+compiler to complain:
 
 ```ts
 const leftInput = document.getElementById('leftNumber');
@@ -137,7 +140,7 @@ and in Part 4 you write your own. For now, one sentence is enough: an
 ## The course way {#sec-types-for-elements-course-way}
 
 `document.querySelector` finds one element too, and it lets you say which kind
-you expect:
+you expect. Replace the `getElementById` line in your file with it:
 
 ```ts
 const leftInput = document.querySelector<HTMLInputElement>('#leftNumber');
@@ -229,7 +232,10 @@ You write `src/index.ts` from nothing. Delete what the starter put there.
 7. Compute the result with a `switch` over the operator and show it in the
    result paragraph as a full line, for example `3.5 + 2 = 5.5`. Clear the
    error paragraph on the way, so a good calculation after a bad one leaves no
-   red text behind.
+   red text behind. One thing TypeScript will insist on: the `<select>` gives
+   you a `string`, and the compiler cannot know that the string is always one
+   of your four operators. Give the `switch` a `default` branch and `throw`
+   there, the same way you did for a missing element.
 8. Run `npm run check` and fix what Biome reports.
 
 Type `10 / 0`, then `3.5 + 2`. The red message must be gone when the result
