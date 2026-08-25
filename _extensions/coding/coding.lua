@@ -1,17 +1,28 @@
 --[[
-  quiz.lua — Quarto *shortcode* for linking to a chapter quiz on Novedu.
+  coding.lua — Quarto *shortcode* for linking to a part's coding buddy on
+  Novedu.
 
   Usage in a chapter:
 
-      {{< quiz <key> [title="..."] >}}
+      {{< coding <key> [title="..."] [text="..."] [cta="..."] >}}
 
-  Renders a compact callout (like a Quarto `callout-note`) that invites the
-  reader to take the chapter's quiz in the Novedu chat app. The book does NOT
-  reproduce the quiz's questions — they live in a YAML activity file hosted on
-  the Novedu server; duplicating them here would only go stale.
+  Renders a compact callout (like a Quarto `callout-caution`) that sends the
+  reader to that buddy's connection page on Novedu. The book does NOT reproduce
+  the buddy's instructions — they live in a YAML activity file
+  (ddp-coding-buddy-<part>.yaml, one per book part) that Novedu reads from this
+  repository's raw URLs, and duplicating them here would only go stale.
 
-  <key> is the quiz's key in the activity registry, `ddp-activities.yaml`
-  (e.g. `number-systems`), NOT an activity code. The generated lock file
+  A coding activity is not a chat. Its Novedu page hands the student the three
+  settings an OpenAI-compatible coding agent needs: a server address, a model
+  name, and a personal API key the page mints on the student's first visit. The
+  box's body text is fixed here, in one place, because those standing rules hold
+  in every chapter — editing this file updates them all. Two of them matter
+  enough to state in every box: the printed code is not the key (a code pasted
+  into a coding agent earns an opaque 401 with no hint), and asking for a key is
+  recorded with the student's name.
+
+  <key> is the activity's key in the activity registry, `ddp-activities.yaml`
+  (e.g. `coding-buddy-dom`), NOT an activity code. The generated lock file
   ddp-activities.lock.yaml maps every key to the code Novedu minted for it and
   is merged into the document metadata as `activity-codes` (metadata-files in
   _quarto.yml), so the shortcode resolves
@@ -22,14 +33,14 @@
   _quarto.yml). The shortcode fetches nothing at render time, so the book
   renders offline and never breaks on a server change.
 
-  Adding a quiz therefore means: add one entry to ddp-activities.yaml, run
-  `novedu-cli codes sync ddp-activities.yaml`, commit registry + lock file, and
-  reference the key here. A key with no entry in the lock file is a hard render
-  error, never a dead link.
+  Adding a coding activity therefore means: add one entry to
+  ddp-activities.yaml, run `novedu-cli codes sync ddp-activities.yaml`, commit
+  registry + lock file, and reference the key here. A key with no entry in the
+  lock file is a hard render error, never a dead link.
 
-  This mirrors the `example` extension (see _extensions/example/example.lua),
-  which explains the shortcode mechanics in detail. Like there, we emit a
-  quarto.Callout so the card renders in BOTH the HTML site and the PDF.
+  This mirrors the `tutor` extension (see _extensions/tutor/tutor.lua), which in
+  turn mirrors `quiz` and `exercise`. Like there, we emit a quarto.Callout so
+  the card renders in BOTH the HTML site and the PDF.
 --]]
 
 local script_dir = PANDOC_SCRIPT_FILE:gsub("[^/\\]+$", "")
@@ -39,9 +50,9 @@ local css_added = false
 local function ensure_css()
   if not css_added and quarto.doc.is_format("html") then
     quarto.doc.add_html_dependency({
-      name = "quarto-quiz",
+      name = "quarto-coding",
       version = "1.0.0",
-      stylesheets = { script_dir .. "quiz.css" },
+      stylesheets = { script_dir .. "coding.css" },
     })
     css_added = true
   end
@@ -57,10 +68,9 @@ end
 --
 -- The block below is shared with the other link extensions — the same code sits
 -- in _extensions/exercise/exercise.lua, _extensions/quiz/quiz.lua,
--- _extensions/tutor/tutor.lua, _extensions/writing/writing.lua, and
--- _extensions/coding/coding.lua. Change one, change the others. The LaTeX half
--- guards itself with \ifdefined, so it is harmless when several extensions add
--- it to the same document.
+-- _extensions/tutor/tutor.lua, _extensions/writing/writing.lua, and this file.
+-- Change one, change the others. The LaTeX half guards itself with \ifdefined,
+-- so it is harmless when several extensions add it to the same document.
 
 local PRINT_LINK_HEADER = [[
 \ifdefined\ddplinkrow\else
@@ -221,7 +231,7 @@ local function activity_code(meta, key)
   local map = meta and meta["activity-codes"]
   if not map then
     error(
-      "quiz shortcode: no `activity-codes` metadata. Check that _quarto.yml lists "
+      "coding shortcode: no `activity-codes` metadata. Check that _quarto.yml lists "
         .. "ddp-activities.lock.yaml under metadata-files, and that the file exists "
         .. "(regenerate it with: novedu-cli codes sync ddp-activities.yaml).",
       0
@@ -230,7 +240,7 @@ local function activity_code(meta, key)
   local entry = map[key]
   if not entry then
     error(
-      "quiz shortcode: unknown activity key '" .. key .. "'. Add it to "
+      "coding shortcode: unknown activity key '" .. key .. "'. Add it to "
         .. "ddp-activities.yaml, run `novedu-cli codes sync ddp-activities.yaml`, "
         .. "and commit the regenerated ddp-activities.lock.yaml.",
       0
@@ -239,48 +249,84 @@ local function activity_code(meta, key)
   return pandoc.utils.stringify(entry)
 end
 
-local function quiz(args, kwargs, meta)
+-- The lines every coding box carries. Each chapter's prose says what that
+-- part's buddy knows; this text only states the standing rules, the ones that
+-- hold wherever the box appears. It is defined once here rather than in every
+-- chapter that links a buddy. An author overrides it with `text=` (and usually
+-- `cta=`) when a box links something other than a coding buddy.
+--
+-- Two facts earn their place in every box. The code is not the key, because a
+-- student who pastes the code into a coding agent gets an opaque 401 with no
+-- hint about what went wrong. And the key request carries the student's name,
+-- which they deserve to read before they click, not after.
+local BODY_TEXT = "Sign in with your school account and the page gives you a "
+  .. "key of your own. That key is what your coding tool needs. The code "
+  .. "below opens the page and nothing else."
+local ATTRIBUTION_TEXT = "Your teacher sees that you asked for a key, never "
+  .. "what you ask the buddy."
+local CTA_TEXT = "Get your coding key on novedu.at"
+
+local function coding(args, kwargs, meta)
   if not args[1] then
-    return pandoc.Para(pandoc.Strong("[quiz: no activity key given]"))
+    return pandoc.Para(pandoc.Strong("[coding: no activity key given]"))
   end
   local key = pandoc.utils.stringify(args[1])
 
   local base = novedu_base(meta)
   if not base then
-    return pandoc.Para(pandoc.Strong("[quiz: novedu-base-url not set]"))
+    return pandoc.Para(pandoc.Strong("[coding: novedu-base-url not set]"))
   end
 
   local code = activity_code(meta, key)
 
   ensure_css()
 
-  -- The registry key names the chapter, not the quiz's heading, and an activity
-  -- code (e.g. "zphawn6k0r") carries no readable name at all, so there is nothing
-  -- to derive a title from; authors pass `title=` for a chapter-specific heading.
   local title = kwargs["title"] and pandoc.utils.stringify(kwargs["title"]) or ""
-  if title == "" then title = "Check your understanding" end
+  if title == "" then title = "Your coding buddy" end
+
+  -- `text=` swaps the body text; `text=""` is treated as "use the default", so
+  -- there is always a body. `cta=` swaps the button label the same way. An
+  -- author who replaces the body also replaces the attribution line, because a
+  -- box that links something else may not mint a key at all.
+  local body = kwargs["text"] and pandoc.utils.stringify(kwargs["text"]) or ""
+  local content
+  if body == "" then
+    content = {
+      pandoc.Para(pandoc.Str(BODY_TEXT)),
+      pandoc.Para(pandoc.Str(ATTRIBUTION_TEXT)),
+    }
+  else
+    content = { pandoc.Para(pandoc.Str(body)) }
+  end
+
+  local cta_text = kwargs["cta"] and pandoc.utils.stringify(kwargs["cta"]) or ""
+  if cta_text == "" then cta_text = CTA_TEXT end
 
   local url = base .. "/" .. code
 
-  local cta = pandoc.Div(
+  content[#content + 1] = pandoc.Div(
     pandoc.Para(pandoc.Link(
-      cta_label("Take the quiz on novedu.at"),
+      cta_label(cta_text),
       url
     )),
-    pandoc.Attr("", { "quiz-cta" })
+    pandoc.Attr("", { "coding-cta" })
   )
 
   -- In print the button is dead, so the PDF also gets a QR code and the address
-  -- in readable type. A quiz address is short (base plus a ten-character code),
-  -- so level "M" costs no room and survives a smudged printout.
-  local content = { cta }
+  -- in readable type. A coding address is short (base plus a ten-character
+  -- code), so level "M" costs no room and survives a smudged printout.
   content[#content + 1] = print_link_block(url, "M")
 
+  -- `caution` (amber) rather than `tip`, `note` or `important`: the tutor and
+  -- writing boxes are tips, the quiz and exercise boxes are notes, and a
+  -- research box is important, so amber keeps this card apart in a chapter that
+  -- carries several. It also suits a box the reader should finish reading
+  -- before clicking.
   return keep_print_card_together(quarto.Callout({
-    type = "note",
-    title = "Quiz: " .. title,
+    type = "caution",
+    title = title,
     content = content,
   }))
 end
 
-return { ["quiz"] = quiz }
+return { ["coding"] = coding }

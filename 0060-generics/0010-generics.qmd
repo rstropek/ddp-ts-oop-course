@@ -8,13 +8,11 @@ nothing else. The day you need the same pile for strings you have two options:
 copy the file, or leave the type open. TypeScript has the second one, and you
 have been using it since Part 2 without a name for it.
 
-::: {.callout-note}
-## New part, new buddy code
+Generics are new for the coding buddy as well. Part 6 has one that writes
+them, and its key replaces the Part 5 key in `~/.pi/agent/auth.json`
+(@sec-buddy-setup-new-part).
 
-Part 6 has its own coding buddy, and this one knows generics. Your teacher
-hands out the code for it, and you put it into `~/.pi/agent/auth.json` in place
-of the Part 5 code. The setup chapter in Part 1 shows that file.
-:::
+{{< coding coding-buddy-generics >}}
 
 ## Two stacks, one difference {#sec-generics-experiment}
 

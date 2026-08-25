@@ -20,9 +20,14 @@ base-url: "https://raw.githubusercontent.com/rstropek/ddp-ts-oop-course/refs/hea
 activities:
   # One coding activity per part of the book: the endpoint students point the
   # `pi` coding agent at. Each level's prompt names what that part has taught
-  # and forbids what comes later; there is no level detection. The code IS the
-  # API key, so the teacher hands out a new code at the start of every part
-  # and the student swaps it into ~/.pi/agent/auth.json.
+  # and forbids what comes later; there is no level detection.
+  #
+  # The code is NOT the API key: a student opens <base>/<code>, signs in, and
+  # the page mints them a personal `nvk-` key for their tool. So the code is
+  # safe to print, and the chapter that opens a part links it with
+  # {{< coding <key> >}} like any quiz. What the student swaps into
+  # ~/.pi/agent/auth.json at the start of a part is that part's key, not a code
+  # from the teacher.
   coding:
     coding-buddy-dom:
       file: ddp-coding-buddy-dom.yaml

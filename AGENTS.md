@@ -128,11 +128,12 @@ matters, in the sentence where it appears.
 ## Links
 
 Link text is descriptive and makes sense on its own, never "click here" or a
-bare URL. Quizzes, tutors, and exercise files are linked through the book's
-shortcodes (`{{< quiz >}}`, `{{< tutor >}}`, `{{< writing >}}`,
-`{{< exercise >}}`), never by pasted URL. A `writing` activity (extension
-`_extensions/writing`, registry group `writing`) is a reflection the student
-drafts next to an AI coach that reads but never edits; it is not anonymous.
+bare URL. Quizzes, tutors, exercise files, and the coding buddies are linked
+through the book's shortcodes (`{{< quiz >}}`, `{{< tutor >}}`,
+`{{< writing >}}`, `{{< exercise >}}`, `{{< coding >}}`), never by pasted URL.
+A `writing` activity (extension `_extensions/writing`, registry group
+`writing`) is a reflection the student drafts next to an AI coach that reads
+but never edits; it is not anonymous.
 
 ## The coding buddy
 
@@ -148,16 +149,27 @@ model never detects the level and never asks which part the student is in.
 When a chapter introduces a construct or changes a convention, update that
 part's level file in the same edit (the fragment instead, when the rule is
 shared), then validate with `npx @novedu/cli validate <file> --kind coding`.
-Every chapter that opens a part from Part 3 on carries a short
-`callout-note` titled "New part, new buddy code" right after the intro
-paragraph, two or three sentences telling the student to put the new code into
-`~/.pi/agent/auth.json`; the setup procedure itself stays in 1.2. Chapter 1.2
-is the only place that covers the agent setup: it points students to pi.dev
-for the installation (the book never prints install commands, because they
-age fast) and shows `models.json` and `auth.json`; other agents such as
-little-coder or opencode are allowed there, but every command the book shows
-is a `pi` command. The activity
-code is an API key and is never printed in a chapter.
+
+Every chapter that opens a part from Part 3 on carries two or three sentences
+of framing right after the intro paragraph, followed by that part's box:
+`{{< coding coding-buddy-svg >}}` and its siblings. The setup procedure itself
+stays in 1.2, and so does the file the student edits, so the framing points at
+`@sec-buddy-setup-new-part` instead of repeating it. Chapter 1.2 is the only
+place that covers the agent setup: it points students to pi.dev for the
+installation (the book never prints install commands, because they age fast)
+and shows `models.json` and `auth.json`; other agents such as little-coder or
+opencode are allowed there, but every command the book shows is a `pi` command.
+
+The activity code is **not** an API key. It opens the buddy's page on Novedu,
+where the student signs in with their school account and the page mints them a
+personal `nvk-` key for their tool. That is why a code is printed in the book at
+all, through the shortcode and never as a pasted URL. The key is personal and
+never printed anywhere. Two standing rules travel with every box, so they live
+in `_extensions/coding/coding.lua` as fixed body text and no chapter repeats
+them: a code pasted into a coding agent earns an opaque 401 with no hint, and
+asking for a key is recorded with the student's name (the conversations
+themselves are never stored). Access ends when the code's availability window
+closes; there is no per-student revocation.
 
 ## Related skills
 

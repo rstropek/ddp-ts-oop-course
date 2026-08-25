@@ -60,8 +60,9 @@ end
 -- keyboard).
 --
 -- The block below is shared with the other link extensions — the same code sits
--- in _extensions/example/example.lua, _extensions/quiz/quiz.lua, and
--- _extensions/tutor/tutor.lua. Change one, change the others. The LaTeX half
+-- in _extensions/exercise/exercise.lua, _extensions/quiz/quiz.lua,
+-- _extensions/tutor/tutor.lua, _extensions/writing/writing.lua, and
+-- _extensions/coding/coding.lua. Change one, change the others. The LaTeX half
 -- guards itself with \ifdefined, so it is harmless when several extensions add
 -- it to the same document.
 

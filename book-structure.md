@@ -146,9 +146,10 @@ and names the concept afterwards.
 ### 2.7 Your coding buddy: pi on Novedu [NEW, drafted as 0020-dom/0070-coding-buddy.qmd]
 * Placed here because the to-do list is the first app big enough that an
   agent helps and can also mislead.
-* Install `pi`, copy the book's `models.json` to `~/.pi/agent/`, put the
-  activity code from the teacher into `auth.json`, first run in the to-do
-  project.
+* Install `pi`, copy the book's `models.json` to `~/.pi/agent/`, pick up a
+  personal key from the part's coding activity on Novedu and put it into
+  `auth.json`, first run in the to-do project. (The setup itself moved to 1.2;
+  this chapter is about working with the buddy.)
 * What the buddy knows (the course rules, the "ladder" of book parts) and the
   two rules that never change: you must be able to explain every line, and its
   mistakes are yours. The buddy answers questions but points to the source;

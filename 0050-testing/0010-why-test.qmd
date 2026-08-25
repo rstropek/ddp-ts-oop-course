@@ -8,13 +8,11 @@ The bracelet editor from the last chapter already carries four rules, and
 walking through all of them after every change costs a minute of clicking. A
 test is that minute, written down once and run by a program in under a second.
 
-::: {.callout-note}
-## New part, new buddy code
+There is a coding buddy for this part too, and tests are the thing it knows
+that the Part 4 buddy did not. Its key goes into `~/.pi/agent/auth.json` in
+place of the old one (@sec-buddy-setup-new-part).
 
-Part 5 has its own coding buddy, and this one knows tests. Your teacher hands
-out the code for it, and you put it into `~/.pi/agent/auth.json` in place of the
-Part 4 code. The setup chapter in Part 1 shows that file.
-:::
+{{< coding coding-buddy-tests >}}
 
 ## A test that fails on purpose {#sec-why-test-experiment}
 

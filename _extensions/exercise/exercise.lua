@@ -21,7 +21,8 @@
   tree URL, both built from `exercises-base-url` in _quarto.yml. A missing
   folder aborts the render. In the PDF the callout also carries a QR code and
   the printed folder address (the shared print-link block below, duplicated
-  in quiz.lua and tutor.lua — change one, change the others).
+  in quiz.lua, tutor.lua, writing.lua and coding.lua — change one, change the
+  others).
 --]]
 
 local script_dir = PANDOC_SCRIPT_FILE:gsub("[^/\\]+$", "")

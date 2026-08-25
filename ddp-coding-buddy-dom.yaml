@@ -6,10 +6,10 @@
 #
 # One coding activity per part of the book. This prompt states plainly what the
 # student has learned by now and what must not appear in generated code yet, so
-# the buddy never asks which part they are in and never guesses. At the start of
-# the part the teacher hands out this activity's code and the student puts it
-# into ~/.pi/agent/auth.json. The code IS an API key and is never printed in a
-# chapter.
+# the buddy never asks which part they are in and never guesses. The chapter
+# that opens the part prints this activity's code with {{< coding <key> >}};
+# the student opens novedu.at/<code>, signs in, and puts the personal key that
+# page mints into ~/.pi/agent/auth.json. The code is not the key.
 #
 # Everything this buddy shares with the other six lives in
 # ddp-tutor-fragments.yaml. What stays here is the "Where the student is"

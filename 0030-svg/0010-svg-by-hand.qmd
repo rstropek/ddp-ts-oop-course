@@ -7,14 +7,12 @@ painted pixels onto a canvas. The browser can draw too, and it does it in a way
 that looks strange for about five minutes: the picture is written as tags,
 inside your HTML, where you can read it. Type one and see.
 
-::: {.callout-note}
-## New part, new buddy code
+Part 3 has its own coding buddy, and this one knows SVG the way the Part 2
+buddy knew the DOM. Pick up its key now and paste it into
+`~/.pi/agent/auth.json` over the Part 2 key, the way @sec-buddy-setup-new-part
+describes.
 
-Part 3 has its own coding buddy, which knows SVG the way the earlier one knew
-the DOM. Your teacher hands out the code for it, and you put it into
-`~/.pi/agent/auth.json` in place of the Part 2 code. The setup chapter in
-Part 1 shows that file.
-:::
+{{< coding coding-buddy-svg >}}
 
 ## A circle you can read {#sec-svg-by-hand-circle}
 

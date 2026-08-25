@@ -8,13 +8,12 @@ an object takes it as a parameter. That carries you a long way, and it creaks
 once six functions all belong to the same kind of object and nothing in the code
 says so. A class says so. Type the small version and watch what moves.
 
-::: {.callout-note}
-## New part, new buddy code
+The coding buddy changes with the part as well. The Part 4 buddy writes
+classes, which the SVG buddy refused to touch, so swap its key into
+`~/.pi/agent/auth.json` before you ask it for anything
+(@sec-buddy-setup-new-part).
 
-Part 4 has its own coding buddy, and this one knows classes. Your teacher hands
-out the code for it, and you put it into `~/.pi/agent/auth.json` in place of the
-Part 3 code. The setup chapter in Part 1 shows that file.
-:::
+{{< coding coding-buddy-classes >}}
 
 ## Two counters, the year-one way {#sec-classes-literal}
 
