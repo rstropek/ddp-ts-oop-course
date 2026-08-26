@@ -566,7 +566,20 @@ rewrite that touched every line of the class.
    const playlist = new Playlist();
    ```
 
-4. Write `renderChain()`. Empty the chain paragraph with `replaceChildren()`,
+4. Write `renderChain()` as an arrow function in a `const`, the shape every
+   render helper in this book has had since the bracelet:
+
+   ```ts
+   const renderChain = (): void => {
+   ```
+
+   The shape matters here. A `function renderChain() {...}` declaration is
+   hoisted, so as far as TypeScript can tell it might run before the `throw`
+   from step 2, and every element inside it goes back to being
+   `possibly 'null'`. An arrow function in a `const` only exists after the
+   check, so the narrowing survives.
+
+   Empty the chain paragraph with `replaceChildren()`,
    then walk `playlist.toArray()` and append two elements per song: a
    `<span class="node">` with `${song.title} - ${song.artist}` in it and a
    `<span class="arrow">` holding `→`. After the loop, append one
