@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the skills chapter quiz
+# (0080-e2e/0030-skills.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: skills-quiz-eval
+target: ./0030-skills-quiz.yaml
+
+questions:
+  - question: research-git-diff
+    answers:
+      - expect: correct
+        answer: |
+          git diff. the lines with a + in front are the ones that got added and
+          the ones with - were deleted. read it in the git docs for git diff.
+      # Right command, markers not explained and no source.
+      - expect: partial
+        answer: |
+          you type git diff and then you see the change
+      - expect: incorrect
+        answer: |
+          git status shows you the lines, + means the line is still there and -
+          means it was changed
+
+  - question: research-git-clean-start
+    answers:
+      - expect: correct
+        answer: |
+          git restore . puts the files git knows back to the last commit, and
+          git clean -fd deletes the new files that were never committed. clean
+          is the scary one because those files are in no commit at all so they
+          are just gone. git docs for restore and clean.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          mit git restore . holt man die dateien zurueck die git schon kennt,
+          und git clean -fd loescht die neuen dateien die noch nie committed
+          wurden. gefaehrlich ist git clean, weil die dateien in keinem commit
+          stehen und danach weg sind. steht in der git doku bei restore und
+          clean.
+      # Only one of the two commands.
+      - expect: partial
+        answer: |
+          git restore . and everything is like in the last commit again
+      - expect: incorrect
+        answer: |
+          git reset --hard does both of them and you can get the files back
+          later with git revert
+
+  - question: agents-md-or-skill
+    answers:
+      - expect: correct
+        answer: |
+          the verify thing goes in AGENTS.md because that file is read every
+          single time and the rule is always true. the steps for a new class go
+          in a skill because thats only for that one kind of task and it gets
+          loaded when the description fits.
+      # Right places, no reason at all.
+      - expect: partial
+        answer: |
+          verify in AGENTS.md, the class steps in the skill
+      - expect: incorrect
+        answer: |
+          both belong in the skill file, AGENTS.md is only for the readme rule
+
+  - question: description-is-the-trigger
+    answers:
+      - expect: correct
+        answer: |
+          only the name and the description are always in the model context and
+          the description decides if the agent opens the file. "Helps with
+          tests." fits nothing so it never opens it. she should write a
+          description that says when to use it, like use this when a task asks
+          for a new class with tests.
+      # Sees the description is the problem, no fix.
+      - expect: partial
+        answer: |
+          the description is too short, thats why the agent ignores it
+      - expect: incorrect
+        answer: |
+          the whole SKILL.md is always in the context anyway, so the steps must
+          be wrong or the folder is in the wrong place
+
+  - question: skills-lock-entry
+    answers:
+      - expect: correct
+        answer: |
+          it says where find-docs was copied from, the github project
+          upstash/context7 and the path of the file, and a hash of the text. so
+          you can check later if there is a newer one or if somebody changed
+          our copy. tested-class isnt in there because i wrote it myself, it
+          wasnt copied from anywhere.
+      # Only the second half.
+      - expect: partial
+        answer: |
+          my own skill is not in it because i made it myself
+      - expect: incorrect
+        answer: |
+          its the file with the instructions for the skills and it switches
+          them on, a skill that is not in there does not run
+
+  - question: green-is-not-done
+    answers:
+      - expect: correct
+        answer: |
+          i still have to be able to explain every line it wrote, in the exam
+          there is no pi. so i read the Cat class and the test. and its
+          mistakes are my mistakes, so before i commit i check that the test
+          really checks the 🐈 Mimi (Siamese) text and not something that
+          passes anyway.
+      # One rule, and nothing about what to do here.
+      - expect: partial
+        answer: |
+          you have to understand the code the agent writes
+      - expect: incorrect
+        answer: |
+          verify is green and there is one test more, so it is fine to commit,
+          the agent tested it already

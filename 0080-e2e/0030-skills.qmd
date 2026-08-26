@@ -1,0 +1,387 @@
+---
+title: "A recipe the agent can follow"
+---
+
+Every app you created this year arrived with a folder you have probably never
+opened. It sits next to `src/` and it is called `.agents/skills/`. The SVG part
+named it once and promised that a later part would have you write a skill of
+your own. This chapter opens the folder, watches the one skill inside it change
+how your buddy answers, and then writes that skill for the salon app.
+
+## The skill that was already in your project {#sec-skills-experiment}
+
+1. Open `coursework/hairdresser`, the salon from @sec-queues-exercise, and open
+   `.agents/skills/find-docs/SKILL.md`. The file starts with a block between
+   two `---` lines:
+
+   ```yaml
+   ---
+   name: find-docs
+   description: >-
+     Retrieves up-to-date documentation, API references, and code examples for any
+     developer technology. Use this skill whenever the user asks about a specific
+     library, framework, SDK, CLI tool, or cloud service ...
+   ---
+   ```
+
+2. Read the rest of the file. It is one page of instructions for the agent: two
+   commands, `npx ctx7@latest library <name> "<query>"` and
+   `npx ctx7@latest docs <libraryId> "<query>"`, the order they go in, and a
+   rule that says three tries per question and no more.
+
+3. Start `pi` in the project and ask it a question about a library:
+
+   > Which Playwright assertion checks how many elements a locator matches?
+
+   Watch the tool lines above the answer instead of the answer itself. The
+   agent reads `.agents/skills/find-docs/SKILL.md`, then runs the two commands
+   it found in there, and answers after that. Some runs answer straight away
+   without opening the file. Put `/skill:find-docs` in front of your question
+   and it opens it.
+
+4. Run the first of those two commands yourself:
+
+   ```bash
+   npx ctx7@latest library Playwright "assertion to check how many elements a locator matches"
+   ```
+
+   ```text
+   1. Title: Playwright
+      Context7-compatible library ID: /microsoft/playwright
+      Description: Playwright is a framework for Web Testing and Automation, enabling cross-browser testing of Chromium, Firefox, and WebKit with a single API.
+      Code Snippets: 6438
+      Source Reputation: High
+      Benchmark Score: 85.72
+      Versions: v1.51.0, v1.58.2, v1.61.0
+   ```
+
+   Four more entries follow. Take the id from the first one and ask for the
+   documentation itself:
+
+   ```bash
+   npx ctx7@latest docs /microsoft/playwright "locator count assertion toHaveCount"
+   ```
+
+   ````text
+   ### Assert element count with toHaveCount
+
+   Source: https://github.com/microsoft/playwright/blob/main/docs/src/api/class-locatorassertions.md
+
+   Ensures the locator resolves to an exact number of DOM nodes. Use this to verify the size of a collection or list.
+
+   ```javascript
+   const list = page.locator('list > .component');
+   await expect(list).toHaveCount(3);
+   ```
+   ````
+
+   The same entry follows in Java, Python, and C#, and every entry carries the
+   `Source:` line with it.
+
+5. Close `pi` and start it again with its skills switched off, then ask exactly
+   the same question:
+
+   ```bash
+   pi --no-skills
+   ```
+
+Both answers say `toHaveCount`, and yours very likely did too. What changed is
+where the answer came from. The second one came out of the model's memory of the
+internet as it looked during training. The first one came with a link to the
+page in the Playwright repository that says so today, which is the difference
+between an answer you can check and an answer you have to believe.
+
+::: {.callout-warning}
+## The first start in a folder
+
+`pi` asks whether it may use the files of the project you started it in, and
+skills from `.agents/skills/` stay switched off until you say yes. Say no and
+the agent still works, it just never sees the recipes. A project you did not
+write yourself is worth a look before you answer that question, because a skill
+file tells the agent what to do and the agent does it.
+:::
+
+## What a skill is {#sec-skills-what}
+
+A **skill** is a folder with a `SKILL.md` file in it, and that file is a recipe
+for one kind of task. The folders live in `.agents/skills/` in the project, so
+they travel with the repository, and every agent that reads the
+[Agent Skills standard](https://agentskills.io/specification) finds them there.
+Your own machine-wide recipes go into `.agents/skills/` in your home folder
+instead.
+
+The `name` and the `description` from the top of the file are the only part the
+model sees all the time. Everything below the second `---` line is on disk and
+nowhere else until the agent decides to read it, which it does when your task
+sounds like the description. That is why `find-docs` spends five lines on
+describing when to use it and names React, Prisma, and Django in there: the
+description is not a label, it is the trigger.
+
+So a lazy description costs you the whole skill. "Helps with tests" matches
+nothing in particular, the agent never opens the file, and you sit there
+wondering why your recipe changed nothing.
+
+## What a year of AGENTS.md looks like {#sec-skills-agents-md}
+
+`AGENTS.md` in the project root is the other half. It has no trigger and no
+description, because the agent reads all of it before it starts working, every
+single time.
+
+Yours has grown line by line since the SVG part: the rule that a changed script
+in `package.json` also changes `README.md` (@sec-toolchain-assets-agents), the
+course style, and the sentence from the testing part that says to run
+`npm run verify` before reporting success and to quote what it printed
+(@sec-verify-ci-agents). A good `AGENTS.md` for the salon holds four kinds of
+thing, and it is shorter than you expect:
+
+```markdown
+# Salon waiting line
+
+A page where humans and dogs join a waiting line and get served in the order
+they arrived.
+
+## Layout
+
+- `src/customer.ts` holds the abstract `Customer` and every customer type.
+- `src/waiting-line.ts` holds the generic `WaitingLine<T>` and its `Node<T>`.
+- `src/index.ts` only wires the page.
+
+## Commands
+
+- `npm test` runs the unit tests.
+- `npm run verify` runs `tsc --noEmit`, Biome, and the tests. Run it before you
+  report that you are done, and say what it printed.
+
+## Rules
+
+- Course style: single quotes, semicolons, `querySelector<T>` with a null check
+  that throws, fields as `private readonly` parameter properties.
+- `WaitingLine<T>` stays generic. It never mentions `Customer`.
+- No `instanceof` and no `switch` on a type field. Different behavior per
+  customer type is an overridden `describe()`.
+```
+
+Layout, commands, rules, and the fourth kind: the things this agent got wrong in
+this project before. That last group is the one nobody writes and everybody
+needs. When your buddy puts a class into `index.ts` twice in one week, the fix
+is one line in `AGENTS.md`, not a third reminder in the chat that you throw away
+when the session ends.
+
+The line between the two files is the trigger. A rule that is true for every
+task belongs in `AGENTS.md`. A procedure for one kind of task belongs in a
+skill, where it stays out of the way until that task shows up.
+
+## Writing a recipe of your own {#sec-skills-recipe}
+
+The salon needs one recipe more than any other: adding a class. You did it for
+`Human` and for `Dog`, and the next customer type works the same way. Ask the
+buddy for one and you get a class that runs. What you get around it is a coin
+flip, because nothing in the task says which file it goes in, whether a test
+comes with it, or where the job ends.
+
+A recipe has three parts, and the file below has them in order. When to use it,
+the steps in the order they happen, and the checks that say whether the job is
+done. Create `.agents/skills/tested-class/SKILL.md` in the salon project:
+
+```markdown
+---
+name: tested-class
+description: Adds a class to this project together with its unit tests. Use when a task asks for a new customer type, a new class, or a new model file under src/.
+---
+
+# A new class with tests
+
+## When to use this
+
+Use this recipe when the task asks for a new class: a new customer type, a new
+model, anything that ends up as a `class` under `src/`. Do not use it for
+changes to the page, the CSS, or a class that already exists.
+
+## Steps
+
+1. Decide where the class goes. A new member of the `Customer` family belongs
+   in `src/customer.ts`. Anything else gets its own module `src/<name>.ts`,
+   kebab-case in the file name.
+
+2. Write the test file first: `src/<name>.test.ts`, next to the class file.
+   One `describe` per class, one `it` per behavior, and the name of an `it`
+   reads as a sentence.
+
+3. Run `npx vitest run src/<name>.test.ts` and read the failure. A test that is
+   green before the class exists is testing nothing.
+
+4. Write the class. Extend the abstract base class when the family has one,
+   take the fields as `private readonly` parameter properties, and give
+   different behavior through an overridden method, never through `instanceof`.
+
+5. Run `npm run verify` and put the test counts from its output into your
+   answer.
+
+6. Stop at the model. `index.html`, `src/styles.css`, and `src/index.ts` change
+   only when the task asks for the page.
+
+## Before you report that you are done
+
+- The test file sits next to the class file and carries the same base name.
+- `npm run verify` printed no findings, and the number of tests is higher than
+  it was before you started.
+- Nothing outside `src/` changed unless the task asked for it.
+```
+
+Read the steps again and notice how little of it is about TypeScript. Step 1
+answers a question the agent cannot guess, step 3 makes it prove the test can
+fail, and step 6 draws a border it kept walking over. Those are your rules for
+your project, written down once instead of typed into a chat every Tuesday.
+
+The checks at the bottom do a job of their own. An agent that reports "done" has
+told you nothing, and an agent that reports "verify printed 17 tests, one more
+than before" has handed you a number you can look at yourself.
+
+## One recipe, many projects {#sec-skills-lock}
+
+A skill is a folder with text in it, so copying one into another project is
+`cp -r` and nothing else. That is how `find-docs` got into your starter: someone
+copied it from the repository of the people who wrote it, and the note about
+where it came from is in `skills-lock.json` in the project root:
+
+```json
+{
+  "version": 1,
+  "skills": {
+    "find-docs": {
+      "source": "upstash/context7",
+      "sourceType": "github",
+      "skillPath": "skills/find-docs/SKILL.md",
+      "computedHash": "93ec2d2786d7e83973252383875c4f345a2ee7cbbd08a1ab38e5201b214640ee"
+    }
+  }
+}
+```
+
+The file records where each borrowed skill came from and a hash of the text as
+it arrived. Half a year later that answers two questions you cannot answer from
+the folder alone: whether a newer version exists upstream, and whether the copy
+in your project is still the original or something a classmate edited. Your own
+`tested-class` gets no entry, because nobody borrowed it. It is yours, and
+`git log` is its history.
+
+::: {.research title="Two git commands the exercise needs"}
+The exercise below asks the buddy for the same feature twice, once without your
+recipe and once with it, and you compare the two attempts. That needs a way to
+see what the agent changed, and a way to get back to where you started. Neither
+is in this chapter.
+
+1. Which git command shows you the lines that changed in your project since the
+   last commit, and what do the `+` and `-` at the start of those lines mean?
+   The git documentation for that command answers both halves. `git status`,
+   which you have used since the git chapter, keeps its job here: it lists the
+   files, and the new command shows the lines inside them.
+2. You want the project back exactly as it was at the last commit. One command
+   throws away your changes to files git already knows, and a second one deletes
+   the files that were never committed. Name both, and say which of the two can
+   destroy work that has never been saved anywhere. The git documentation has a
+   page for each of them.
+
+Keep the commands in your head rather than in a bookmark. The moment you need
+them is the moment an agent has rewritten a file you liked, and that is a bad
+moment to start searching.
+:::
+
+## Exercise: two attempts at the same cat {#sec-skills-exercise}
+
+The salon takes cats now. You ask the buddy for the class twice, from the same
+starting point, and let the two attempts argue for themselves.
+
+1. Open `coursework/hairdresser`, run `npm run verify`, and commit whatever is
+   still open. `git status` has to print "nothing to commit, working tree clean"
+   before you go on, because everything below compares your project against that
+   commit.
+
+2. **Attempt one, without a recipe.** Start the buddy with its skills switched
+   off:
+
+   ```bash
+   pi --no-skills
+   ```
+
+   Ask for the new customer type in one sentence:
+
+   > Add a Cat customer type. A cat has a name and a breed, and describes itself
+   > as 🐈 Mimi (Siamese).
+
+3. Look at what came back, with `git status` for the file names and your first
+   research answer for the lines inside them. Two questions, and neither of them
+   is "does it look nice": which files did the agent touch, and is a new test
+   file among them? Then run `npm run verify` yourself and read the last two
+   lines, because the test count answers a third question the file names
+   cannot.
+
+4. Put the project back on the last commit with the two commands from your
+   second research answer, then check with `git status` that nothing is left
+   over. A forgotten file from attempt one lands in the middle of attempt two
+   and ruins the comparison.
+
+5. **Write the recipe.** Create `.agents/skills/tested-class/SKILL.md` with the
+   three parts from @sec-skills-recipe: when to use it, the steps, the checks.
+   Type it yourself rather than pasting the chapter's version, and change the
+   steps where your salon works differently from the one in the text. The
+   description is the part to spend real time on, because it decides whether the
+   file is ever read.
+
+6. **Attempt two, with the recipe.** Start `pi` normally and send exactly the
+   same sentence as in step 2. Watch the first tool line: an agent that picked
+   the recipe up reads `SKILL.md` before it touches any of your files. If it
+   does not, `/skill:tested-class` loads the recipe by hand, and a description
+   that needed forcing is a description worth rewriting.
+
+7. Compare the two attempts against the three questions from step 3, then decide
+   which one you would commit. Both attempts can be good. Judge them on whether
+   the rules you wrote held: a test file written before the class, a test count
+   that went up, and files outside `src/` that stayed untouched while the task
+   never mentioned the page.
+
+8. Keep the better attempt and throw the other away. Then go through every line
+   you kept and say out loud what it does, to the person next to you or to the
+   buddy itself. A line you cannot explain does not get committed.
+
+9. **Teach the project what you learned.** Somewhere in those two runs the
+   agent did something you had to correct. Put it into `AGENTS.md` as one
+   sentence in your own words, next to the rules that are already in there. If
+   both attempts really were clean, write the rule for the thing you fixed by
+   hand instead.
+
+10. Run `npm run verify`, then commit the kept change together with
+    `SKILL.md` and `AGENTS.md`. Expected result: green, and one test more than
+    the verify run in step 1 printed.
+
+::: {.callout-tip}
+## The same prompt twice
+
+The same model with the same prompt does not answer the same way twice, so
+attempt one might write a beautiful test file without any recipe at all, and
+attempt two might still wander into `index.html`. Neither result makes your
+recipe pointless or magic. A rule you wrote down is a rule you can point at when
+the agent skips it, and "you did not follow step 3 of tested-class" is a
+sentence that fixes a session in five seconds.
+:::
+
+::: {.callout-tip}
+## When you finish early
+
+**Take the recipe with you.** Copy `.agents/skills/tested-class/` into
+`coursework/train-builder` or into whichever project from Part 7 you kept, edit
+the file-layout step to match that project, and ask for a small class there.
+Nothing else has to change, and nothing gets added to `skills-lock.json`,
+because the recipe never came from anywhere but you.
+
+**A second recipe.** The salon has one more job with steps worth writing down:
+adding a control to the page. Write `page-control` with the steps
+you actually follow, from the `<label for>` in `index.html` to the null check in
+`src/index.ts`, and let the buddy add a Serve all button with it.
+:::
+
+## Check your understanding {#sec-skills-quiz}
+
+Six questions, the first two of them the research task.
+
+{{< quiz skills title="A recipe the agent can follow" >}}

@@ -1,0 +1,195 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Let the browser do the clicking"
+# (0080-e2e/0020-testing-apps.qmd).
+# One quiz per chapter, at the end. The two research questions of the chapter's
+# research box come first (ids prefixed `research-`) and get the research
+# feedback rule (point at the Playwright documentation, never the answer). The
+# other four cover the chapter's own points: what a codegen recording is and is
+# not, why the strict mode error appears, what the Enter test found, and why
+# the end-to-end tests live in CI instead of in `verify`.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: testing-apps-quiz
+name: "Quiz: Testing the apps you already built"
+
+title: "Check your understanding: testing the apps you already built"
+description: |
+  Six short questions about the chapter *Let the browser do the clicking*, two
+  of them the research task. Answer in your own words; if you cannot answer a
+  research question yet, look it up and come back. One or two sentences are
+  enough. This quiz is anonymous and is here for you. Answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="await expect(page.getByText('The line is empty.')).toBeVisible();"
+      scope="after the chapter about testing the apps of this book"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "forms with a `submit` listener and `event.preventDefault()`, labels, and `input.value`"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "Vitest: `describe`, `it`, `expect`, `beforeEach`, `npm test`, a `verify` script, and a GitHub Actions workflow"
+        "generics: a type parameter `T`, generic classes and functions, and constraints"
+        "hand-built data structures: `Node<T>` linked lists, a stack, and a queue with head and tail pointers"
+        "Playwright: `npm run test:e2e`, `page.goto`, `getByRole`, `getByLabel`, `getByText`, `fill`, `click`, `check`, `press`, `toBeVisible`, `toBeHidden`, `toBeDisabled`, and `await` in `e2e/*.e2e.ts`"
+        "the codegen recorder, strict mode with `{ exact: true }`, auto-waiting, and running end-to-end tests in CI")
+      not_yet=(array
+        "what `--with-deps` installs and which setting saves a screenshot of a failed test (those are the research tasks right now)"
+        "nothing else: this is the last part of the book, so no construct of the course is held back any more")}}
+
+questions:
+  - id: research-with-deps
+    title: "The flag on the install line"
+    question: |
+      The CI job runs `npx playwright install --with-deps chromium` on a fresh
+      GitHub machine. What does `--with-deps` add on top of downloading the
+      browser, and why does that machine need it while your own laptop never
+      asked for it? Say where you read it.
+    evaluation: |
+      Expected: `--with-deps` also installs the operating system packages the
+      browser needs to run (system dependencies, the shared libraries and
+      fonts Chromium links against), using the machine's package manager. A
+      fresh Ubuntu runner is bare and has none of them, while a normal laptop
+      already has a browser installed and therefore already has those
+      libraries. Source is the Playwright documentation (the browsers page or
+      the continuous integration page).
+      Required: (1) it installs system or OS level dependencies, not just the
+      browser download; (2) a reason why the fresh CI machine lacks them and a
+      normal desktop does not; (3) names the source.
+      Partial: says it installs "extra things" or "dependencies" without
+      making clear these are operating system packages, or gives no reason for
+      the difference, or names no source.
+      Incorrect: says it installs the npm packages from `package.json`,
+      downloads all three browsers, or installs Node.
+
+  - id: research-failure-screenshot
+    title: "A picture of the moment it broke"
+    question: |
+      Playwright can save a picture of the page at the moment a test fails.
+      Which setting in `playwright.config.ts` switches that on, and which
+      folder does the file land in? Say where you read it.
+    evaluation: |
+      Expected: `screenshot: 'only-on-failure'` inside the `use` block of
+      `playwright.config.ts`, and the PNG lands in `test-results/`, in a
+      subfolder named after the test. Source is the Playwright documentation
+      about test configuration (or its screenshots page).
+      Required: (1) names the `screenshot` setting with a value that means "on
+      failure" (`'only-on-failure'`, or `'on'` which also saves it), and says
+      it goes into `use` in `playwright.config.ts`; (2) names
+      `test-results` as the folder; (3) names the source.
+      Partial: names the setting but not the folder, or the folder but not the
+      setting, or names no source. Partial needs at least one of the two facts
+      right; an answer with neither the setting nor `test-results` in it is
+      incorrect, however confident it sounds.
+      Incorrect: says Playwright saves the screenshot on its own with nothing
+      to switch on, names `playwright-report` as the place the PNG is written,
+      or says it is only a command line flag.
+
+  - id: codegen-first-draft
+    title: "What the recorder hands you"
+    question: |
+      You record a click-through with `npx playwright codegen` and paste the
+      result into your project. Name two things you have to change before that
+      recording is a test worth keeping, and say why each one matters.
+    evaluation: |
+      Expected: any two of these, with a reason. The test is called `test`, so
+      it needs a name that says what it proves and that shows up in the failure
+      line. There is no assertion at all, because codegen records what you did
+      and not what you expected, so every `expect` is yours to type. The
+      address is hard-coded to the dev server, while `page.goto('/')` plus the
+      `baseURL` from `playwright.config.ts` always lands on the right page. And
+      there is a `click` before every `fill`, which `fill` does itself.
+      Required: (1) two of those changes; (2) a reason for each that goes
+      beyond "it looks nicer".
+      Partial: two changes named with only one reason, or one change named with
+      a good reason.
+      Incorrect: says the recording is ready to use as it is, or names only
+      cosmetic edits such as formatting and indentation.
+
+  - id: strict-mode
+    title: "Three answers to one question"
+    question: |
+      A classmate writes `await page.getByLabel('Name').fill('Rex');` in a test
+      for the salon page, and the run stops with `strict mode violation:
+      getByLabel('Name') resolved to 3 elements`. What is Playwright
+      complaining about, and how do you fix that line?
+    evaluation: |
+      Expected: the locator matches more than one element on the page, because
+      `First name` and `Last name` both contain the word `Name`, and Playwright
+      refuses to guess which of the three inputs was meant instead of picking
+      one. The fix is `getByLabel('Name', { exact: true })`, which matches only
+      the label that reads exactly `Name`. Any other locator that picks out one
+      element also counts.
+      Required: (1) the locator matches several elements and Playwright will
+      not choose for you; (2) a fix that narrows it to one, `{ exact: true }`
+      being the one from the chapter.
+      Partial: explains the cause but gives no usable fix, or gives the fix
+      without saying what the error means.
+      Incorrect: says the element is missing from the page, says the page
+      loaded too slowly, or suggests adding a wait.
+
+  - id: enter-key-bug
+    title: "The test that was right"
+    question: |
+      The test that fills both name fields and presses Enter failed on the
+      salon page, and the fix was in the app, not in the test. Why did pressing
+      Enter do nothing, and what changed in `index.html` and `src/index.ts` to
+      make it work?
+    evaluation: |
+      Expected: Enter in a text field fires a `submit` event on the form around
+      that field, and the Add a human section had no `<form>` in it, only divs
+      and a button with a `click` listener. The fix wraps the fields and the
+      button in a `<form>`, makes the button `type="submit"`, and turns the
+      listener into a `submit` listener on the form whose first line is
+      `event.preventDefault()`.
+      Required: (1) the page had no `<form>`, so the Enter key fired no
+      `submit` event; (2) a `<form>` was added and the listener moved to the
+      form's `submit` event. Mentioning `preventDefault` or the
+      `type="submit"` button is a bonus.
+      Partial: names the missing form without saying what replaced the click
+      listener, or describes the fix without naming why Enter did nothing.
+      Incorrect: the answer puts the fault anywhere other than the missing
+      form. Anything that blames the test, `press('Enter')`, the timeout, or
+      Playwright is incorrect even when it sounds confident and even when it
+      also proposes some change, because the question already says the fix was
+      in the app. A `keydown` listener on the button is incorrect too.
+
+  - id: e2e-in-ci
+    title: "Two commands, two places"
+    question: |
+      On your laptop `npm run verify` runs the type check, Biome, and Vitest,
+      and it never starts a browser. The CI job runs `npm run verify` and then
+      `npm run test:e2e` as a second step. Why are the end-to-end tests kept
+      out of `verify`, and why does CI run them anyway?
+    evaluation: |
+      Expected: `verify` is the command you run before every commit, so it has
+      to stay fast. The unit tests finish in a fraction of a second, while
+      Playwright starts a dev server and a browser and needs seconds, and a
+      slow check is a check people stop running. CI has all the time it wants:
+      it runs after the push, on a machine that is not yours, and nobody waits
+      in front of it, so the slow tests belong there.
+      Required: (1) speed, and that `verify` runs before every commit so it
+      must stay quick; (2) CI runs after the push on its own machine, so the
+      extra minutes cost the student nothing.
+      Partial: only the speed half, or only the CI half.
+      Incorrect: says end-to-end tests cannot run locally, says they only work
+      on GitHub, or says `verify` would fail because there is no browser on the
+      student's laptop.

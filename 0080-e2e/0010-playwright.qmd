@@ -1,0 +1,472 @@
+---
+title: "Let a browser do the clicking"
+---
+
+Every test you have written so far talks to a class. It builds a `Bracelet` or a
+`WaitingLine` and asks it questions in TypeScript. None of them has ever clicked
+a button, so none of them would notice if the Add button in your to-do list
+stopped adding anything. This part hands that job to a program that opens a real
+browser, types into your page, clicks what a person would click, and reads what
+comes back.
+
+The coding buddy for Part 8 knows Playwright, and it is the last one of the
+year: nothing in this course is held back from it any more, so it may use every
+construct you have learned. Its key replaces the Part 7 key in
+`~/.pi/agent/auth.json` (@sec-buddy-setup-new-part).
+
+{{< coding coding-buddy-e2e >}}
+
+## A browser you never see {#sec-playwright-experiment}
+
+1. Create a new app from our tests template. This one carries the experiments of
+   the chapter, so it can stay outside `coursework/`.
+
+2. Look inside it. Next to `src/` there is a folder called `e2e/` with one file
+   in it, `e2e/add.e2e.ts`, and next to `package.json` there is a
+   `playwright.config.ts`. Your `package.json` has a script you have never run:
+
+   ```json
+   "test:e2e": "playwright test"
+   ```
+
+3. Playwright drives real browsers, and it brings its own copies of them. Fetch
+   them:
+
+   ```bash
+   npx playwright install
+   ```
+
+   This is a big download. Here are the first lines of it, shortened, with the
+   progress bar cut down to its last step:
+
+   ```text
+   Downloading Chrome for Testing 151.0.7922.34 (playwright chromium v1234)
+   |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 184.3 MiB
+   Chrome for Testing 151.0.7922.34 (playwright chromium v1234) downloaded to .../.cache/ms-playwright/chromium-1234
+   Downloading Chrome Headless Shell 151.0.7922.34 (playwright chromium-headless-shell v1234)
+   |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.7 MiB
+   ```
+
+   Firefox and WebKit, the engine behind Safari, follow after those two. Read
+   the destination: the browsers land in a cache folder in your home directory,
+   not in `node_modules`. You run this command once per computer, not once per
+   project, and every app you create from now on finds the browsers already
+   there. Your version numbers will be higher than the ones above.
+
+4. Run the test:
+
+   ```bash
+   npm run test:e2e
+   ```
+
+   ```text
+   Running 1 test using 1 worker
+
+     ✓  1 e2e/add.e2e.ts:3:1 › shows the result of adding two numbers (141ms)
+
+     1 passed (1.0s)
+   ```
+
+Something started a browser, loaded your app in it, found the line `2 + 3 = 5`
+on the page, and closed the browser again, all without a single window appearing
+on your screen. That is **headless** mode, and it is the default because it is
+faster and because a build server has no screen at all.
+
+Watch it happen once anyway:
+
+```bash
+npx playwright test --headed
+```
+
+The same test runs, the terminal prints the same summary, and a Chrome window
+flashes open in the middle of it. Blink and you miss it, which tells you how
+little of your time these tests take.
+
+A test like this is an **end-to-end test**: it uses your app from one end, the
+user interface, to the other, the code underneath, exactly the way a person
+would.
+
+## What just ran {#sec-playwright-first}
+
+Open `e2e/add.e2e.ts`. There is not much in it:
+
+```ts
+import { expect, test } from '@playwright/test';
+
+test('shows the result of adding two numbers', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page.getByText('2 + 3 = 5', { exact: true })).toBeVisible();
+});
+```
+
+The import is the first thing worth noticing. `test` and `expect` come from
+`@playwright/test`, not from `'vitest'`. They are different functions with
+familiar names, and mixing the two imports in one file is a mistake that
+produces confusing errors.
+
+`test('...', callback)` is the shape you know from `it`: a name written as a
+sentence, then the callback that holds the test.
+
+The callback is where this file stops looking like a Vitest file. `async
+({ page })` says two things at once. The braces around `page` pull one property
+out of an object that Playwright passes in, and that property is a fresh, empty
+browser tab, made for this one test and thrown away afterwards. Two tests in one
+file never see each other's tabs.
+
+The `async` in front of it, and the `await` on every line inside, are there
+because your program and the browser are two separate programs. `page.goto('/')`
+sends the browser an order and comes straight back with a placeholder for a
+result that has not happened yet. That placeholder is called a **promise**, and
+`await` means "stop here until the real result arrives". Without it, your test
+would fire all its orders in a row and finish before the browser had loaded
+anything.
+
+::: {.callout-important}
+## The one place this course uses await
+
+`await` belongs in `e2e/*.e2e.ts` and nowhere else in your projects. Every other
+file you write this year is ordinary code that runs top to bottom. When your
+coding buddy offers you an `async` function in `src/`, say no. MDN has the full
+story on promises when you want it.
+:::
+
+`page.goto('/')` opens a path, not an address, and the address it hangs the path
+on comes from `playwright.config.ts`:
+
+```ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  testMatch: '**/*.e2e.ts',
+  use: {
+    baseURL: 'http://127.0.0.1:4173',
+  },
+  webServer: {
+    command: 'npm run start -- --host 127.0.0.1 --port 4173 --strictPort',
+    url: 'http://127.0.0.1:4173',
+  },
+});
+```
+
+`testDir` and `testMatch` say which files are end-to-end tests, which is why
+they end in `.e2e.ts` and why Vitest leaves them alone. `baseURL` is the address
+`'/'` is measured from. And `webServer` is the part that surprises people:
+Playwright runs `npm run start` for you, waits until Vite answers on port 4173,
+runs the tests, and shuts the server down again. You never start the app
+yourself.
+
+::: {.callout-warning}
+## Port 4173 is already used
+
+A run that you stop with Ctrl-C sometimes leaves the Vite server behind, and the
+next run refuses to start:
+
+```text
+Error: http://127.0.0.1:4173 is already used, make sure that nothing is running
+on the port/url or set reuseExistingServer:true in config.webServer.
+```
+
+Close that terminal, give the server a few seconds to die, and run again.
+:::
+
+The last line reads the page. `getByText('2 + 3 = 5')` on its own would match any
+element containing those characters, ignoring upper and lower case, so the
+starter adds `{ exact: true }`: the whole text of the element has to be exactly
+that. `toBeVisible()` then says what has to be true about it.
+
+## Two kinds of test, two kinds of bug {#sec-playwright-kinds}
+
+Run both test commands in the same app and compare.
+
+```text
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Duration  137ms
+```
+
+```text
+   1 passed (1.0s)
+```
+
+The unit test finishes in a fraction of a second. The end-to-end test needs
+about seven times as long for one single assertion, because it starts Vite,
+launches a browser, and loads a page before it can check anything.
+
+They are that different because they look at different halves of your app.
+`src/math.test.ts` imports `add` and calls it. It never loads `src/index.ts` and
+never opens `index.html`, so it cannot notice that you deleted the
+`<p id="mathResult">` from the page or misspelled the id in your
+`querySelector`. `add` returns 5, the test is green, the app shows nothing.
+
+`e2e/add.e2e.ts` never sees inside `add`. It reads what a visitor reads, which
+means it catches the missing paragraph, the misspelled id, the listener you
+forgot to register, and the CSS rule that hides the result. What it cannot tell
+you is which of those went wrong. It says the text is not on the page, and you
+go looking.
+
+You write both kinds, in very different amounts. Rules and arithmetic get many
+unit tests, because they are cheap and they name the broken rule exactly. The
+paths a user walks get a handful of end-to-end tests, because they are slow and
+each one covers a lot of ground.
+
+One rule follows from this, and your coding buddy will hold you to it: an
+end-to-end test never imports your app's own modules. The moment a test writes
+`import { Bracelet } from '../src/bracelet'`, it has stopped using the app the
+way a person does and started being a slow unit test.
+
+## Locators speak the page's language {#sec-playwright-locators}
+
+The starter's page has one paragraph and nothing to click. Give the experiment
+app something to drive.
+
+1. Delete `src/math.ts`, `src/math.test.ts`, and `e2e/add.e2e.ts`. You have read
+   that test, and its paragraph is about to disappear.
+
+2. Replace the body of `index.html`:
+
+   ```html
+   <h1>Greeter</h1>
+   <label for="visitorName">Your name</label>
+   <input id="visitorName" type="text">
+   <button id="greetButton" type="button">Greet me</button>
+   <p id="greeting"></p>
+   <script src="./src/index.ts" type="module"></script>
+   ```
+
+3. Replace `src/index.ts`:
+
+   ```ts
+   const visitorName = document.querySelector<HTMLInputElement>('#visitorName');
+   const greetButton = document.querySelector<HTMLButtonElement>('#greetButton');
+   const greeting = document.querySelector<HTMLParagraphElement>('#greeting');
+
+   if (!visitorName || !greetButton || !greeting) {
+     throw new Error('The page is missing one of its elements');
+   }
+
+   greetButton.addEventListener('click', () => {
+     greeting.textContent = `Hello, ${visitorName.value}!`;
+   });
+   ```
+
+4. Create `e2e/greeting.e2e.ts`:
+
+   ```ts
+   import { expect, test } from '@playwright/test';
+
+   test('greets the visitor by name', async ({ page }) => {
+     await page.goto('/');
+
+     await page.getByLabel('Your name').fill('Mia');
+     await page.getByRole('button', { name: 'Greet me' }).click();
+
+     await expect(page.getByRole('paragraph')).toHaveText('Hello, Mia!');
+   });
+   ```
+
+5. Run `npm run test:e2e`:
+
+   ```text
+   Running 1 test using 1 worker
+
+     ✓  1 e2e/greeting.e2e.ts:3:1 › greets the visitor by name (222ms)
+
+     1 passed (1.2s)
+   ```
+
+Everything that starts with `page.getBy...` is a **locator**: a description of an
+element, written the way a person would describe it out loud. Read the test
+again as a sentence. Fill the field labeled "Your name" with Mia. Click the
+button that says "Greet me". The paragraph now has to read "Hello, Mia!".
+
+`getByLabel('Your name')` works because `index.html` carries
+`<label for="visitorName">`. That is the rule from @sec-forms-labels, and this is
+the payoff it promised: a field with a label is a field your test can name, and a
+field without one is a field your test has to hunt for.
+
+`getByRole('button', { name: 'Greet me' })` names two things, the kind of element
+and the text a screen reader would announce for it. For a button that text is
+simply what is written on it. Roles come from the HTML you chose: a `<button>`
+has the role `button` and a `<p>` has the role `paragraph`. The greeter page
+holds exactly one paragraph, so `getByRole('paragraph')` needs no name to go
+with it.
+
+Then two verbs and two assertions do the work in this chapter:
+
+* `fill(text)` puts text into an input, replacing whatever was in it.
+* `click()` clicks the element.
+* `toBeVisible()` checks that the element is on the page and can be seen.
+* `toHaveText(text)` checks the whole text of the element, character for
+  character.
+
+Playwright has a long list of locators and an even longer list of assertions.
+Two pages of the [Playwright documentation](https://playwright.dev/docs/intro)
+hold both, "Locators" and "Assertions", and you will open them often this part.
+
+## Reading a red run {#sec-playwright-red}
+
+Break the greeter test on purpose. Drop the exclamation mark from the expected
+text:
+
+```ts
+  await expect(page.getByRole('paragraph')).toHaveText('Hello, Mia');
+```
+
+```text
+  1) e2e/greeting.e2e.ts:3:1 › greets the visitor by name
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByRole('paragraph')
+    Expected: "Hello, Mia"
+    Received: "Hello, Mia!"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" with timeout 5000ms
+      - waiting for getByRole('paragraph')
+        14 × locator resolved to <p id="greeting">Hello, Mia!</p>
+           - unexpected value "Hello, Mia!"
+```
+
+`Expected` and `Received` read exactly as they do in Vitest, and the element it
+found is printed with them, so you can see whether the locator picked the right
+thing.
+
+The interesting number is the `14 ×`. A browser is slow in a way a function call
+never is: a click starts work that finishes a few milliseconds later, and an
+assertion that looked once would sometimes check an element that has not been
+filled in yet. So Playwright keeps looking. It checked this paragraph 14 times
+over 5 seconds before it gave up. That is why the test above passes in 222
+milliseconds and fails in 5 seconds, and it is why no end-to-end test in this
+book ever waits for a fixed number of seconds.
+
+Playwright also drops an `error-context.md` into `test-results/` for every
+failure, with the error and a description of the page as it saw it. Open it when
+a locator finds nothing and you cannot work out why.
+
+Put the exclamation mark back before you go on.
+
+::: {.research title="Three things the exercise needs"}
+The three tests you write below check a number of elements, check a class on an
+element, and click one of two identical buttons. This chapter does none of the
+three, and the [Playwright documentation](https://playwright.dev/docs/intro)
+does all of them, on its "Assertions" page and in the "Strictness" part of its
+"Locators" page.
+
+1. Which assertion checks how many elements a locator found, so a test can say
+   "one item is left in the list" without counting them yourself?
+2. Which assertion checks that an element carries a given CSS class?
+3. Your page has two buttons that both say `x`. What does Playwright do when a
+   locator matches more than one element, and name one way to narrow a locator
+   down to the one you want.
+
+For the exam, keep the counting assertion and the answer to the third question
+in your head. Almost every list you ever test needs both.
+:::
+
+## Exercise: your to-do list under test {#sec-playwright-exercise}
+
+Your to-do list from @sec-creating-elements-exercise was the first app in this
+book that built its own elements, and it has never been tested. It is also the
+right app to start with, because all of its behavior lives in the page. There is
+no class to unit test here, only clicks and what they leave on the screen.
+
+{{< exercise todo-list tests=true >}}
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `todo-e2e`.
+
+2. Delete `src/math.ts`, `src/math.test.ts`, and `e2e/add.e2e.ts`.
+
+3. Copy your own `src/index.ts` from your to-do list project into `src/`. The
+   `index.html` and `src/styles.css` you copied in above are the files that
+   project started from, so your code will find every element it looks for. This
+   step is the point of the exercise: you are testing an app you already wrote,
+   not writing a new one.
+
+4. Run `npm start`. Add two items, click one of them to cross it out, and delete
+   the other. If that works, the copy is complete. If your project had the open
+   count bonus in it, that line keeps working too, and the tests below do not
+   care either way.
+
+5. Create `e2e/todo.e2e.ts` and write three tests in it. Every one of them starts
+   with `await page.goto('/');` on a fresh, empty list, and every one of them
+   uses the New item field and the Add button through their label and their
+   text.
+
+   * **shows a new item in the list.** Fill the field with `Buy milk`, click Add,
+     and check that `Buy milk` is visible on the page.
+   * **crosses an item out when it is clicked.** Add `Buy milk`, then click the
+     item itself, and check that the list item now carries the class `done`.
+     Your second research answer names the assertion for that.
+   * **removes an item when its x button is clicked.** Add `Buy milk` and then
+     `Walk the dog`, click the `x` button that belongs to `Buy milk`, and check
+     that exactly one list item is left and that it is `Walk the dog`. There are
+     two `x` buttons on that page, so read your third research answer before you
+     write this one.
+
+6. Run `npm run test:e2e`. Expected result:
+
+   ```text
+   Running 3 tests using 1 worker
+
+     ✓  1 e2e/todo.e2e.ts:3:1 › shows a new item in the list (210ms)
+     ✓  2 e2e/todo.e2e.ts:12:1 › crosses an item out when it is clicked (166ms)
+     ✓  3 e2e/todo.e2e.ts:22:1 › removes an item when its x button is clicked (198ms)
+
+     3 passed (1.6s)
+   ```
+
+   Your times will differ. The line numbers will too, unless you wrote the tests
+   in the same order and with the same blank lines.
+
+7. Prove that the tests really watch the app. Comment out the line in
+   `src/index.ts` that appends the new `li` to the list, run the tests again, and
+   read what the three failures say. That run takes about a minute, because a
+   click on an element that never appears waits 30 seconds before it gives up.
+   Put the line back.
+
+8. Add the `verify` script to `package.json`, with one change:
+
+   ```json
+   "verify": "tsc --noEmit && biome check . && vitest run --passWithNoTests"
+   ```
+
+   This app has no unit tests, because it has no logic outside the page, and
+   `vitest run` treats a project with no test files as a failure:
+
+   ```text
+   No test files found, exiting with code 1
+   ```
+
+   `--passWithNoTests` turns that into an exit code of 0. Use it here and nowhere
+   else: in a project that should have unit tests, the red run is the right
+   answer.
+
+9. Run `npm run verify`, fix what it reports, and commit.
+
+Notice what `verify` did not do: it ran TypeScript, Biome, and Vitest, and it
+never touched your end-to-end tests. `vitest run` only picks up files ending in
+`.test.ts`, so `npm run test:e2e` stays a command of its own. The next chapter
+puts both of them into the workflow that runs on every push.
+
+::: {.callout-tip}
+## When you finish early
+
+**Test the empty case.** Click Add with an empty field and check that no list
+item appears at all. Your Part 2 code already refuses empty text, and this is the
+test that says so.
+
+**Test the way back.** Click an item twice and check that the class is gone
+again. `classList.toggle` promised both directions; nobody has ever checked the
+second one.
+:::
+
+## Check your understanding {#sec-playwright-quiz}
+
+Six questions, the first three of them the research task.
+
+{{< quiz playwright title="Let a browser do the clicking" >}}

@@ -73,6 +73,12 @@ book:
         - 0070-data-structures/0030-stacks.qmd
         - 0070-data-structures/0040-queues.qmd
         - 0070-data-structures/0050-choosing.qmd
+    - part: "End-to-end testing and shipping"
+      chapters:
+        - 0080-e2e/0010-playwright.qmd
+        - 0080-e2e/0020-testing-apps.qmd
+        - 0080-e2e/0030-skills.qmd
+        - 0080-e2e/0040-final-project.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

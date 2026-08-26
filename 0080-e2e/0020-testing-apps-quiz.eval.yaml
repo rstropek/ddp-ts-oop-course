@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the quiz of the chapter
+# "Let the browser do the clicking" (0080-e2e/0020-testing-apps.qmd).
+# One correct, one partial, one incorrect per question, plus one German
+# correct answer per quiz. Teacher-only test data; never publish as an
+# activity. Grading runs on the quiz's own small model (Qwen on SCCH, free);
+# the feedback audit uses a frontier judge via --judge-llm-* and costs money,
+# so run it after rubric changes.
+
+id: testing-apps-quiz-eval
+target: ./0020-testing-apps-quiz.yaml
+
+questions:
+  - question: research-with-deps
+    answers:
+      - expect: correct
+        answer: |
+          it installs the linux packages the browser needs to even start, like
+          the libraries and fonts, not just chromium itself. the github runner
+          is a fresh empty ubuntu so nothing like that is on it, my laptop
+          already has chrome so it has all that stuff. read it on the
+          playwright docs, the browsers page.
+      # "Dependencies" without saying they are OS packages, and no source.
+      - expect: partial
+        answer: |
+          it installs the dependencies too so the browser works on the ci
+          machine
+      - expect: incorrect
+        answer: |
+          it installs the npm packages from package.json so you can skip npm ci
+
+  - question: research-failure-screenshot
+    answers:
+      - expect: correct
+        answer: |
+          you put screenshot: 'only-on-failure' into the use block in
+          playwright.config.ts. the png ends up in test-results in a folder
+          named after the test. playwright docs, test configuration page.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          man schreibt screenshot: 'only-on-failure' in den use block in der
+          playwright.config.ts. das bild landet dann im ordner test-results,
+          in einem unterordner mit dem namen vom test. steht in der playwright
+          doku bei test configuration.
+      # Setting right, folder missing.
+      - expect: partial
+        answer: |
+          screenshot only-on-failure in the config
+      - expect: incorrect
+        answer: |
+          playwright saves a screenshot of every failed test automatically, you
+          find it in playwright-report
+
+  - question: codegen-first-draft
+    answers:
+      - expect: correct
+        answer: |
+          first the name, it is just called test so nobody knows what broke
+          when it goes red, you write a real sentence there. second there is no
+          expect at all, the recorder only writes down the clicks and not what
+          you wanted to see, so all the assertions you type yourself.
+      # Two changes named, only one has a reason.
+      - expect: partial
+        answer: |
+          you rename the test and you delete the clicks before the fills.
+          renaming matters because the name shows up when it fails.
+      - expect: incorrect
+        answer: |
+          nothing really, you can paste it in like that, maybe fix the
+          indentation
+
+  - question: strict-mode
+    answers:
+      - expect: correct
+        answer: |
+          getByLabel('Name') hits three inputs because First name and Last name
+          also have Name in them, and playwright does not pick one for you, it
+          just stops. write getByLabel('Name', { exact: true }) then only the
+          dog field is left.
+      # Cause without a fix.
+      - expect: partial
+        answer: |
+          because the locator finds more than one element on the page
+      - expect: incorrect
+        answer: |
+          the input is not there yet when the test runs, you need to wait
+          longer before filling it
+
+  - question: enter-key-bug
+    answers:
+      - expect: correct
+        answer: |
+          enter in a textfield only fires submit on the form around it and
+          there was no form, just divs and a button with a click listener. so
+          you wrap the fields and the button in a <form id="humanForm">, make
+          the button type submit and put the listener on the form with submit
+          and event.preventDefault() first.
+      # The missing form, nothing about the listener move.
+      - expect: partial
+        answer: |
+          there was no form element on the page so enter could not submit
+          anything
+      - expect: incorrect
+        answer: |
+          the test was wrong, press('Enter') does not work on an input, you
+          have to use page.keyboard and give the assertion more time
+
+  - question: e2e-in-ci
+    answers:
+      - expect: correct
+        answer: |
+          verify is what you run before every commit so it has to be quick, the
+          vitest tests are done in like 200ms but playwright starts vite and a
+          whole browser and that takes seconds. on github nobody is sitting
+          there waiting, the run happens after the push on their machine, so a
+          minute more does not bother anyone.
+      # Only the speed half.
+      - expect: partial
+        answer: |
+          because e2e is slow and verify should be fast
+      - expect: incorrect
+        answer: |
+          you cannot run playwright on your own laptop at all, it only works on
+          github, that is why it is a ci step

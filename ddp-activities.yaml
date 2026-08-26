@@ -166,3 +166,12 @@ activities:
     choosing:
       file: 0070-data-structures/0050-choosing-quiz.yaml
       note: "Creative Coding 2 book: Picking the right structure (0050) — GitHub-hosted"
+    playwright:
+      file: 0080-e2e/0010-playwright-quiz.yaml
+      note: "Creative Coding 2 book: Let a browser do the clicking (0010) — GitHub-hosted"
+    testing-apps:
+      file: 0080-e2e/0020-testing-apps-quiz.yaml
+      note: "Creative Coding 2 book: Testing the apps you already built (0020) — GitHub-hosted"
+    skills:
+      file: 0080-e2e/0030-skills-quiz.yaml
+      note: "Creative Coding 2 book: A recipe the agent can follow (0030) — GitHub-hosted"

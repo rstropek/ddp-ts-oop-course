@@ -1,0 +1,116 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the Playwright chapter quiz
+# (0080-e2e/0010-playwright.qmd). One correct, one partial, one incorrect per
+# question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: playwright-quiz-eval
+target: ./0010-playwright-quiz.yaml
+
+questions:
+  - question: research-count-assertion
+    answers:
+      - expect: correct
+        answer: |
+          toHaveCount. you write
+          await expect(page.getByRole('listitem')).toHaveCount(1); and it
+          checks that the locator found exactly that many elements. its on the
+          assertions page of the playwright docs.
+      # Names the assertion, but no number, no locator and no source.
+      - expect: partial
+        answer: |
+          there is toHaveCount for that
+      - expect: incorrect
+        answer: |
+          you take the locator and read .length on it and then toBe(1)
+
+  - question: research-class-assertion
+    answers:
+      - expect: correct
+        answer: |
+          toHaveClass, so
+          await expect(page.getByRole('listitem')).toHaveClass('done');
+          i found it in the playwright docs under assertions.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          das geht mit toHaveClass, also
+          await expect(page.getByRole('listitem')).toHaveClass('done');
+          steht in der playwright doku auf der assertions seite.
+      # Right idea, no name for the assertion and no source.
+      - expect: partial
+        answer: |
+          playwright has an assertion that checks the class of an element, you
+          just give it the class name
+      - expect: incorrect
+        answer: |
+          toHaveCSS, you check that text-decoration is line-through
+
+  - question: research-strict-mode
+    answers:
+      - expect: correct
+        answer: |
+          it does not click anything, it throws a strict mode violation and
+          says the locator resolved to 2 elements. you have to make it
+          unique, i chained it like page.getByText('Buy milk').getByRole('button')
+          but filter or first() also work. playwright docs, locators page,
+          the strictness part.
+      # Names a fix but gets the behavior wrong.
+      - expect: partial
+        answer: |
+          it just takes the first one it finds. if you want another one you
+          use nth() or first().
+      - expect: incorrect
+        answer: |
+          playwright clicks both of them one after the other
+
+  - question: which-test-catches-what
+    answers:
+      - expect: correct
+        answer: |
+          npm test is still green because math.test.ts only imports add and
+          calls it, it never opens index.html. the e2e test goes red because it
+          really opens the page in the browser and the text 2 + 3 = 5 is not
+          there anymore.
+      # Both results right, no reason.
+      - expect: partial
+        answer: |
+          the unit test stays green and the e2e test fails
+      - expect: incorrect
+        answer: |
+          both go red because the paragraph is missing so nothing works
+
+  - question: webserver-block
+    answers:
+      - expect: correct
+        answer: |
+          thats the webServer block in playwright.config.ts. playwright runs
+          npm run start itself on port 4173, waits until vite answers there,
+          runs the tests and kills the server again afterwards. baseURL is what
+          makes goto('/') land on that address.
+      # Names the block, explains nothing.
+      - expect: partial
+        answer: |
+          the webServer part of the config does that
+      - expect: incorrect
+        answer: |
+          baseURL starts the server, it says which address to open
+
+  - question: labels-not-ids
+    answers:
+      - expect: correct
+        answer: |
+          the label is what you actually see on the page and what a screen
+          reader says, so the test uses the app like a real person. the id is
+          only an internal name, and if somebody renames it the test breaks
+          even though nothing changed for the user.
+      # No reason behind the preference.
+      - expect: partial
+        answer: |
+          because getByLabel is nicer and its the style we use in the course
+      - expect: incorrect
+        answer: |
+          because page.locator with a css selector does not work in playwright

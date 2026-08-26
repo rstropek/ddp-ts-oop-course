@@ -1,0 +1,190 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Let a browser do the clicking"
+# (0080-e2e/0010-playwright.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point at the Playwright documentation, never the
+# answer). The other three cover the chapter's own points: which bug each kind
+# of test catches, what the webServer block does, and why locators name roles
+# and labels instead of ids.
+# Part 8 is the last part of the book, so no construct of the course is held
+# back from the discussion chat any more.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: playwright-quiz
+name: "Quiz: Let a browser do the clicking"
+
+title: "Check your understanding: let a browser do the clicking"
+description: |
+  Six short questions about the chapter *Let a browser do the clicking*, three
+  of them the research task. Answer in your own words; if you cannot answer a
+  research question yet, look it up and come back. One or two sentences are
+  enough. This quiz is anonymous and is here for you. Answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="await page.getByRole('button', { name: 'Add' }).click();"
+      scope="after the first chapter of the end-to-end testing part, which is the last part of the book, so no construct of the course is held back any more"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `classList`, `replaceChildren`, and events"
+        "semantic HTML with `<label for>` on every input, and CSS in `src/styles.css`"
+        "own classes with fields, methods, `private`, `readonly`, getters, parameter properties, `extends`, `super`, `abstract`, and polymorphism"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `beforeEach`, `npm test`, the `verify` script, and a GitHub Actions workflow"
+        "generics: a type parameter `T`, `class Stack<T>`, and constraints"
+        "hand-built `Node<T>` linked lists, stacks, and queues, built test-first"
+        "Playwright: `npx playwright install`, `e2e/*.e2e.ts`, `npm run test:e2e`, headless against headed"
+        "an end-to-end test with `async ({ page })`, `await` on every line, and `page.goto('/')`"
+        "the `baseURL` and `webServer` blocks in `playwright.config.ts`"
+        "locators `getByLabel`, `getByRole`, and `getByText`, the actions `fill` and `click`, and the assertions `toBeVisible` and `toHaveText`"
+        "auto-waiting: Playwright retries a locator until it matches or the timeout runs out, so tests never wait a fixed number of seconds")
+      not_yet=(array
+        "which Playwright assertion counts the elements a locator found, which one checks a CSS class, and what happens when a locator matches more than one element (those are the research tasks right now)"
+        "the codegen recorder, end-to-end tests in the CI workflow, and skill files, which come in the next chapters"
+        "`fetch`, `localStorage`, `Symbol.iterator`, `interface`, and `keyof`, which this course does not cover"
+        "`async` and `await` anywhere except in an `e2e/*.e2e.ts` file")}}
+
+questions:
+  - id: research-count-assertion
+    title: "Counting what the locator found"
+    question: |
+      After deleting one of two to-do items, a test has to check that exactly
+      one list item is left. Which Playwright assertion answers that, so you
+      never count the elements yourself? Write the line you would use, and say
+      where you read it.
+    evaluation: |
+      Expected: `toHaveCount`, used as
+      `await expect(page.getByRole('listitem')).toHaveCount(1);`. It takes the
+      number of elements the locator has to match. Source is the Playwright
+      documentation, the "Assertions" page (the list of `expect(locator)`
+      assertions).
+      Required: (1) names `toHaveCount`; (2) shows or describes that it takes
+      the expected number, applied to a locator; (3) names the source.
+      Partial: names `toHaveCount` with no number, no locator, and no source.
+      Incorrect: names `toHaveLength`, `count()` compared with `toBe`,
+      `toHaveText`, or reading `.length` on the locator.
+
+  - id: research-class-assertion
+    title: "Is that item crossed out?"
+    question: |
+      Clicking a to-do item puts the class `done` on its `<li>`, and CSS turns
+      that class into a line through the text. Which Playwright assertion
+      checks that an element carries a given class? Say where you read it.
+    evaluation: |
+      Expected: `toHaveClass`, used as
+      `await expect(page.getByRole('listitem')).toHaveClass('done');`. Source is
+      the Playwright documentation, the "Assertions" page. `toContainClass` is
+      accepted as fully correct too; it is the assertion for an element that
+      carries several classes at once, while `toHaveClass` with a string
+      compares the whole class attribute.
+      Required: (1) names `toHaveClass` or `toContainClass`; (2) names the
+      source. Showing the line is welcome, not required.
+      Partial: describes the idea without the name, for example "there is an
+      assertion for classes", or names the assertion with no source.
+      Incorrect: names `toHaveCSS`, `toHaveAttribute('class')`, or suggests
+      reading `classList` from the test.
+
+  - id: research-strict-mode
+    title: "Two buttons that both say x"
+    question: |
+      Your list holds two items, so the page has two buttons that both say `x`,
+      and `page.getByRole('button', { name: 'x' })` matches both. What does
+      Playwright do when you click a locator that matches more than one
+      element, and name one way to get down to the one you want. Say where you
+      read it.
+    evaluation: |
+      Expected: Playwright refuses to act. It is strict, so it throws a strict
+      mode violation error saying the locator resolved to 2 elements, instead
+      of guessing or taking the first one. Ways to narrow it down: chain from
+      an outer locator (`page.getByText('Buy milk').getByRole('button')`), use
+      `filter({ hasText: 'Buy milk' })`, or pick a position with `first()`,
+      `last()`, or `nth(i)`. Source is the Playwright documentation, the
+      "Locators" page, section on strictness.
+      Required: (1) it fails with an error instead of clicking; (2) names one
+      working way to narrow it down; (3) names the source. Spelling out that a
+      locator has to match exactly one element is a bonus, never a
+      requirement.
+      Partial: names a way to narrow it down but says Playwright clicks the
+      first match, or describes the error with no way out.
+      Incorrect: says Playwright clicks the first match, clicks all of them, or
+      picks one at random.
+
+  - id: which-test-catches-what
+    title: "The paragraph that disappeared"
+    question: |
+      A classmate deletes the line `<p id="mathResult"></p>` from `index.html`
+      in a fresh app from the tests template. They run `npm test` and
+      `npm run test:e2e`. Which of the two turns red, which one stays green,
+      and why?
+    evaluation: |
+      Expected: `npm test` stays green and `npm run test:e2e` turns red.
+      `src/math.test.ts` imports `add` and calls it, so it never loads
+      `index.html` at all and cannot see that the paragraph is gone. The
+      end-to-end test opens the page in a browser and looks for the text
+      `2 + 3 = 5`, which is no longer anywhere, so `toBeVisible` fails.
+      Required: (1) the unit test stays green, the end-to-end test turns red;
+      (2) the reason is that the unit test only calls the function while the
+      end-to-end test reads the real page.
+      Partial: both results right with no usable reason, or the reason right
+      but one of the two results wrong.
+      Incorrect: swaps the two, says both turn red, or says both stay green.
+
+  - id: webserver-block
+    title: "Who started the server?"
+    question: |
+      You never run `npm start` before `npm run test:e2e`, and the tests still
+      find your app. Which part of `playwright.config.ts` arranges that, and
+      what does it do?
+    evaluation: |
+      Expected: the `webServer` block. Playwright runs the command in it
+      (`npm run start` on port 4173), waits until the address answers, runs the
+      tests against it, and shuts the server down afterwards. `baseURL` in the
+      `use` block is what makes `page.goto('/')` land on that address.
+      Required: (1) names `webServer`; (2) says Playwright starts the dev
+      server itself and waits for it before the tests run. Mentioning that it
+      stops the server again, or naming `baseURL` for the `'/'`, is a bonus.
+      Partial: names `webServer` with no explanation, or describes the
+      behavior without naming the block.
+      Incorrect: an answer that never mentions `webServer` at all. In
+      particular, "baseURL starts the server" is incorrect, not partial:
+      `baseURL` only says which address `'/'` is measured from and starts
+      nothing. Also incorrect: Vite starts Playwright, or the test file starts
+      the server.
+
+  - id: labels-not-ids
+    title: "Why not just use the id?"
+    question: |
+      A classmate writes `page.locator('#todoText')` where the chapter writes
+      `page.getByLabel('New item')`. Both find the input today. Give one reason
+      the course asks for the label version.
+    evaluation: |
+      Expected: any one of these counts. The label is what the user actually
+      sees and what a screen reader reads out, so the test uses the page the
+      way a person does, while an `id` is an internal name nobody on the page
+      can see. An `id` can be renamed in a refactor without the app changing at
+      all, and the test breaks for no user-visible reason. And a locator that
+      needs a label fails loudly when the label is missing, which is an
+      accessibility bug worth finding.
+      Required: one reason, stated so it says something about what a user sees
+      or about the id being an internal detail.
+      Partial: says the label version is "cleaner" or "better style" with no
+      reason behind it.
+      Incorrect: says `page.locator` does not work, says ids are not allowed in
+      HTML, or claims the label version is faster.

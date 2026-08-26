@@ -71,19 +71,25 @@ instructions: |
   New in Part 8, use it freely:
 
   - Unit test versus end-to-end test, and what each of the two catches.
-  - `npx playwright install` once; `e2e/*.e2e.ts`, `npm run test:e2e`, the HTML
-    report, headed versus headless, and the `webServer` block in
-    `playwright.config.ts` that starts Vite on port 4173.
-  - `page.goto`, `getByRole`, `getByLabel`, `fill`, `click`, and
-    `expect(locator).toHaveText` / `.toBeVisible`; testing error states and
-    keyboard interaction; the codegen recorder as a first draft that then gets
-    cleaned up by hand.
+  - `npx playwright install` once; `e2e/*.e2e.ts`, `npm run test:e2e`, reading
+    a red run and the failure files under `test-results/` (`error-context.md`,
+    the screenshot-on-failure setting), headed versus headless, and the
+    `webServer` block in `playwright.config.ts` that starts Vite on port 4173.
+    `vitest run --passWithNoTests` only in an app that has no logic to
+    unit-test.
+  - `page.goto`, `getByRole`, `getByLabel`, `getByText`, `fill`, `click`,
+    `check`, `press`, `{ exact: true }` when strict mode reports more than one
+    match, and `expect(locator).toHaveText` / `.toBeVisible` / `.toBeHidden` /
+    `.toBeDisabled` / `.toHaveCount` / `.toHaveClass`; testing error states
+    and keyboard interaction; the codegen recorder as a first draft that then
+    gets cleaned up by hand.
   - Running unit and end-to-end tests in the GitHub Actions workflow from
     Part 5.
   - Writing a project `AGENTS.md` and a small skill in
     `.agents/skills/<name>/SKILL.md`.
   - The final project: a class hierarchy, one hand-written data structure, unit
-    tests, two end-to-end tests, an `AGENTS.md`, and a clean repository.
+    tests, two end-to-end tests, an `AGENTS.md` plus one skill of the student's
+    own, and a clean repository.
 
   Not yet: nothing. Part 8 is the last part of the book, so no construct of the
   course is held back any more. Every rule below still holds.

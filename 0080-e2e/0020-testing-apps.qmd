@@ -1,0 +1,502 @@
+---
+title: "Testing the apps you already built"
+---
+
+You know your salon app works because you typed three names into it, clicked
+Serve next three times, and watched the line empty out. Every change you make
+from now on costs you that walk-through again. This chapter hands it to
+Playwright. It starts with a recorder that writes the first draft while you
+click, and it ends with a computer at GitHub that repeats everything after
+every push.
+
+## The recorder writes the first draft {#sec-testing-apps-codegen}
+
+1. Open `coursework/hairdresser`, the salon app from the queues chapter, and
+   start it with `npm start`.
+
+2. Leave it running and open a second terminal in the same folder:
+
+   ```text
+   npx playwright codegen http://localhost:5173/
+   ```
+
+   Two windows open. On the left is your salon, on the right the Playwright
+   Inspector with an empty code panel.
+
+3. Click through one customer in the left window. Type `Mia` into First name,
+   `Berger` into Last name, tick Long hair, click Add human, then click Serve
+   next. Watch the right window fill up while you click.
+
+4. Stop the recorder with Ctrl+C in the terminal. Here is what the Inspector
+   collected:
+
+   ```ts
+   import { test, expect } from '@playwright/test';
+
+   test('test', async ({ page }) => {
+     await page.goto('http://localhost:5173/');
+     await page.getByRole('textbox', { name: 'First name' }).click();
+     await page.getByRole('textbox', { name: 'First name' }).fill('Mia');
+     await page.getByRole('textbox', { name: 'Last name' }).click();
+     await page.getByRole('textbox', { name: 'Last name' }).fill('Berger');
+     await page.getByRole('checkbox', { name: 'Long hair' }).check();
+     await page.getByRole('button', { name: 'Add human' }).click();
+     await page.getByRole('button', { name: 'Serve next' }).click();
+   });
+   ```
+
+That is a real Playwright test, and it is not yet a test worth keeping. Read
+it once and count what has to change.
+
+**The test is called `test`.** The recorder does not know what you were
+trying to prove. You do, so write the sentence.
+
+**The address is hard-coded.** `playwright.config.ts` starts its own copy of
+Vite on port 4173 and puts that address into `baseURL`, so `page.goto('/')`
+lands on the right page every time. The recorded line points at the dev server
+you happened to have open, and next week you will have a different app on that
+port.
+
+**There is a click before every `fill`.** You moved the cursor into the field,
+so the recorder wrote it down. `fill` puts the cursor in the field itself, so
+those three lines say nothing.
+
+**Nothing is checked.** Codegen records what you did. It does not know what
+you expected, and the whole point of a test is the expectation. Every
+assertion in the file below is one you have to type.
+
+The locators survive the cleanup with one change.
+`getByRole('textbox', { name: 'First name' })` and `getByLabel('First name')`
+find exactly the same input, because the accessible name of that textbox comes
+from its `<label for>`. This course writes the shorter one.
+
+Delete `e2e/add.e2e.ts`, which still tests the template's own page, and write
+`e2e/salon.e2e.ts`:
+
+```ts
+import { expect, test } from '@playwright/test';
+
+test('serves the customers in the order they arrived', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByLabel('First name').fill('Mia');
+  await page.getByLabel('Last name').fill('Berger');
+  await page.getByLabel('Long hair').check();
+  await page.getByRole('button', { name: 'Add human' }).click();
+
+  await page.getByLabel('Name', { exact: true }).fill('Rex');
+  await page.getByLabel('Breed').fill('Beagle');
+  await page.getByRole('button', { name: 'Add dog' }).click();
+
+  await expect(page.getByText('Now serving: 🧑 Mia Berger (long hair)')).toBeVisible();
+  await expect(page.getByText('Next up: 🐕 Rex (Beagle)')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Serve next' }).click();
+
+  await expect(page.getByText('Now serving: 🐕 Rex (Beagle)')).toBeVisible();
+});
+```
+
+The dog is in there because a queue with one customer proves nothing about
+order. `check()` ticks the Long hair box and makes sure it really ends up
+ticked, which a plain `click()` would not promise.
+
+`{ exact: true }` on the dog's Name field is the one thing you cannot leave
+out. Write `getByLabel('Name')` and the run stops before it clicks anything:
+
+```text
+Error: locator.fill: Error: strict mode violation: getByLabel('Name') resolved to 3 elements:
+    1) <input type="text" id="humanFirstName"/> aka getByRole('textbox', { name: 'First name' })
+    2) <input type="text" id="humanLastName"/> aka getByRole('textbox', { name: 'Last name' })
+    3) <input type="text" id="dogName"/> aka getByRole('textbox', { name: 'Name', exact: true })
+```
+
+Playwright calls that **strict mode**, and it is on for every locator. A
+locator that matches three elements is a question with three answers, and
+Playwright refuses to guess which one you meant. `First name` and `Last name`
+both contain the word `Name`, and `{ exact: true }` says you want the label
+that reads exactly `Name`. The error even prints a locator that would work.
+
+Run the file:
+
+```text
+npm run test:e2e
+```
+
+```text
+Running 1 test using 1 worker
+
+  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (368ms)
+
+  1 passed (1.4s)
+```
+
+There is no `sleep` anywhere in that test, and there is no reason to add one.
+Every locator action waits until the element is there and can be clicked, and
+every `expect(locator)` keeps asking until the page agrees or five seconds are
+up. Playwright calls this auto-waiting, and it is why an end-to-end suite can
+be trusted on a slow machine.
+
+## Error states are where a suite earns its keep {#sec-testing-apps-errors}
+
+The happy flow is the part you test by hand anyway, because it is the part you
+enjoy. The refusals are the part nobody clicks twice: the second letter cube in
+a row, the empty name field, the warning that has to appear once and then stay
+away. Those are also the parts that break quietly when you touch the rules
+months later.
+
+Your bracelet editor has three of them, and it already has a home for tests.
+
+1. Open `homework/bracelet-tests` and delete `e2e/add.e2e.ts` there too.
+
+2. Create `e2e/bracelet.e2e.ts`:
+
+   ```ts
+   import { expect, test } from '@playwright/test';
+
+   test('refuses a second letter cube in a row', async ({ page }) => {
+     await page.goto('/');
+
+     await page.getByRole('button', { name: 'A', exact: true }).click();
+     await page.getByRole('button', { name: 'B', exact: true }).click();
+
+     await expect(page.getByText('You need to add a spacer bead next!')).toBeVisible();
+   });
+
+   test('refuses a spacer bead on the empty string', async ({ page }) => {
+     await page.goto('/');
+
+     await page.getByRole('button', { name: 'rose' }).click();
+
+     await expect(page.getByText('You need to add a letter cube next!')).toBeVisible();
+   });
+
+   test('warns about mixed colors once and then keeps quiet', async ({ page }) => {
+     await page.goto('/');
+
+     await page.getByRole('button', { name: 'A', exact: true }).click();
+     await page.getByRole('button', { name: 'rose' }).click();
+     await page.getByRole('button', { name: 'B', exact: true }).click();
+     await page.getByRole('button', { name: 'mint' }).click();
+
+     await expect(page.getByText('You are mixing spacer colors!')).toBeVisible();
+
+     await page.getByRole('button', { name: 'C', exact: true }).click();
+     await page.getByRole('button', { name: 'blue' }).click();
+
+     await expect(page.getByText('You are mixing spacer colors!')).toBeHidden();
+   });
+   ```
+
+3. Run `npm run test:e2e`:
+
+   ```text
+   Running 3 tests using 1 worker
+
+     ✓  1 e2e/bracelet.e2e.ts:3:1 › refuses a second letter cube in a row (240ms)
+     ✓  2 e2e/bracelet.e2e.ts:12:1 › refuses a spacer bead on the empty string (136ms)
+     ✓  3 e2e/bracelet.e2e.ts:20:1 › warns about mixed colors once and then keeps quiet (307ms)
+
+     3 passed (1.6s)
+   ```
+
+The letter buttons need `{ exact: true }` for the same reason the dog's Name
+field did. A plain `A` also matches the accessible name of `aqua`, `sand`,
+`lilac`, `peach`, and `Remove last`, so strict mode stops the run and prints
+all six buttons, the letter cube included.
+
+The color buttons carry no text at all. `getByRole('button', { name: 'rose' })`
+finds one anyway, because you gave every color button an `aria-label` back in
+the bracelet chapter. A test that reads the page the way a screen reader does
+only works on a page that a screen reader can read, which is the payoff for
+every `<label for>` and every `aria-label` you have written since the DOM part.
+
+`toBeHidden()` is the mirror of `toBeVisible()`, and it is how the last
+assertion proves the warning came exactly once. There is a matcher for the
+state of a control too: `expect(locator).toBeDisabled()` passes while a button
+is gray and unclickable.
+
+`npm test` in this project still runs the Vitest tests that call `Bracelet`
+directly, and those are the tests that pin down `addLetter` throwing a
+`RuleError`. The three tests above prove something the unit tests cannot
+reach: that the refusal actually arrives on the page, in the paragraph a
+person is looking at.
+
+## What a keyboard does that a mouse does not {#sec-testing-apps-keyboard}
+
+Watch somebody who fills in forms all day. They type a first name, press Tab,
+type a last name, and press Enter, and the mouse never moves. A receptionist in
+a busy salon works exactly like that. Go back to `coursework/hairdresser` and
+add that flow as a second test in `e2e/salon.e2e.ts`:
+
+```ts
+test('adds a human when you press Enter in the form', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByLabel('First name').fill('Tom');
+  await page.getByLabel('Last name').fill('Novak');
+  await page.getByLabel('Last name').press('Enter');
+
+  await expect(page.getByText('Now serving: 🧑 Tom Novak (short hair)')).toBeVisible();
+});
+```
+
+`press` sends one key to whatever the locator points at, and `'Enter'` is the
+name of that key. Run `npm run test:e2e`:
+
+```text
+  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (377ms)
+  ✘  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (5.1s)
+
+
+  1) e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form ─────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Now serving: 🧑 Tom Novak (short hair)')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByText('Now serving: 🧑 Tom Novak (short hair)')
+```
+
+Five seconds of asking, and Tom never showed up. The test is right and the app
+is wrong. Enter in a text field fires a `submit` event on the form around it
+(@sec-forms-submit), and the Add a human section of your salon has no form in
+it. Two `<div>`s, a checkbox, and a button with a click listener answer the
+mouse and have nothing to say to the keyboard.
+
+Open `index.html` and put a form around the human fields, with the button
+inside it:
+
+```html
+<form id="humanForm">
+  <div class="field">
+    <label for="humanFirstName">First name</label>
+    <input id="humanFirstName" type="text">
+  </div>
+  <div class="field">
+    <label for="humanLastName">Last name</label>
+    <input id="humanLastName" type="text">
+  </div>
+  <div class="checkbox-field">
+    <input id="humanLongHair" type="checkbox">
+    <label for="humanLongHair">Long hair</label>
+  </div>
+  <button type="submit">Add human</button>
+</form>
+```
+
+The button lost its `id` and gained `type="submit"`, so `src/index.ts` looks up
+the form instead of the button:
+
+```ts
+const humanForm = document.querySelector<HTMLFormElement>('#humanForm');
+```
+
+Change that name in the null check too, and turn the listener into a `submit`
+listener whose first line is the one you have written since the forms chapter:
+
+```ts
+humanForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+
+  const firstName = humanFirstName.value.trim();
+  const lastName = humanLastName.value.trim();
+  // the rest of the listener stays exactly as it was
+```
+
+Run the tests again:
+
+```text
+Running 2 tests using 1 worker
+
+  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (382ms)
+  ✓  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (158ms)
+
+  2 passed (1.4s)
+```
+
+The first test still passes without a single edit, because a click on a submit
+button fires the same `submit` event. One listener now answers the mouse and
+the keyboard, and five lines of test found something that clicking through the
+app by hand never did.
+
+## Both kinds of test on every push {#sec-testing-apps-ci}
+
+`npm run verify` runs the type check, Biome, and Vitest, and it has never
+started a browser. That stays that way. Your 16 Vitest tests in the salon
+project finish in 183 milliseconds, while the four Playwright tests need 1.8
+seconds plus the time Vite takes to start, and `verify` is the command you run
+before every commit. Speed is what makes you run it.
+
+GitHub has no such worry. The workflow already runs after every push, nobody
+waits for it, and a run that takes two minutes instead of one costs you
+nothing. So the end-to-end tests go there.
+
+Open `.github/workflows/verify.yml` in the root of your `creative-coding-2`
+repository and add two steps at the end of the `bracelet-tests` job:
+
+```yaml
+  bracelet-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: homework/bracelet-tests
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: homework/bracelet-tests/package-lock.json
+      - run: npm ci
+      - run: npm run verify
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+```
+
+Everything above `npm run verify` is the file you wrote in the CI chapter, and
+it does what it did there: fresh Linux machine, your repository downloaded onto
+it, Node installed, packages installed with `npm ci`, and then your own check
+command.
+
+`npx playwright install --with-deps chromium` puts a browser on that machine.
+`npm ci` installed the `@playwright/test` package, which is the program that
+drives a browser, and the browser itself is a separate download of a few
+hundred megabytes that npm knows nothing about. On your laptop you did this
+once and forgot about it. The GitHub machine is thrown away after every run, so
+this line runs every time. The word `chromium` at the end names the only
+browser your `playwright.config.ts` asks for, so the other two stay
+undownloaded. What `--with-deps` adds is your research task below.
+
+`npm run test:e2e` is the same command you ran in your terminal. Playwright
+starts Vite itself through the `webServer` block, drives the browser with no
+window on the screen, and ends with an exit code. Red exit code, red cross next
+to your commit.
+
+The order matters. `verify` costs seconds and catches every type error and
+every broken unit test, so it runs before the browser download. A commit that
+does not compile fails in twenty seconds instead of two minutes.
+
+::: {.research title="One flag and one picture"}
+The exercise pushes an end-to-end job of your own, and then it breaks the app
+on purpose and asks you to look at the page the test gave up on. Neither
+answer is above. Playwright's page about continuous integration and its page
+about browsers cover the first question, and its page about test configuration
+covers the second.
+
+1. `npx playwright install` downloads browsers. `--with-deps` does something
+   more. What does the flag add, and why does a fresh GitHub machine need it
+   while your own laptop never asked for it? Say where you read it.
+2. Playwright can save a picture of the page at the moment a test fails.
+   Which setting in `playwright.config.ts` switches that on, and which folder
+   does the file land in? Say where you read it.
+
+For the exam, remember why the browser step exists at all. A workflow that
+installs packages and then runs Playwright without it fails on a machine that
+has no browser, and the log line that says so is easy to miss.
+:::
+
+## Exercise: the salon under test {#sec-testing-apps-exercise}
+
+Your `coursework/hairdresser` project has two end-to-end tests and a form that
+answers the keyboard. This exercise finishes the suite and puts it on GitHub.
+
+1. Open `coursework/hairdresser` and add a third test to `e2e/salon.e2e.ts`,
+   called `'starts with an empty line and a dead Serve next button'`. It goes
+   to `/` and touches nothing, then checks three things about the fresh page:
+   `The line is empty.` is visible, so is `Customers in line: 0`, and the Serve
+   next button is disabled.
+
+2. Add a fourth test, `'refuses a human without a name'`. It clicks Add human
+   with both name fields empty, then checks that
+   `Please enter a first name and a last name.` is visible and that the line is
+   still showing `The line is empty.`. The second assertion is the important
+   one: a message that appears while the customer joins anyway is worse than no
+   message.
+
+3. Run `npm run test:e2e`:
+
+   ```text
+   Running 4 tests using 1 worker
+
+     ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (366ms)
+     ✓  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (129ms)
+     ✓  3 e2e/salon.e2e.ts:33:1 › starts with an empty line and a dead Serve next button (104ms)
+     ✓  4 e2e/salon.e2e.ts:41:1 › refuses a human without a name (134ms)
+
+     4 passed (1.8s)
+   ```
+
+   Your line numbers and times differ. The four names and the green ticks do
+   not.
+
+4. Add the `verify` script with its three checks to `package.json` if the
+   project has none yet, and run `npm run verify`. The 16 Vitest tests from the
+   queues chapter have to be green as well.
+
+5. Switch on the failure pictures your second research answer describes. It is
+   one line in `playwright.config.ts`, inside the `use` block next to
+   `baseURL`.
+
+6. Break the app on purpose. In `src/index.ts`, change the message
+   `'Please enter a first name and a last name.'` to anything else and run
+   `npm run test:e2e`. Expected result: three green ticks, one cross on
+   `refuses a human without a name`, and a line in the failure report naming
+   the file Playwright saved:
+
+   ```text
+       attachment #1: screenshot (image/png) ──────────────────────────────
+       test-results/salon.e2e.ts-refuses-a-human-without-a-name/test-failed-1.png
+   ```
+
+7. Open that PNG. Expected result: your salon page with the wrong message in
+   it, exactly as the browser had it when the assertion gave up. Put the
+   original message back and run the tests until they are green again.
+
+8. Give the salon its own job in `.github/workflows/verify.yml`. Copy the whole
+   `bracelet-tests:` block, name the copy `hairdresser:`, and point both of its
+   paths at `coursework/hairdresser`. Keep the two Playwright steps.
+
+9. Commit and push. Expected result: two lines in the Actions tab, one per job,
+   both green after a minute or two. Open the `hairdresser` job and read the
+   Playwright step. It prints the same four test names your terminal printed.
+
+10. Break the same message once more, commit, and push. Expected result: a red
+    cross next to the commit, and the log of the failing step naming
+    `refuses a human without a name`. Put the message back, run
+    `npm run verify` and `npm run test:e2e` until both are green, then commit
+    and push, and leave the workflow file in your repository.
+
+::: {.callout-tip}
+## When you finish early
+
+**Test the dog form too.** The Add a dog section still has no form around it,
+so Enter does nothing there either. Give it the same treatment and prove it
+with a fifth test.
+
+**Test the beehive.** Your beehive game from the SVG part sits on the plain
+starter, which has no Playwright in it. Create a new app from the tests
+template, copy your `src/` and `index.html` into it, and write one test that
+presses `ArrowRight` twice and then expects `Bee at column 2, row 0.` on the
+status line. `page.keyboard.press('ArrowRight')` sends the key to the page, and
+your `keydown` listener sits on `document`, so it hears it without anything
+being clicked first. Add a second test that walks the bee into the left wall
+and proves it stays at column 0.
+
+**Count what is on the page.** The salon shows Now serving and Next up and
+nothing about the customers behind them. Render the rest of the line into an
+`<ol>`, then assert how many list items stand there after four customers
+joined. `getByRole('listitem')` finds them all at once, and Playwright's page
+about assertions has the matcher for a number of elements.
+:::
+
+## Check your understanding {#sec-testing-apps-quiz}
+
+Six questions, the first two of them the research task.
+
+{{< quiz testing-apps title="Testing the apps you already built" >}}

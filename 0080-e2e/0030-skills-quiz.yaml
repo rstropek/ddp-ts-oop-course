@@ -1,0 +1,194 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "A recipe the agent can follow"
+# (0080-e2e/0030-skills.qmd).
+# One quiz per chapter, at the end. The two research questions of the chapter's
+# research box come first (ids prefixed `research-`) and get the research
+# feedback rule (point at the git documentation, never the answer). The other
+# four cover the chapter's own points: which of two findings belongs in
+# AGENTS.md and which in a skill, why the description decides whether a skill
+# is ever read, what skills-lock.json records, and the two rules that stand
+# between an agent's green run and a commit.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: skills-quiz
+name: "Quiz: A recipe the agent can follow"
+
+title: "Check your understanding: a recipe the agent can follow"
+description: |
+  Six short questions about the chapter *A recipe the agent can follow*, two of
+  them the research task. Answer in your own words; if you cannot answer a
+  research question yet, look it up and come back. One or two sentences are
+  enough. This quiz is anonymous and is here for you. Answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="npx vitest run src/customer.test.ts"
+      scope="after the skills chapter of the end-to-end testing part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `beforeEach`, and `npm test`"
+        "a `verify` script that runs `tsc --noEmit`, Biome, and the tests, and a GitHub Actions workflow that runs it on every push"
+        "generics: a type parameter `T`, `class Stack<T>`, and constraints"
+        "hand-built `Node<T>` linked lists, stacks, and queues, built test-first"
+        "Playwright: `e2e/*.e2e.ts`, `npm run test:e2e`, `page.goto`, `getByRole`, `getByLabel`, `fill`, `click`, `toBeVisible`, `toHaveText`, and `await` in an end-to-end test"
+        "the codegen recorder as a first draft, testing error states, and running both kinds of test in CI"
+        "the coding buddy: one activity per part, `AGENTS.md` in the project root, and skills in `.agents/skills/<name>/SKILL.md` with a name, a description, steps, and checks")
+      not_yet=(array
+        "the two git commands the research task asks about: the one that shows the lines changed since the last commit, and the ones that put the project back on that commit"
+        "nothing else from this course: this is the last part of the book, so no construct of the course is held back any more"
+        "`fetch`, `localStorage`, and frameworks such as React, which this course does not teach")}}
+
+questions:
+  - id: research-git-diff
+    title: "What did the agent actually change?"
+    question: |
+      The buddy reports that it added a class. Which git command shows you the
+      lines it changed since your last commit, and what do the `+` and `-` at
+      the start of those lines mean? Say where you read it.
+    evaluation: |
+      Expected: `git diff` shows the changed lines in the working tree. A line
+      starting with `+` is a line the change added, a line starting with `-` is
+      a line it removed. Source is the git documentation for `git diff` (or an
+      equally concrete source such as the Pro Git book).
+      Required: (1) names `git diff`; (2) says `+` is added and `-` is removed;
+      (3) names the source.
+      Partial: names `git diff` but explains the two markers wrong or not at
+      all, or gives no source.
+      Incorrect: names `git status`, `git log`, or `git show` in its place, or
+      swaps the meaning of `+` and `-`.
+
+  - id: research-git-clean-start
+    title: "Back to the last commit"
+    question: |
+      You want the project back exactly as it was at your last commit, so the
+      second attempt starts where the first one did. One command throws away
+      your changes to files git already knows about, and a second one removes
+      the files that were never committed. Name both, and say which of the two
+      can destroy work that was never saved anywhere. Say where you read it.
+    evaluation: |
+      Expected: `git restore .` (older wording: `git checkout .`) puts tracked
+      files back to the last commit, and `git clean -fd` deletes untracked
+      files and folders. `git clean` is the dangerous one, because an untracked
+      file exists in no commit, so nothing can bring it back. Source is the git
+      documentation for `git restore` and `git clean`.
+      Required: (1) names a command that restores tracked files (`git restore`
+      or `git checkout`); (2) names `git clean` for the untracked files;
+      (3) says `git clean` deletes work that is in no commit and cannot be
+      recovered; (4) names the source.
+      Partial: names only one of the two commands, or names both without saying
+      which one destroys unrecoverable work.
+      Incorrect: names `git reset --hard` alone as the answer to both halves,
+      names `git revert` or `git rm`, or claims the deleted files can be
+      brought back with git afterwards.
+
+  - id: agents-md-or-skill
+    title: "Which file gets the rule"
+    question: |
+      Two things annoy you about your buddy. It keeps saying it is done without
+      running `npm run verify`, and every time you ask for a new class it puts
+      the class straight into `src/index.ts` instead of following the steps you
+      would follow. One of the two belongs in `AGENTS.md`, the other in a
+      skill. Which goes where, and what is the rule you used to decide?
+    evaluation: |
+      Expected: the `verify` rule goes into `AGENTS.md`, because the agent
+      reads that file before every task and the rule is true for every task.
+      The steps for adding a class go into a skill, because they are the
+      procedure for one kind of task and the agent loads them when the task
+      matches the skill's description. The deciding rule: always true means
+      `AGENTS.md`, and a procedure for one kind of job means a skill.
+      Required: (1) `verify` into `AGENTS.md` and the class steps into a skill;
+      (2) a usable reason, namely that `AGENTS.md` is read every time while a
+      skill is loaded only when the task matches it.
+      Partial: puts both in the right place with no reason, or gives the right
+      reason but swaps one of the two.
+      Incorrect: puts both into the same file, swaps both, or answers that it
+      makes no difference where a rule goes.
+
+  - id: description-is-the-trigger
+    title: "The recipe nobody reads"
+    question: |
+      A classmate writes `.agents/skills/tests/SKILL.md`. The steps in it are
+      good, and its frontmatter says `description: Helps with tests.` The buddy
+      never follows the steps. What is wrong, and what do you tell them to
+      change?
+    evaluation: |
+      Expected: only the name and the description of a skill sit in the model's
+      context. The agent reads the rest of the file when a task sounds like the
+      description, and "Helps with tests." names no situation, so nothing ever
+      matches it and the file is never opened. The fix is a description that
+      says when to use the skill, in the words a task would use, for example
+      "Adds a class to this project together with its unit tests. Use when a
+      task asks for a new customer type or a new model file under src/."
+      Required: (1) the description is what triggers the skill, and this one is
+      too vague to match anything; (2) rewrite the description so it names the
+      tasks it is for. Naming `/skill:tests` as a way to force it by hand is a
+      bonus, not a substitute for (2).
+      Incorrect: blames the steps, the file name, or the folder location, or
+      says the whole SKILL.md is always in the model's context.
+
+  - id: skills-lock-entry
+    title: "Where a recipe came from"
+    question: |
+      `skills-lock.json` in your salon project has an entry for `find-docs` and
+      no entry for the `tested-class` skill you wrote yourself. What does the
+      file record about `find-docs`, and why is your own skill missing from it?
+    evaluation: |
+      Expected: the entry records where the borrowed skill came from, the
+      GitHub project `upstash/context7` and the path of the file inside it,
+      plus a hash of the text as it arrived. That lets you check later whether
+      a newer version exists and whether your copy is still the original or
+      something somebody edited. Your own skill was not copied from anywhere,
+      so there is nothing to record; its history is in your git commits.
+      Required: (1) it records the source of a borrowed skill (repository and
+      path; naming the hash as well is welcome); (2) `tested-class` is missing
+      because you wrote it yourself instead of copying it in.
+      Partial: says it lists the skills of the project without the idea of
+      where they came from, or explains only why the own skill is missing.
+      Incorrect: says the file contains the skill's instructions, that it
+      decides which skills are switched on, or that a skill without an entry
+      does not work.
+
+  - id: green-is-not-done
+    title: "Green, and still your job"
+    question: |
+      Your buddy adds a `Cat` class with a test, `npm run verify` is green, and
+      17 tests pass where 16 passed before. Two rules of this course still
+      stand between that run and your commit. Name them, and say what each one
+      makes you do here.
+    evaluation: |
+      Expected: every line the agent wrote is a line you have to be able to
+      explain, because the exam happens without the agent, so you read the new
+      class and the new test and can say what each line does. And the agent's
+      mistakes are your mistakes, so you check the change before you commit it,
+      for example whether the test really checks the `🐈 Mimi (Siamese)` string
+      and not something that would pass anyway.
+      Required: (1) you must be able to explain every line the agent wrote;
+      (2) you own the result, so you read and check the change before
+      committing. Wording such as "the AI wrote it is not an answer in the
+      exam" counts for (1).
+      Partial: one of the two rules is enough for partial, even when the answer
+      says nothing about what it makes the student do here ("you have to
+      understand the code the agent writes" is partial, not incorrect). Both
+      rules named with no action attached is partial too.
+      Incorrect: answers that a green `verify` and a higher test count are
+      enough, or that the buddy is responsible for what it wrote.
