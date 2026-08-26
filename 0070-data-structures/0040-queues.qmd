@@ -1,0 +1,346 @@
+---
+title: "Nobody jumps the line"
+---
+
+A hairdresser serves whoever has waited longest. Your undo stack does the
+opposite: it hands back whatever arrived last, which is exactly right for Ctrl+Z
+and exactly wrong for a salon. This chapter builds the structure that keeps a
+line fair, with one pointer at each end of the chain, and puts it under a page
+where humans and dogs wait for a haircut.
+
+## The stack gets it wrong {#sec-queues-experiment}
+
+1. Open `coursework/train-builder`, the app with your own tested `Stack<T>` in
+   `src/stack.ts`. Create `src/salon.test.ts` next to it:
+
+   ```ts
+   import { describe, expect, it } from 'vitest';
+   import { Stack } from './stack';
+
+   describe('a salon that stores its customers in a stack', () => {
+     it('serves the customer who has waited longest', () => {
+       const line = new Stack<string>();
+       line.push('Anna');
+       line.push('Ben');
+       line.push('Chiara');
+
+       expect(line.pop()).toBe('Anna');
+     });
+   });
+   ```
+
+2. Anna walked in first, so Anna gets the chair first. That is what the test
+   says. Predict what `pop()` really gives back, then run this one file:
+
+   ```text
+   npx vitest run src/salon.test.ts
+   ```
+
+   ```text
+    ❯ src/salon.test.ts (1 test | 1 failed) 6ms
+        × serves the customer who has waited longest 5ms
+
+   ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+    FAIL  src/salon.test.ts > a salon that stores its customers in a stack > serves the customer who has waited longest
+   AssertionError: expected 'Chiara' to be 'Anna' // Object.is equality
+
+   Expected: "Anna"
+   Received: "Chiara"
+   ```
+
+3. Delete `src/salon.test.ts` again. It was a scratch experiment, and the train
+   builder's own tests should stay the only tests in that project.
+
+The stack did nothing wrong. Chiara walked in last, so Chiara sits on top of the
+chain, and `pop()` takes the top. Last in, first out is the whole point of an
+undo history, where the click you want back is always the most recent one. In a
+salon the same rule means Chiara gets the chair while Anna, who has been waiting
+since ten o'clock, watches her go.
+
+## First in, first out {#sec-queues-fifo}
+
+A structure that hands back the oldest item first is a **queue**, and its rule
+is **FIFO**: first in, first out. It is the rule of the supermarket checkout and
+of a printer working through the jobs people sent it, and it is the only rule a
+waiting line can use without starting an argument.
+
+The two operations get their own names, because `push` and `pop` say nothing
+about which end they work on:
+
+* **enqueue** puts an item at the back of the line
+* **dequeue** takes the item at the front out of the line and gives it back
+
+The class in this chapter is called `WaitingLine<T>`, and this is everything it
+can do:
+
+```ts
+class WaitingLine<T> {
+  enqueue(item: T): void;
+  dequeue(): T | null;
+  get length(): number;
+  isEmpty(): boolean;
+  toArray(): T[];
+}
+```
+
+`dequeue` gives back `null` when the line is empty, the same answer the playlist
+gave for a song it could not find: you asked, and there is nothing there.
+`toArray()` lists the customers front first, so `toArray()[0]` is the one in the
+chair.
+
+## Two pointers, one line {#sec-queues-tail}
+
+![The line is a chain of nodes. The head pointer holds the customer who is
+served next, the tail pointer holds the customer who joined
+last.](queue-head-tail.svg){width=560}
+
+A stack gets by with a head pointer, because push and pop both happen at that
+one end. A queue works on both ends, and the two ends need different things.
+
+Taking the front customer out is cheap either way: read `head.value`, move
+`head` on to `head.next`, done. Adding at the back is the problem. The last node
+in the chain is the one whose `next` is `null`, and the only way to reach it
+from the head is to walk the whole chain. Ten customers, ten steps. Five hundred
+customers, five hundred steps for the next one who walks in. That is the price
+`unshift` charges an array for inserting at the front (@sec-linked-list-costs),
+turned around and charged at the back.
+
+So the class keeps a second pointer that always holds the last node. The file
+starts with the same `Node<T>` you wrote for the playlist and for the stack,
+because every app in this part builds its own:
+
+```ts
+class Node<T> {
+  value: T;
+  next: Node<T> | null = null;
+
+  constructor(value: T) {
+    this.value = value;
+  }
+}
+
+export class WaitingLine<T> {
+  private head: Node<T> | null = null;
+  private tail: Node<T> | null = null;
+  private count = 0;
+```
+
+The two methods go inside that class. `enqueue` touches two nodes and walks
+nowhere:
+
+```ts
+  enqueue(item: T): void {
+    const node = new Node(item);
+
+    if (this.tail === null) {
+      this.head = node;
+    } else {
+      this.tail.next = node;
+    }
+
+    this.tail = node;
+    this.count++;
+  }
+```
+
+`dequeue` works at the other end, and it hands back `null` instead of a value
+when there is nobody to serve:
+
+```ts
+  dequeue(): T | null {
+    if (this.head === null) {
+      return null;
+    }
+
+    const front = this.head;
+    this.head = front.next;
+
+    if (this.head === null) {
+      this.tail = null;
+    }
+
+    this.count--;
+    return front.value;
+  }
+```
+
+The playlist counted its songs by walking the chain on every read
+(@sec-iteration-length). This class keeps a `count` field instead. Only two
+methods ever change the line, so keeping the number honest costs one line in
+each of them, and the page reads `length` every single time it redraws.
+
+## The line with one customer in it {#sec-queues-edge-cases}
+
+The `if` at the top of `enqueue` and the `if` in the middle of `dequeue` are the
+whole reason a queue is more than a chain with two pointers. Both of them are
+about a line that holds exactly one customer, reached from the two directions.
+
+![An empty line has both pointers on null, the first enqueue puts both pointers
+on the same node, and the dequeue that hands that customer out puts both back on
+null.](queue-edge-cases.svg){width=520}
+
+When Ida walks into an empty salon there is no last node to attach her to, so
+`this.tail.next = node` would crash on a `null`. She becomes the first customer
+and the last one at the same time, which is why the empty case sets `head` and
+the line below sets `tail`.
+
+When Ida walks out again, `head` moves on to `head.next`, and for the last
+customer that is `null`. Forget the second `if` and `tail` still points at Ida,
+who has left the building. Nothing goes wrong yet. The page shows an empty line,
+`isEmpty()` asks the head and says `true`, and the bug sits there and waits. It
+shows up on the next `enqueue`: the new node gets hooked behind Ida, `head` stays
+`null`, and the customer disappears into a chain nobody can reach.
+
+A bug that needs three steps to become visible is exactly what a test file is
+for. Among the tests you copy in for the exercise, one is called `takes new
+items again`: it enqueues one item, dequeues it, and then enqueues two more.
+That is the only test in the file that a forgotten `tail = null` turns red.
+
+::: {.research title="Two things the exercise needs"}
+The Add human form has a Long hair checkbox, and the test file you copy in
+carries three tests that do not test anything yet. This chapter answers neither
+question, and the exercise needs both answers.
+
+1. A checkbox is an `<input type="checkbox">`, and in TypeScript it is an
+   `HTMLInputElement` like every other input. Reading `.value` on it gives you
+   the string `'on'` whether the box is ticked or not. Which property answers
+   whether it is ticked, and what type does that property have? MDN has a page
+   for `HTMLInputElement`.
+2. The three unwritten tests all say `expect.fail('Test not implemented yet')`.
+   What does `expect.fail` do when the test runs, and why would the author of a
+   test file put it there on purpose? The Vitest documentation for `expect` has
+   the answer.
+
+For the exam, the checkbox property has to be in your head. Reading a form and
+turning it into an object is the first half of half the exercises you will get.
+:::
+
+## Exercise: the salon waiting line {#sec-queues-exercise}
+
+{{< exercise hairdresser tests=true >}}
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `hairdresser`. Part 8 comes back to this app, so give the folder
+   exactly that name.
+
+2. Delete `src/math.ts` and `src/math.test.ts`. The files you copy in bring
+   their own `index.html` and their own `src/index.ts`.
+
+3. Run `npx tsc --noEmit` and read what it says:
+
+   ```text
+   src/waiting-line.ts(13,11): error TS6133: 'head' is declared but its value is never read.
+   src/waiting-line.ts(15,11): error TS6133: 'tail' is declared but its value is never read.
+   src/waiting-line.ts(21,11): error TS6133: 'item' is declared but its value is never read.
+   ```
+
+   Those three complaints are your to-do list. Every method in
+   `src/waiting-line.ts` throws `new Error('Method not implemented.')`, so
+   nothing in the file uses the two pointers yet, and TypeScript refuses to let
+   a field or a parameter sit there unread.
+
+4. Write `Human` and `Dog` in `src/customer.ts`. Both extend the `Customer`
+   class that is already there, both implement `describe()`, and the strings
+   have to match to the character:
+
+   * `🧑 Mia Berger (long hair)` for a human with long hair
+   * `🧑 Tom Novak (short hair)` for a human without
+   * `🐕 Rex (Beagle)` for a dog
+
+   A human is built from a first name, a last name, and whether the hair is
+   long. A dog is built from a name and a breed. Parameter properties keep both
+   classes down to a constructor and one method.
+
+5. Write the five members of `WaitingLine<T>`. `enqueue` and `dequeue` are in
+   @sec-queues-tail. `isEmpty()` asks the head. `toArray()` starts at the head
+   and follows `next` until it runs out, pushing every value into an array, front
+   first. `length` gives back the counter.
+
+6. Run `npm test`:
+
+   ```text
+    ❯ src/waiting-line.test.ts (16 tests | 3 failed) 8ms
+          × puts the first item at the front and at the back of the line 2ms
+          × makes the line non-empty 0ms
+          × keeps the first item at the front while the newest joins the back 0ms
+   ```
+
+   ```text
+    Test Files  1 failed (1)
+         Tests  3 failed | 13 passed (16)
+   ```
+
+   Thirteen tests already pass against the class you just wrote. If any of them
+   is red, fix the class before you go on.
+
+7. Write the three missing tests in `src/waiting-line.test.ts`. Each one has a
+   comment above it saying what it has to show. `head` and `tail` are private,
+   so a test cannot look at them and does not need to: `toArray()`, `length`,
+   and `isEmpty()` say everything about the line from the outside. When all
+   three are written you get:
+
+   ```text
+    Test Files  1 passed (1)
+         Tests  16 passed (16)
+   ```
+
+8. Open `src/index.ts` and replace the six `TODO` comments. Two of them ask the
+   customer at the front and the one behind them to `describe()` themselves, two
+   build a `Human` and a `Dog` from the form and enqueue them, one clears the
+   checkbox after a human joined, and the last one dequeues when Serve next is
+   clicked. The element lookups, the render helper, and the two form checks are
+   already wired.
+
+9. Run `npm start` and walk through the salon. Expected results:
+
+   * the fresh page shows `The line is empty.`, `Customers in line: 0`, and a
+     gray Serve next button
+   * add Mia Berger with Long hair ticked, then Rex the Beagle, then Tom Novak
+     with the box empty: the page shows
+     `Now serving: 🧑 Mia Berger (long hair)`, `Next up: 🐕 Rex (Beagle)`, and
+     `Customers in line: 3`
+   * click Serve next: `Now serving: 🐕 Rex (Beagle)` and
+     `Next up: 🧑 Tom Novak (short hair)`
+   * click it twice more: the line is empty again and the button turns gray
+   * click Add human with both name fields empty:
+     `Please enter a first name and a last name.` appears and nobody joins
+
+10. Add the `verify` script with its three checks to `package.json` as in every
+    new app, run `npm run verify`, fix what it reports, and commit.
+
+::: {.callout-tip}
+## From last year's exam sheet
+
+"No arrays and no built-in structures inside the line, the job is to build the
+chain yourself. And the class stays generic: `WaitingLine` never mentions
+`Customer`."
+
+The second sentence is the one people lose points on. It is tempting to type
+`enqueue(item: Customer)` when the only app you can see holds customers, and the
+test file settles the question for you: it fills the same class with strings and
+with numbers, and a `WaitingLine` that knows about haircuts fails all of it.
+:::
+
+::: {.callout-tip}
+## When you finish early
+
+**Test the customers too.** `src/customer.test.ts`, three `it` blocks, one per
+line of text from step 4. They are the cheapest tests in the project and they
+catch the missing space in `(long hair)`.
+
+**Show the whole line.** `toArray()` already hands you every customer in order.
+Render the ones behind the first two into an `<ol>` under Next up, and give the
+list item of the last customer a class so you can gray it out in CSS.
+
+**Count the served customers.** Keep a number next to the line, add one to it in
+the Serve next listener, and show `Served today: 4` under the count. Nothing in
+`WaitingLine` changes for this, which is the point: the queue hands out
+customers and has no opinion about what you do with them.
+:::
+
+## Check your understanding {#sec-queues-quiz}
+
+Six questions, the first two of them the research task.
+
+{{< quiz queues title="Nobody jumps the line" >}}

@@ -151,3 +151,18 @@ activities:
     undo:
       file: 0060-generics/0020-undo-quiz.yaml
       note: "Creative Coding 2 book: Commands you can take back (0020) — GitHub-hosted"
+    linked-list:
+      file: 0070-data-structures/0010-linked-list-quiz.yaml
+      note: "Creative Coding 2 book: A chain you can rewire (0010) — GitHub-hosted"
+    iteration:
+      file: 0070-data-structures/0020-iteration-quiz.yaml
+      note: "Creative Coding 2 book: A loop your own class understands (0020) — GitHub-hosted"
+    stacks:
+      file: 0070-data-structures/0030-stacks-quiz.yaml
+      note: "Creative Coding 2 book: One end is all you need (0030) — GitHub-hosted"
+    queues:
+      file: 0070-data-structures/0040-queues-quiz.yaml
+      note: "Creative Coding 2 book: Nobody jumps the line (0040) — GitHub-hosted"
+    choosing:
+      file: 0070-data-structures/0050-choosing-quiz.yaml
+      note: "Creative Coding 2 book: Picking the right structure (0050) — GitHub-hosted"

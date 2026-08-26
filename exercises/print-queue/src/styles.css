@@ -1,0 +1,48 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 30rem;
+  margin: 2rem auto;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+#documentName {
+  flex: 1;
+  padding: 0.3rem;
+}
+
+#pages {
+  width: 5rem;
+  padding: 0.3rem;
+}
+
+.controls button {
+  padding: 0.4rem 0.9rem;
+}
+
+.controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.printing-line {
+  font-size: 1.3rem;
+}
+
+#printing {
+  font-weight: bold;
+}
+
+#queue li {
+  padding: 0.15rem 0;
+}
+
+.message {
+  min-height: 1.4rem;
+  color: #555;
+}

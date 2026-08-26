@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon waiting line</title>
+  </head>
+  <body>
+    <h1>Salon waiting line</h1>
+
+    <div class="forms">
+      <section>
+        <h2>Add a human</h2>
+        <div class="field">
+          <label for="humanFirstName">First name</label>
+          <input id="humanFirstName" type="text">
+        </div>
+        <div class="field">
+          <label for="humanLastName">Last name</label>
+          <input id="humanLastName" type="text">
+        </div>
+        <div class="checkbox-field">
+          <input id="humanLongHair" type="checkbox">
+          <label for="humanLongHair">Long hair</label>
+        </div>
+        <button id="addHumanButton" type="button">Add human</button>
+      </section>
+
+      <section>
+        <h2>Add a dog</h2>
+        <div class="field">
+          <label for="dogName">Name</label>
+          <input id="dogName" type="text">
+        </div>
+        <div class="field">
+          <label for="dogBreed">Breed</label>
+          <input id="dogBreed" type="text">
+        </div>
+        <button id="addDogButton" type="button">Add dog</button>
+      </section>
+    </div>
+
+    <p id="message" class="message"></p>
+
+    <section>
+      <h2>Waiting line</h2>
+      <p>
+        <button id="serveButton" type="button" disabled>Serve next</button>
+      </p>
+      <div id="line"></div>
+      <p id="countLine" class="count"></p>
+    </section>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

@@ -75,9 +75,9 @@ instructions: |
   - Linked list: `find`, `insertAtBeginning`, `insertAfter`, `delete`,
     `toArray`, `length`, and a `forEach(callback: (value: T) => void)` method.
     `Symbol.iterator` is deliberately left out of this course.
-  - Stack: `push`, `pop`, `peek`, `isEmpty`, on a linked list with a head
-    pointer only. Queue: `enqueue`, `dequeue`, with the two edge cases, the
-    first insert and the last remove.
+  - Stack: `push`, `pop`, `peek`, `isEmpty`, `toArray`, on a linked list with
+    a head pointer only. Queue: `enqueue`, `dequeue`, `length`, `isEmpty`,
+    `toArray`, with the two edge cases, the first insert and the last remove.
   - Box-and-pointer thinking: say what points where before and after an
     operation.
   - Choosing between an array, a list, a stack, a queue, a `Map`, and a `Set`

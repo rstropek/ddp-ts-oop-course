@@ -1,0 +1,644 @@
+---
+title: "A chain you can rewire"
+---
+
+Your playlist holds 300 songs and the newest one belongs at the top. An array
+puts it there with one call, `unshift`, and behind that call it moves all 300
+songs one slot to the right to make room. This part builds the same playlist out
+of small boxes that point at each other, where a song joins the top by rewiring
+exactly one arrow.
+
+Hand-built data structures are new for the coding buddy as well. Part 7 has one
+that knows about nodes, head pointers, and the tail pointer a queue needs, and
+its key replaces the Part 6 key in `~/.pi/agent/auth.json`
+(@sec-buddy-setup-new-part).
+
+{{< coding coding-buddy-data-structures >}}
+
+## The price of the front {#sec-linked-list-experiment}
+
+{{< exercise playlist tests=true >}}
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `playlist`. This app carries the whole chapter, and the next chapter
+   opens it again.
+
+2. Delete `src/math.ts` and `src/math.test.ts`, and replace everything in
+   `src/index.ts` with one line:
+
+   ```ts
+   import './styles.css';
+   ```
+
+3. Under that line, fill two arrays with the same 100,000 numbers. The first one
+   grows at the end, the second one grows at the front:
+
+   ```ts
+   const COUNT = 100_000;
+
+   const atEnd: number[] = [];
+   const endStart = performance.now();
+   for (let i = 0; i < COUNT; i++) {
+     atEnd.push(i);
+   }
+   console.log(`push:    ${(performance.now() - endStart).toFixed(1)} ms`);
+
+   const atFront: number[] = [];
+   const frontStart = performance.now();
+   for (let i = 0; i < COUNT; i++) {
+     atFront.unshift(i);
+   }
+   console.log(`unshift: ${(performance.now() - frontStart).toFixed(1)} ms`);
+   ```
+
+   `performance.now()` hands you a number of milliseconds, so the difference
+   between two of them is how long the loop took. The underscores in `100_000`
+   are for your eyes only, and TypeScript reads that as 100000.
+
+4. Run `npm start` and open the browser console with F12. The page shows an
+   empty playlist for now, and the console carries the answer:
+
+   ```text
+   push:    5.3 ms
+   unshift: 263.4 ms
+   ```
+
+Your two numbers will look different, and that is fine. The ratio is the point.
+Both loops inserted the same 100,000 numbers, and the loop that inserted at the
+front took about fifty times as long.
+
+## What the array is paying for {#sec-linked-list-costs}
+
+An array keeps its items in one block, in order, so the item at index 7 is
+always exactly seven slots from the start. That is why reading by index is
+instant. It is also why `unshift` is slow: there is no free slot in front of
+index 0, so every item in the array shifts one slot to the right to open one.
+With 100,000 items in the array, one `unshift` moves 100,000 items.
+
+A **linked list** gives that block up. It uses one small box per item, and each
+box holds the item plus the location of the next box. The boxes may sit anywhere
+in memory. A new item joins the front by building one box that points at the old
+first box, and nothing else moves at all.
+
+|                              | Array                                | Linked list                                   |
+| ---------------------------- | ------------------------------------ | --------------------------------------------- |
+| Read the item at position 7  | one step, whatever the length        | start at the front and take seven steps       |
+| Insert or remove at the front | move every item one slot            | build or unhook one box                       |
+| Insert or remove in the middle | find the spot fast, then move the rest | walk to the spot, then change two arrows  |
+| Memory                       | one block, in one piece              | one box per item, and a pointer inside each box |
+
+Read that table as a trade and not as a scoreboard. An array is the right answer
+for a high score table you read by rank and rewrite once a game. A linked list
+is the right answer when items keep arriving and leaving at the ends and nobody
+ever asks for item number 40. Almost every collection you built this year was
+right to be an array, and Part 7 closes by making that choice on purpose instead
+of by habit.
+
+People who compare structures for a living write these costs in a short
+notation, `O(1)` for "one step whatever the size" and `O(n)` for "a step per
+item". You will meet it in every algorithms book, and a search for "Big O
+notation" explains it in five minutes.
+
+## Boxes with a pointer in them {#sec-linked-list-node}
+
+The box is called a **node**, and this is the whole class:
+
+```ts
+class Node<T> {
+  value: T;
+  next: Node<T> | null = null;
+
+  constructor(value: T) {
+    this.value = value;
+  }
+}
+```
+
+A node carries exactly two things. `value` is the item, and `next` is the node
+that comes after this one. The type parameter `T` is there for the same reason
+`Stack<T>` has one in @sec-generics-type-parameter: a node has no opinion about
+what it carries, and the moment it says `Song` it can never carry anything
+else. Every structure in this part writes its own `Node<T>` again.
+
+The `| null` is the interesting half. The last node in the chain has nothing
+after it, and something has to go into `next` anyway. Take the `| null` away and
+TypeScript refuses the class before you have written a single method:
+
+```text
+src/playlist.ts(3,3): error TS2564: Property 'next' has no initializer and is not definitely assigned in the constructor.
+```
+
+So `null` moves in as the end marker, and it answers the only question a walk
+ever asks: is there another node, or am I done?
+
+The list class itself remembers one single node, the first one, in a field
+called the **head**. An empty list has `head === null`.
+
+![A playlist of three songs: the head points at the first node, every node
+points at the next one, and the last node has `null` in its `next`
+field.](list-chain.svg){width=720}
+
+Every arrow in that picture is a **pointer**, the word programmers everywhere
+use for "this box knows where that box is". Nowhere in the picture is there an
+index or a length. To reach the third song you start at `head` and follow `next`
+twice, and that walk is the move every method below is built from.
+
+`Node` is not exported: it lives in the same file as the structure that uses it,
+the way the three command classes shared `src/command.ts` in @sec-undo-command.
+Nobody outside the playlist ever holds a node, so nobody outside needs the class.
+
+::: {.research title="Three things the playlist needs from you"}
+The tests you write next check for a missing song, the wiring at the end of the
+chapter fills a dropdown from your playlist, and the arrows in the diagram above
+carry a name with a history. MDN and the Vitest documentation have all three
+answers, and nothing after this box gives any of them away.
+
+1. Two of your playlist tests check that `find` gave nothing back. Which Vitest
+   matcher checks that a value is exactly `null`? And what is the difference
+   between `null` and `undefined` in JavaScript?
+2. The **Insert after** dropdown is empty in `index.html`, and your code fills
+   it. Which element does `document.createElement('option')` hand you, and which
+   two properties do you set on it so that the dropdown shows a song title and
+   gives that same title back through `select.value`?
+3. The word **pointer** comes from languages such as C. What is a pointer there?
+   And when TypeScript runs `newNode.next = this.head;`, does the node on the
+   right get copied into `next`, or do both names then mean the very same node?
+
+Question 3 is exam material. Every rewiring in this part stands or falls on that
+one sentence, and the exam has no internet and no AI.
+:::
+
+## The playlist on an array {#sec-linked-list-array}
+
+The interface comes first, and an array is the fastest way to pin it down. You
+write the tests, make them pass with `Song[]` inside the class, and then swap the
+insides for nodes without touching a single test. If the tests survive that, the
+interface was the real thing and the array was just an early guess about how to
+store the songs.
+
+1. Create `src/playlist.test.ts` with the first sentence about a class that does
+   not exist yet:
+
+   ```ts
+   import { describe, expect, it } from 'vitest';
+   import { Playlist } from './playlist';
+
+   describe('Playlist', () => {
+     it('starts with no songs', () => {
+       const playlist = new Playlist();
+
+       expect(playlist.toArray()).toEqual([]);
+     });
+   });
+   ```
+
+2. Run `npm test`:
+
+   ```text
+    ❯ src/playlist.test.ts (0 test)
+
+   ⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+    FAIL  src/playlist.test.ts [ src/playlist.test.ts ]
+   Error: Cannot find module './playlist' imported from
+   /home/you/creative-coding-2/coursework/playlist/src/playlist.test.ts
+    ❯ src/playlist.test.ts:2:1
+         1| import { describe, expect, it } from 'vitest';
+         2| import { Playlist } from './playlist';
+          | ^
+
+    Test Files  1 failed (1)
+         Tests  no tests
+   ```
+
+   `Tests  no tests` at the bottom is the same failed suite you met in
+   @sec-undo-experiment. The import had nowhere to go, so Vitest never reached
+   your `it`.
+
+3. Write the smallest class that answers that one test, in `src/playlist.ts`:
+
+   ```ts
+   export type Song = {
+     title: string;
+     artist: string;
+   };
+
+   export class Playlist {
+     private songList: Song[] = [];
+
+     toArray(): Song[] {
+       return this.songList.slice();
+     }
+   }
+   ```
+
+   `npm test` turns green: `Tests  1 passed (1)`. `toArray` hands out a copy, so
+   nobody can push a song into the playlist behind the class's back, exactly as
+   the `items` getter of the undo stack did in @sec-undo-generic.
+
+4. Another 14 sentences finish the playlist, and almost all of them need
+   three songs on the list first. Put two small helpers and a `beforeEach` at the
+   top of the `describe`, above your first `it`:
+
+   ```ts
+   describe('Playlist', () => {
+     let playlist: Playlist;
+
+     const addThreeSongs = (): void => {
+       playlist.insertAtBeginning('Levitating', 'Dua Lipa');
+       playlist.insertAtBeginning('Believer', 'Imagine Dragons');
+       playlist.insertAtBeginning('Yellow', 'Coldplay');
+     };
+
+     const titles = (): string[] => playlist.toArray().map((song) => song.title);
+
+     beforeEach(() => {
+       playlist = new Playlist();
+     });
+   ```
+
+   Add `beforeEach` to the import from `vitest`, and rewrite the first `it` to
+   use the shared `playlist` instead of building its own. `map` runs your
+   function on every item of an array and collects the results, so `titles()`
+   turns three songs into three strings and a test can compare the order in one
+   line. VS Code grays both helpers out until the tests below start calling
+   them.
+
+5. Write the five sentences about looking songs up and adding them at the front,
+   one `it` at a time, and watch each one fail before you make it true:
+
+   * an empty playlist finds nothing when you ask it for a title
+   * three songs added at the beginning come out newest first
+   * `find` hands back the whole song, title and artist together
+   * `find` answers `null` for a title nobody added
+   * a second song with a title that is already on the list is refused with
+     `false`, and the playlist still holds its three songs
+
+6. Then the four sentences about inserting behind a song you name:
+
+   * a new song lands directly behind the title it names
+   * naming the last song puts the new one at the end
+   * a title nobody added is refused with `false`
+   * a title that is already on the list is refused with `false`
+
+7. And the five about removing:
+
+   * the first song goes and the rest of the list closes up
+   * a song in the middle goes
+   * the last song goes
+   * a title nobody added is refused with `false`
+   * deleting the only song leaves an empty playlist
+
+8. Here is the class once all 15 are green:
+
+   ```ts
+   export type Song = {
+     title: string;
+     artist: string;
+   };
+
+   export class Playlist {
+     private songList: Song[] = [];
+
+     find(title: string): Song | null {
+       for (const song of this.songList) {
+         if (song.title === title) {
+           return song;
+         }
+       }
+       return null;
+     }
+
+     insertAtBeginning(title: string, artist: string): boolean {
+       if (this.find(title) !== null) {
+         return false;
+       }
+
+       this.songList.unshift({ title, artist });
+       return true;
+     }
+
+     insertAfter(afterTitle: string, title: string, artist: string): boolean {
+       if (this.find(title) !== null) {
+         return false;
+       }
+
+       const index = this.songList.findIndex((song) => song.title === afterTitle);
+       if (index === -1) {
+         return false;
+       }
+
+       this.songList.splice(index + 1, 0, { title, artist });
+       return true;
+     }
+
+     delete(title: string): boolean {
+       const index = this.songList.findIndex((song) => song.title === title);
+       if (index === -1) {
+         return false;
+       }
+
+       this.songList.splice(index, 1);
+       return true;
+     }
+
+     toArray(): Song[] {
+       return this.songList.slice();
+     }
+   }
+   ```
+
+   `findIndex` hands every item to your function and gives back the position of
+   the first item your function said yes to, or `-1` when nothing matched.
+   `splice(index, 0, item)` puts an item in at that position, and
+   `splice(index, 1)` takes one out. Expected result:
+
+   ```text
+    Test Files  1 passed (1)
+         Tests  15 passed (15)
+   ```
+
+The three methods that change the playlist answer with a `boolean` saying
+whether anything happened, and `find` answers with a `Song | null`. That `null`
+is the rule for the whole part: it means "you asked, and it is not there". The
+caller has to look at the answer, which is why every test above checks the return
+value and the list afterwards.
+
+## The same playlist on nodes {#sec-linked-list-rewrite}
+
+Now throw the array out. Nothing in `src/playlist.test.ts` changes, not one
+character, because no test ever mentioned `songList`.
+
+Put `Node<T>` at the top of `src/playlist.ts`, above `Song`, and replace the
+private field:
+
+```ts
+export class Playlist {
+  private head: Node<Song> | null = null;
+```
+
+Every method needs the same walk, so write it once as a private helper. It
+starts at the head and follows `next` until either the title matches or the
+chain runs out:
+
+```ts
+  private findNode(title: string): Node<Song> | null {
+    let current = this.head;
+    while (current !== null) {
+      if (current.value.title === title) {
+        return current;
+      }
+
+      current = current.next;
+    }
+    return null;
+  }
+```
+
+`find` is that helper with the box unwrapped, because the outside world gets
+songs and never nodes:
+
+```ts
+  find(title: string): Song | null {
+    const node = this.findNode(title);
+    if (node === null) {
+      return null;
+    }
+    return node.value;
+  }
+```
+
+`toArray` is the same walk again, collecting instead of comparing:
+
+```ts
+  toArray(): Song[] {
+    const songs: Song[] = [];
+    let current = this.head;
+    while (current !== null) {
+      songs.push(current.value);
+      current = current.next;
+    }
+    return songs;
+  }
+```
+
+### insertAtBeginning is two lines {#sec-linked-list-insert}
+
+The `unshift` half of the timing experiment (@sec-linked-list-experiment) is the
+cheapest thing this class does now. Build the node, point it at whatever the head
+was, and make it the new head:
+
+```ts
+  insertAtBeginning(title: string, artist: string): boolean {
+    if (this.find(title) !== null) {
+      return false;
+    }
+
+    const newNode = new Node<Song>({ title, artist });
+    newNode.next = this.head;
+    this.head = newNode;
+    return true;
+  }
+```
+
+![Inserting at the beginning: the new node takes over the arrow the head used to
+carry, and the head then points at the new node.](list-insert.svg){width=680}
+
+The order of those two lines matters. Set `this.head` first and the arrow to the
+old first node is gone, and the rest of the playlist goes with it. Watch out for
+that in every method you write in this part, because once no arrow points at a
+node any more there is no way back to it.
+
+The rewiring is those same two lines on a playlist of 300 songs and on a playlist
+of three. The duplicate check in front of it still walks the whole chain, so the
+method as a whole is not free, but the part the experiment measured, making room
+at the front, now costs nothing.
+
+### insertAfter finds one node and puts a new one behind it {#sec-linked-list-insert-after}
+
+`insertAfter` needs the node itself and not the song, which is exactly why
+`findNode` is a separate helper:
+
+```ts
+  insertAfter(afterTitle: string, title: string, artist: string): boolean {
+    if (this.find(title) !== null) {
+      return false;
+    }
+
+    const afterNode = this.findNode(afterTitle);
+    if (afterNode === null) {
+      return false;
+    }
+
+    const newNode = new Node<Song>({ title, artist });
+    newNode.next = afterNode.next;
+    afterNode.next = newNode;
+    return true;
+  }
+```
+
+Two arrows change and the same trap applies, one step later. The new node has to
+pick up the rest of the chain before `afterNode` lets go of it. The last song on
+the list needs no special case: its `next` is `null`, the new node copies that
+`null`, and the new node is the last one now.
+
+### delete has a head to worry about {#sec-linked-list-delete}
+
+Removing a node means making the node in front of it skip over it, and the first
+node has nothing in front of it. That is the whole reason `delete` is longer than
+the rest:
+
+```ts
+  delete(title: string): boolean {
+    if (this.head === null) {
+      return false;
+    }
+
+    if (this.head.value.title === title) {
+      this.head = this.head.next;
+      return true;
+    }
+
+    let previous = this.head;
+    let current = this.head.next;
+    while (current !== null) {
+      if (current.value.title === title) {
+        previous.next = current.next;
+        return true;
+      }
+
+      previous = current;
+      current = current.next;
+    }
+
+    return false;
+  }
+```
+
+The head case moves the head one step forward. The general case walks with two
+names instead of one, `previous` one node behind `current`, and hooks
+`previous.next` onto whatever `current` was pointing at.
+
+![Deleting from the middle: the node in front of the deleted song points at the
+song behind it, and nothing points at the deleted node any
+more.](list-delete.svg){width=740}
+
+Look at the lower box in that picture. The deleted node still holds its song and
+still points at the node behind it, and none of that matters, because no arrow
+reaches it any more. A walk starting at the head can never arrive there, and
+JavaScript throws the box away for you on its own schedule. Unhooking is all
+deleting ever is.
+
+Run `npm test`:
+
+```text
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+```
+
+Same 15, same file, and the storage underneath them is a different idea. That is
+what a test suite is worth. The 15 sentences describe what a playlist does, they
+never describe how it is stored, and that is why they could sit still through a
+rewrite that touched every line of the class.
+
+## Exercise: the playlist on the page {#sec-linked-list-exercise}
+
+`Playlist` is tested and has never seen the DOM. Everything below happens in
+`src/index.ts`, the only file in this project that touches the page.
+
+1. Open the `index.html` you copied in and find the seven elements the next steps
+   use: the paragraph with `id="chain"`, the form, the two text inputs for title
+   and artist, the empty `<select id="afterTitle">`, the paragraph with
+   `id="message"`, and the empty `<ul id="songs">`.
+
+2. Replace `src/index.ts`. It starts with two imports, the seven lookups with
+   `querySelector` and their element types, and one `if` with a
+   `throw new Error(...)` that stops the app when any of them is missing.
+
+   ```ts
+   import './styles.css';
+   import { Playlist } from './playlist';
+   ```
+
+3. The whole state of this app is one line:
+
+   ```ts
+   const playlist = new Playlist();
+   ```
+
+4. Write `renderChain()`. Empty the chain paragraph with `replaceChildren()`,
+   then walk `playlist.toArray()` and append two elements per song: a
+   `<span class="node">` with `${song.title} - ${song.artist}` in it and a
+   `<span class="arrow">` holding `→`. After the loop, append one
+   `<span class="node end">` reading `null`. An empty playlist therefore shows
+   `null` and nothing else, which is exactly what the diagrams say it is.
+
+5. Write `renderSongs()`. Empty the `<ul>`, then build one `<li>` per song with
+   three children: a `<span class="song-title">` with the title, a plain `<span>`
+   with the artist, and a **Delete** button. Give each button a `click` listener
+   that calls `playlist.delete(song.title)`, clears the message paragraph, and
+   calls `render()`.
+
+6. Write `renderAfterOptions()`. Read `afterTitle.value` into a `const` first,
+   empty the `<select>`, append one `<option>` with an empty value reading
+   `the beginning`, then one `<option>` per song, and put the saved value back
+   into `afterTitle.value` at the end. The research task has both properties an
+   `<option>` needs. Saving the value first keeps the user's choice from jumping
+   back to the top on every redraw.
+
+7. Write `render()` with the three calls in it, and call it once at the end of
+   the file so the fresh page already shows an empty chain.
+
+8. Give the form a `submit` listener. Call `preventDefault()`, read both inputs
+   with `.trim()`, and write `'Please enter a title and an artist.'` into the
+   message paragraph when either is empty. Otherwise insert: an empty
+   `afterTitle.value` means `insertAtBeginning`, any other value means
+   `insertAfter` with that value as the first argument. When the insert answers
+   `false`, write
+   `` `The playlist already has a song called "${title}".` `` into the message
+   and leave the handler. When it answers `true`, clear the message, clear both
+   inputs, and call `render()`.
+
+9. Run `npm start` and check all of it. Expected results:
+
+   * a fresh page shows a chain of one gray `null` box and nothing else
+   * adding *Levitating* by *Dua Lipa*, then *Believer* by *Imagine Dragons*,
+     then *Yellow* by *Coldplay*, each of them with **Insert after** on
+     *the beginning*, gives the chain
+     `Yellow - Coldplay → Believer - Imagine Dragons → Levitating - Dua Lipa → null`
+   * adding *Bad Guy* by *Billie Eilish* with **Insert after** on *Believer*
+     drops it between *Believer* and *Levitating*, and the dropdown grows a
+     *Bad Guy* entry in the same place
+   * adding *Yellow* a second time changes nothing on the page and writes
+     `The playlist already has a song called "Yellow".` into the message
+   * submitting with an empty artist field writes
+     `Please enter a title and an artist.` and adds nothing
+   * **Delete** on the *Believer* row removes it and closes the chain up
+     around it
+
+10. Run `npm test` and expect `Tests  15 passed (15)`. Add the `verify` script
+    with its three checks to `package.json` as in every new app, run
+    `npm run verify`, fix what it reports, and commit.
+
+::: {.callout-tip}
+## When you finish early
+
+**Move a song to the top.** Add `moveToFront(title: string): boolean` to
+`Playlist`. Write the tests first: moving the middle song puts it in front and
+keeps the other two in their old order, moving the first song changes nothing,
+and a title nobody added answers `false`. You already own both halves of the
+job, `delete` and `insertAtBeginning`, so the method can be four lines. Then put
+a **To top** button next to every **Delete** button.
+
+**Point backwards too.** Give each node a second pointer, `previous`, so the
+chain can be walked from either end. Every method that rewires `next` now
+rewires `previous` as well, and the head case of `delete` needs one more line.
+That structure is called a doubly linked list, and it is worth building once so
+you feel what the second pointer costs in every single method.
+:::
+
+## Check your understanding {#sec-linked-list-quiz}
+
+Six questions, the first three of them the research task.
+
+{{< quiz linked-list title="A chain you can rewire" >}}

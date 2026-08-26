@@ -1,0 +1,234 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "One end is all you need"
+# (0070-data-structures/0030-stacks.qmd).
+# One quiz per chapter, at the end. The two research questions of the chapter's
+# research box come first (ids prefixed `research-`) and get the research
+# feedback rule (point at the source, never the answer). The last four cover the
+# chapter's own points: why a head pointer is the whole stack, why the public
+# return type survived the rewrite, which rule one `peek` answers, and the price
+# of the counter field.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: stacks-quiz
+name: "Quiz: One end is all you need"
+
+title: "Check your understanding: one end is all you need"
+description: |
+  Six short questions about the chapter *One end is all you need*, two of them
+  the research task. Answer in your own words; if you cannot answer a research
+  question yet, look it up and come back. One or two sentences are enough. This
+  quiz is anonymous and is here for you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const parts = new Stack<TrainPart>();"
+      scope="after the stacks chapter of the data structures part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "union literal types such as `type PartRestriction = 'must-be-first' | 'must-be-last' | 'none'` instead of `enum`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `toBeUndefined`, `beforeEach`, and `npm test`"
+        "generics: a type parameter `T`, `class Stack<T>`, generic functions, and a constraint such as `T extends { describe(): string }`"
+        "the command pattern with an abstract `Command` that has `execute`, `undo`, and `describe`"
+        "a hand-built `Node<T>` with `value` and `next`, `null` as the end of a chain, and a head pointer"
+        "a linked-list playlist with `find`, `insertAtBeginning`, `insertAfter`, `delete`, and `toArray`"
+        "`forEach` on their own collection, and a `length` getter that walks the chain"
+        "a stack with `push`, `pop`, `peek`, `isEmpty`, and `toArray`, built on a head pointer alone")
+      not_yet=(array
+        "what an exhaustive `switch` over a union literal type is called, and why a listener written inside a loop remembers its own value (those are the research tasks right now)"
+        "queues, a tail pointer, and the two edge cases around it, which arrive in the next chapter"
+        "`interface`, `keyof`, mapped types, and default type parameters"
+        "Playwright and end-to-end tests"
+        "`async`, `fetch`, and `localStorage`")}}
+
+questions:
+  - id: research-exhaustive-switch
+    title: "A switch with no default"
+    question: |
+      `createPart` has one `case` for each of the five strings in
+      `PartKind`, a `return` in every case, and no `default` clause.
+      TypeScript still accepts it as a function that always gives back a
+      `TrainPart`. What is that check called, and what does the compiler
+      report the day somebody adds a sixth kind to `PartKind` and forgets
+      the new `case`? Say where you read it.
+    evaluation: |
+      First check, before anything else: does the answer say that TypeScript
+      reports an error when the sixth `case` is missing? If the answer says
+      the compiler is fine with it, or that the trouble only shows up while
+      the program runs, the verdict is `incorrect`, and nothing else in the
+      answer can lift it.
+
+      Expected: exhaustiveness checking. Once every member of the union has
+      a `case`, TypeScript narrows the variable to `never` after the switch
+      and knows the function always returns. Add a sixth kind without a
+      `case` and the compiler reports an error saying the function lacks an
+      ending return statement and its return type does not include
+      `undefined` (TS2366). Source is the TypeScript handbook, the
+      Narrowing page, section "Exhaustiveness checking".
+      Required: (1) names exhaustiveness checking, or describes it as
+      TypeScript seeing that every member of the union is covered and
+      narrowing the leftover to `never`; (2) says the compiler refuses the
+      code, at compile time, because the function no longer returns a value
+      on every path (the TS2366 number is not required); (3) names the
+      source (the TypeScript handbook, the Narrowing page).
+      Partial: describes the compile-time error correctly but neither names
+      exhaustiveness checking nor mentions `never`, or explains it well and
+      names no source.
+      Incorrect: any answer claiming the compiler stays quiet, that the
+      problem only turns up at runtime, that the function simply hands back
+      `undefined` for the unhandled kind, or that a `default` clause is
+      needed before the code compiles. Each of these is incorrect whatever
+      else the answer gets right, because the whole point is that TypeScript
+      rejects the missing case before the program ever runs. Mentioning the
+      words `undefined` or `default` does not make an answer correct.
+
+  - id: research-listener-in-loop
+    title: "The button that remembers its own option"
+    question: |
+      `src/index.ts` builds the five buttons with
+      `for (const option of PART_OPTIONS)`, and inside that loop each
+      button gets its own `click` listener that reads `option`. The loop
+      has long finished by the time anybody clicks. Why does the cargo
+      button's listener see the cargo option and not the caboose option
+      that the loop ended on? Say where you read it.
+    evaluation: |
+      Expected: `const` inside the loop gives every turn of the loop its own
+      separate `option` binding, and the arrow function keeps that binding
+      alive after the loop ends. That is a closure: the listener carries its
+      own turn's `option` with it. Written with `var` instead, all five
+      listeners would share one variable and every one of them would see the
+      last option. Source is the MDN page on closures (the part about
+      creating closures in loops), or MDN on `let` and `const` block scope.
+      Required: (1) each turn of the loop gets its own `option`, because it
+      is declared with `const` (or `let`) inside the loop; (2) the listener
+      keeps that value because it is a closure, so it reads its own turn's
+      value and not the loop's final one; (3) names the source (MDN).
+      Partial: says each listener keeps its own value but gives no reason,
+      naming neither the per-turn binding nor the closure; or explains both
+      correctly and names no source.
+      Incorrect: says all five listeners end up seeing the caboose option,
+      or says the listener looks the option up in `PART_OPTIONS` again at
+      click time.
+
+  - id: head-pointer-is-enough
+    title: "Why the stack never walks"
+    question: |
+      A classmate looks at your `Stack<T>` and says: "That is a linked
+      list, so `push` has to walk the chain to find the place to put the
+      new node." Your stack has a head pointer and nothing else. Explain
+      why `push` and `pop` never walk, and say what that means for a stack
+      holding a million items.
+    evaluation: |
+      Expected: a stack only ever adds and removes at one end, and the head
+      is that end. `push` hooks the new node in front of the head and `pop`
+      moves the head one step on, so both touch the first node only and
+      never look further. The work therefore stays the same tiny amount no
+      matter how many items are in the stack: a million items cost the same
+      as three.
+      Required: (1) both operations happen at the same end, the head, so
+      neither one looks past the first node; (2) the cost does not grow with
+      the number of items ("always the same", "constant", "just as fast" all
+      count).
+      Partial: says the stack works only at the head but says nothing about
+      the cost, or claims it is fast with no reason given.
+      Incorrect: says `push` walks to the end of the chain, says a stack
+      needs a tail pointer for this, or says a bigger stack makes `push`
+      slower.
+
+  - id: pop-return-contract
+    title: "The word you did not change"
+    question: |
+      While replacing the array in `UndoStack<T>` with nodes, a classmate
+      also changes `pop(): T | undefined` into `pop(): T | null`, because
+      the rest of the part uses `null`. `npm test` answers:
+
+      ```text
+      AssertionError: expected null to be undefined
+      ```
+
+      Is the test wrong here, and what did the change break?
+    evaluation: |
+      Expected: the test is right and the change is the mistake. The job was
+      to replace the insides of the class while everything outside it stays
+      the same. A public return type is part of what the class promises its
+      callers, so changing it changes what every caller sees, and the test
+      that pinned `undefined` is exactly the thing that caught it. Fix the
+      class back to `T | undefined`, not the test.
+      Required: (1) the test is not wrong, the changed return type is;
+      (2) the return type is part of the class's public contract, so
+      callers (and the tests that stand for them) depend on it, and a
+      rewrite of the insides must leave it alone.
+      Partial: says the test should not be changed but gives no reason about
+      the public contract, or explains the contract and still concludes the
+      test should be updated.
+      Incorrect: says the test is out of date and should be changed to
+      `toBeNull`, says `null` and `undefined` are the same thing here, or
+      says the failure comes from the nodes rather than from the return
+      type.
+
+  - id: peek-answers-the-caboose-rule
+    title: "One look at the top"
+    question: |
+      The train builder must refuse any part added behind the caboose.
+      `Train.add` answers that rule with a single `peek()` on its stack,
+      with no loop and no search. Explain why one look at the top of the
+      stack is enough.
+    evaluation: |
+      Expected: a new part is always coupled at the same end the stack works
+      on, so the only part it could land behind is the one `peek()` shows.
+      If that part is the caboose, the new part is refused. A caboose can
+      never end up buried in the middle either, because from the moment it
+      is on top nothing else is allowed on, so checking the top checks
+      everything that matters.
+      Required: (1) a new part can only ever go on top, which is exactly the
+      part `peek()` returns, so only that one part can be the caboose that
+      blocks it.
+      Partial: says `peek` looks at the newest part without connecting that
+      to where a new part would land, or answers only "because a stack is
+      LIFO".
+      Incorrect: says the train has to search the whole stack for a caboose,
+      says `pop` should be used instead of `peek` for this check, or says
+      the caboose could be sitting anywhere in the train.
+
+  - id: counter-field-price
+    title: "What the counter field costs"
+    question: |
+      The playlist counts its songs by walking the chain every time
+      `length` is read. `UndoStack<T>` instead keeps a private `count`
+      field that `push`, `pop`, and `clear` update. Name the price the
+      counter field makes you pay, and say what the counter app gets in
+      return.
+    evaluation: |
+      Expected: the price is that every method which changes the chain has
+      to remember to update `count`, so a method added later that forgets it
+      leaves `size` quietly wrong. In return, reading `size` costs the same
+      tiny amount however long the history is, and the counter app reads it
+      inside `render()` on every click, which would otherwise mean walking
+      the whole history again and again.
+      Required: (1) the price: every method that changes the chain must keep
+      `count` up to date, and forgetting that in a new method makes `size`
+      wrong; (2) the gain: reading `size` needs no walk, which matters
+      because `render()` reads it on every click.
+      Partial: names only one of the two sides, for example "it is faster"
+      with no word about the maintenance price.
+      Incorrect: says the counter field saves memory as its main point, says
+      walking the chain would give a wrong number, or says the two
+      approaches make no practical difference.

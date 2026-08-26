@@ -1,0 +1,8 @@
+      head                           tail
+        |                              |
+        v                              v
+   +--------+      +--------+      +--------+
+   |  Anna  |----->|  Ben   |----->| Chiara |-----> null
+   +--------+      +--------+      +--------+
+
+   dequeue here                    enqueue here

@@ -1,0 +1,285 @@
+---
+title: "A loop your own class understands"
+---
+
+Your playlist keeps its songs in a chain of nodes, and every test in
+`src/playlist.test.ts` is green. The page draws that chain by looping over
+`playlist.toArray()`, which builds a fresh array just to throw it away after
+the loop. Looping over the playlist itself feels like the obvious shortcut.
+Type it and TypeScript stops you, with an error message worth reading slowly.
+
+## The loop that refuses {#sec-iteration-experiment}
+
+1. Open `coursework/playlist`, the app from the last chapter.
+
+2. Create `src/scratch.test.ts` and ask for the loop you want:
+
+   ```ts
+   import { describe, expect, it } from 'vitest';
+   import { Playlist } from './playlist';
+
+   describe('for...of', () => {
+     it('walks the playlist', () => {
+       const playlist = new Playlist();
+       playlist.insertAtBeginning('Yellow', 'Coldplay');
+
+       const titles: string[] = [];
+       for (const song of playlist) {
+         titles.push(song.title);
+       }
+
+       expect(titles).toEqual(['Yellow']);
+     });
+   });
+   ```
+
+3. Run `npm test`:
+
+   ```text
+    FAIL  src/scratch.test.ts > for...of > walks the playlist
+   TypeError: playlist is not iterable
+    ❯ src/scratch.test.ts:10:24
+         8|
+         9|     const titles: string[] = [];
+        10|     for (const song of playlist) {
+          |                        ^
+        11|       titles.push(song.title);
+        12|     }
+   ```
+
+4. Run `npx tsc --noEmit`, which says the same thing and names the missing
+   piece:
+
+   ```text
+   src/scratch.test.ts(10,24): error TS2488: Type 'Playlist' must have a '[Symbol.iterator]()' method that returns an iterator.
+   ```
+
+`for...of` does not work on just anything: it asks the value on its right for a
+method with the odd-looking name `[Symbol.iterator]()`, and that method is what
+hands the loop one item after another. Arrays have it. So does the
+`NodeList` that `querySelectorAll` gives back, which is why
+`for (const paragraph of paragraphs)` has worked since Part 2. Your `Playlist`
+is a class you wrote yourself, and nothing in it answers that question.
+
+5. Change one thing in the loop and run `npm test` again:
+
+   ```ts
+   for (const song of playlist.toArray()) {
+   ```
+
+   Green. `toArray` walks the chain and builds an array, and `for...of` knows
+   what to do with an array.
+
+That is one way to visit every song, and for 20 songs it costs nothing you will
+ever notice. It is still worth seeing the other way, because building a fresh
+array on every redraw is work nobody asked for.
+
+6. Delete `src/scratch.test.ts`. It has done its job.
+
+## Handing the loop body to your class {#sec-iteration-foreach}
+
+Instead of teaching `Playlist` the `[Symbol.iterator]()` trick, give it a method
+that does the walking and takes the loop body as a parameter. Arrays offer that
+method under the name `forEach`, and your class can offer it too:
+
+```ts
+forEach(callback: (song: Song) => void): void
+```
+
+Read the parameter type out loud as "a function that takes a `Song` and gives
+nothing back". That is a **callback**, the same idea as in
+@sec-callbacks-maps-callback: you hand another object a function, and that
+object calls your function back when it has something for you. Every
+`addEventListener` call you have written works this way.
+
+Write the sentence first, in `src/playlist.test.ts`:
+
+```ts
+it('visits every song from front to back', () => {
+  const playlist = new Playlist();
+  playlist.insertAtBeginning('Yellow', 'Coldplay');
+  playlist.insertAtBeginning('Roar', 'Katy Perry');
+  playlist.insertAtBeginning('Believer', 'Imagine Dragons');
+
+  const visited: string[] = [];
+  playlist.forEach((song) => {
+    visited.push(song.title);
+  });
+
+  expect(visited).toEqual(['Believer', 'Roar', 'Yellow']);
+});
+```
+
+`npm test` goes red with `TypeError: playlist.forEach is not a function`, and
+`npx tsc --noEmit` adds
+`error TS2339: Property 'forEach' does not exist on type 'Playlist'.` Now make
+it true, in `src/playlist.ts`:
+
+```ts
+forEach(callback: (song: Song) => void): void {
+  let current = this.head;
+  while (current !== null) {
+    callback(current.value);
+    current = current.next;
+  }
+}
+```
+
+That is the walk from `toArray` with one line swapped. Where `toArray` pushes
+the song into an array, `forEach` hands it to the callback. The class keeps the
+half that has to know about nodes and `next`, the caller keeps the half that
+decides what happens to each song, and nothing outside `Playlist` ever touches
+a `Node`.
+
+Write one more sentence for this method: an empty playlist never calls the
+callback. Count the calls in a `let` and expect 0.
+
+## Counting without a counter {#sec-iteration-length}
+
+The page wants a line that says how many songs are in the playlist, so
+`Playlist` needs a `length`. Two more test sentences, and you write them the
+same way, one at a time:
+
+* a fresh playlist has a `length` of 0
+* after two inserts and one delete, `length` is 1
+
+A missing method and a missing getter fail differently, and both failures are
+worth seeing once. `playlist.forEach(...)` on a class without `forEach` crashes
+before the expectation is ever reached. `playlist.length` on a class without
+`length` is simply `undefined`, so the test runs to the end and reports what it
+compared:
+
+```text
+AssertionError: expected undefined to be +0 // Object.is equality
+
+- Expected:
+0
+
++ Received:
+undefined
+```
+
+`npx tsc --noEmit` names the real cause either way:
+`error TS2339: Property 'length' does not exist on type 'Playlist'.` Here is the
+getter that makes both sentences true:
+
+```ts
+get length(): number {
+  let count = 0;
+  let current = this.head;
+  while (current !== null) {
+    count += 1;
+    current = current.next;
+  }
+  return count;
+}
+```
+
+A getter is read without parentheses, as you learned in
+@sec-encapsulation-getters, so the page writes `playlist.length` and it looks
+exactly like `songs.length` on an array. The two are not the same price. An
+array stores its length as a plain number and hands that number over. Your
+playlist counts from the head every single time somebody asks.
+
+You could buy the cheap read: keep a private `count` field, start it at 0, and
+change it in every method that adds or removes a song. Reading it is then one
+step instead of one step per song. The bill arrives later, because
+`insertAtBeginning`,
+`insertAfter`, and `delete` each have to remember that extra line, and so does
+every method you add to this class next month. Forget one of them and `length`
+lies while the chain itself is still perfect. The wrong number shows up on the
+page, far away from the method that caused it.
+
+The walk pays on every read and can never go out of sync, because there is
+nothing to keep in sync. A playlist holds a few dozen songs and redraws when the
+user clicks, so pick the walk. When a structure grows long and something reads
+its length many times a second, the counter starts to win, and the next chapter
+has exactly that case.
+
+## An array when you really need one {#sec-iteration-toarray}
+
+`Playlist` now offers two ways to get at its songs, and they are for two
+different jobs. Reach for `forEach` when you only visit, which covers drawing
+one `<li>` per song and hunting for the longest title. Nothing new is built and
+the songs stay in their nodes.
+
+Reach for `toArray` when an array is what the next line actually needs. An index
+is the clearest case, because `playlist.toArray()[0]` is the first song and
+`forEach` has no way to express that. `reverse()` is another, and so is any code
+that expects an array and will not take a callback. Your tests are that kind of
+code: `expect(playlist.toArray()).toEqual([...])` needs a real array to compare
+against.
+
+::: {.callout-tip}
+## For the curious
+
+The `[Symbol.iterator]()` from the error message is real, and you can write it.
+A class that has that method works with `for...of` like any array does. MDN
+describes the rules under
+[iteration protocols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols).
+This course leaves the method out on purpose: writing one needs either a
+generator function with `yield` or a hand-written object with a `next()` method,
+and that is a lot of new syntax to buy a loop you can already write with
+`forEach`.
+:::
+
+## Exercise: a playlist that counts itself {#sec-iteration-exercise}
+
+Your `Playlist` class is tested and still knows nothing about the page. After
+the first step, everything below happens in `index.html` and `src/index.ts`.
+
+1. Run `npm test`. It reports four tests more than at the end of the last
+   chapter: two for `forEach` and two for `length`.
+
+2. Open `index.html` and add a paragraph for the count right above the element
+   that shows the chain:
+
+   ```html
+   <p id="songCount"></p>
+   ```
+
+3. In `src/index.ts`, look that paragraph up next to the elements that are
+   already there, and add it to the same null check.
+
+4. Rewrite `renderChain()` so it asks `playlist.forEach(...)` instead of
+   looping over `playlist.toArray()`. The body of your old loop becomes the
+   body of the callback, mostly unchanged. Give `renderSongs()` the same
+   treatment.
+
+5. In `render()`, write the count into the new paragraph with a template
+   string: `` `${playlist.length} songs` ``. A page that has just loaded says
+   `0 songs`.
+
+6. Also in `render()`, set `disabled` on the insert-after select to
+   `playlist.length === 0`. An empty playlist has nothing to insert after, and a
+   control that cannot do anything should look that way. The **Delete** buttons
+   need no such line, because they leave the page together with their songs.
+
+7. Run `npm start` and check all of it. Expected results:
+
+   * a fresh page shows `0 songs` and a gray insert-after control
+   * after adding two songs the line reads `2 songs`, the chain shows both, and
+     the insert-after control works
+   * after deleting both songs the line is back to `0 songs` and the control is
+     gray again
+
+8. Run `npm run verify`, which this project already has from the last chapter,
+   fix what it reports, and commit.
+
+::: {.callout-tip}
+## When you finish early
+
+**One song, one word.** `1 songs` reads wrong. Make the line say `1 song` when
+`playlist.length` is 1 and `songs` for every other number, 0 included.
+
+**The chain backwards.** Add a button that draws the chain from the last song to
+the first without changing the playlist itself. `forEach` cannot help, it only
+ever walks forward. `playlist.toArray()` hands you an array that belongs to you,
+`reverse()` flips that array, and the nodes stay exactly where they were.
+:::
+
+## Check your understanding {#sec-iteration-quiz}
+
+Four questions about this chapter.
+
+{{< quiz iteration title="A loop your own class understands" >}}

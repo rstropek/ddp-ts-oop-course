@@ -1,0 +1,33 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 28rem;
+  margin: 2rem auto;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#address {
+  flex: 1;
+  padding: 0.3rem;
+}
+
+.controls button {
+  padding: 0.4rem 0.9rem;
+}
+
+.controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.current-line {
+  font-size: 1.3rem;
+}
+
+#currentPage {
+  font-weight: bold;
+}

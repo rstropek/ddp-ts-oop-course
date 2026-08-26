@@ -1,0 +1,119 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the queues chapter quiz
+# (0070-data-structures/0040-queues.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: queues-quiz-eval
+target: ./0040-queues-quiz.yaml
+
+questions:
+  - question: research-checkbox-checked
+    answers:
+      - expect: correct
+        answer: |
+          you take .checked, that one is a boolean. true when the box is
+          ticked, false when not. found it on mdn on the HTMLInputElement
+          page.
+      # Property right, type and source missing.
+      - expect: partial
+        answer: |
+          humanLongHair.checked tells you that
+      - expect: incorrect
+        answer: |
+          you read .value, if the box is ticked it says 'on' and otherwise it
+          is empty
+
+  - question: research-expect-fail
+    answers:
+      - expect: correct
+        answer: |
+          expect.fail just kills the test right away with the text you give
+          it, it checks nothing. you put it in a test you still have to write
+          so it stays red and you cannot forget it. vitest docs, the expect
+          page.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          expect.fail laesst den test sofort fehlschlagen mit der nachricht
+          die man reinschreibt, ohne irgendwas zu pruefen. man schreibt das in
+          einen test der noch fehlt, damit er rot bleibt und man ihn nicht
+          vergisst. steht in der vitest doku bei expect.
+      # Says what it does, no word on why anybody would want it.
+      - expect: partial
+        answer: |
+          it makes the test fail with that message
+      - expect: incorrect
+        answer: |
+          it skips the test so the run stays green until somebody writes it
+
+  - question: fifo-vs-lifo
+    answers:
+      - expect: correct
+        answer: |
+          pop gives chiara back because the stack takes the newest one (lifo).
+          the waiting line would give anna because a queue is fifo and she was
+          first.
+      # One of the two names wrong.
+      - expect: partial
+        answer: |
+          the stack gives you chiara, and the queue would also start with
+          chiara i think
+      - expect: incorrect
+        answer: |
+          pop gives anna because she was first in the stack, and dequeue gives
+          chiara
+
+  - question: tail-pointer
+    answers:
+      - expect: correct
+        answer: |
+          nothing gets wrong, it just costs more. every enqueue has to run
+          through the whole line first, so with 500 people waiting the next
+          one needs 500 steps. with the tail you always do the same two lines
+          no matter how long the line is.
+      # "Slower" with no link to the length of the line.
+      - expect: partial
+        answer: |
+          it is slower now
+      - expect: incorrect
+        answer: |
+          the order breaks, customers come out wrong and the tests would go
+          red
+
+  - question: forgotten-tail-reset
+    answers:
+      - expect: correct
+        answer: |
+          it still says The line is empty. and rex never shows up (the counter
+          says 1 though). tail was never set back to null so it still points
+          at ida, and enqueue hangs rex behind ida instead of putting him on
+          head. head stays null. missing line is this.tail = null;
+      # The fix, nothing about what the page does.
+      - expect: partial
+        answer: |
+          this.tail = null; is missing in the if
+      - expect: incorrect
+        answer: |
+          rex shows up as Now serving, the only problem is that count is wrong
+          by one
+
+  - question: public-api-tests
+    answers:
+      - expect: correct
+        answer: |
+          head and tail are private so a test outside cannot even read them,
+          typescript complains. and if you only test the public methods you
+          can rebuild the inside later and the tests still work, like when the
+          array got replaced by nodes.
+      # Only the private half.
+      - expect: partial
+        answer: |
+          because they are private, you cannot use them from the test file
+      - expect: incorrect
+        answer: |
+          private is only a naming thing, the tests could read head and tail
+          fine, they just do it like this because it is shorter

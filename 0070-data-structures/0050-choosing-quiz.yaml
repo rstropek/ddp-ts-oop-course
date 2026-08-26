@@ -1,0 +1,161 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Picking the right structure"
+# (0070-data-structures/0050-choosing.qmd).
+# The closing chapter of the data structures part has no research box, so
+# there are no `research-` questions here. All five are scenario questions:
+# four hand the student an app and ask which structure it needs and why, and
+# the last one asks for the two questions the chapter decides with.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: choosing-quiz
+name: "Quiz: Picking the right structure"
+
+title: "Check your understanding: picking the right structure"
+description: |
+  Five short questions about the chapter *Picking the right structure*. Each
+  one hands you an app and asks which structure it needs and why. Answer in
+  your own words; one or two sentences are enough. This quiz is anonymous and
+  is here for you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const backStack = new Stack<string>();"
+      scope="at the end of the data structures part"
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `toBeUndefined`, `beforeEach`, and `npm test`"
+        "generics: a type parameter `T`, `class Stack<T>`, generic functions, and a constraint such as `T extends { describe(): string }`"
+        "the command pattern with an abstract `Command` that has `execute`, `undo`, and `describe`"
+        "hand-built `Node<T>` chains: a head pointer, `null` as the end of the chain, and a tail pointer where a queue needs one"
+        "a linked list with `find`, `insertAtBeginning`, `insertAfter`, `delete`, `toArray`, `forEach`, and a `length` getter"
+        "a node-based `Stack<T>` with `push`, `pop`, `peek`, and `isEmpty`, and a node-based `WaitingLine<T>` with `enqueue` and `dequeue`"
+        "choosing between an array, a linked list, a stack, a queue, a `Map`, and a `Set` for a task, and saying why")
+      not_yet=(array
+        "Playwright and end-to-end tests"
+        "`interface`, `keyof`, mapped types, and default type parameters"
+        "`async`, `fetch`, and `localStorage`")}}
+
+questions:
+  - id: chat-message-lookup
+    title: "Fifty messages and a search result"
+    question: |
+      A chat app keeps the last 50 messages. New messages always arrive at
+      the end, nothing is ever removed from the middle, and the messages
+      carry no ids. Clicking a search result has to show message number 12
+      straight away. Which structure would you keep the messages in, and
+      name the one thing it does better here than a linked list.
+    evaluation: |
+      Expected: an array. An array reaches message number 12 in one step,
+      while a linked list has to start at the head and walk through 11 nodes
+      to get there.
+      Required: (1) an array; (2) reaching an item by its position is one
+      step in an array and a walk along the chain in a linked list.
+      "Index", "position", and "message number 12" all count for the same
+      idea.
+      Partial: names the array but gives no reason, or gives only a vague
+      reason such as "it is simpler" with nothing about position.
+      Incorrect: names a linked list, a stack, or a queue.
+
+  - id: undo-with-a-queue
+    title: "Undo built on a waiting line"
+    question: |
+      A classmate builds the undo feature of a drawing app on a
+      `WaitingLine<Command>` instead of a stack. Every action is enqueued,
+      and the Undo button dequeues. The user draws a circle, then a square,
+      then a triangle, and presses Undo once. What disappears from the
+      drawing, and which structure does the feature need?
+    evaluation: |
+      Expected: the circle disappears, because a queue hands back the oldest
+      item first and the circle was enqueued first. Undo needs a stack, which
+      hands back the newest item first.
+      Required: (1) the circle goes away (naming it as the first or oldest
+      action counts); (2) a stack, because undo has to take back the newest
+      action first.
+      Partial: names the stack but says nothing about which shape
+      disappears, or says the circle disappears without naming the structure
+      the feature needs.
+      Incorrect: says the triangle disappears, or says the waiting line works
+      fine for undo. Naming the triangle is the classic wrong answer here,
+      because it describes what undo ought to do instead of what this code
+      does, so it stays incorrect even when the rest of the answer sounds
+      sensible.
+
+  - id: shape-by-id
+    title: "Finding a shape by its id"
+    question: |
+      A drawing app gives every shape an id string such as `shape-7`, and a
+      click on the page hands you that id. Right now the app keeps its shapes
+      in an array and loops through it until the ids match. Which structure
+      removes that loop, and what would its two types be here?
+    evaluation: |
+      Expected: a `Map<string, Shape>`. `get(id)` finds the shape without
+      looking at anything else, the keys are the id strings, and the values
+      are the shape objects.
+      Required: (1) a `Map`; (2) the keys are the id strings and the values
+      are the shapes. Writing `Map<string, Shape>` counts as saying both.
+      Partial: names the `Map` but does not say what the keys and the values
+      are, or describes a lookup by key without naming `Map`.
+      Incorrect: names a `Set`, a stack, a queue, or a linked list.
+
+  - id: cancel-in-the-middle
+    title: "Canceling the third print job"
+    question: |
+      The print queue app gets a Cancel button next to every waiting job. The
+      jobs live in a `WaitingLine<T>` with `enqueue`, `dequeue`, `length`,
+      `isEmpty`, and `toArray`. Why can that class not cancel the third job
+      in the line, and name one change that would make it possible.
+    evaluation: |
+      Expected: `dequeue` only ever removes at the head, so none of the
+      methods can take a node out of the middle. `toArray` hands out a fresh
+      array of the values, so removing something from that array changes
+      nothing in the line. One fix: give the class a `delete` method that
+      walks the chain and unhooks the node, the way the playlist's `delete`
+      does. Another: keep the jobs in a linked list instead of a queue.
+      Required: (1) the class removes only at the head, so there is no way to
+      reach the middle with these methods; (2) one workable change, either a
+      delete method that walks the chain and unhooks a node, or a different
+      structure such as a linked list.
+      Partial: says the middle cannot be reached but names no change, or
+      names a change without saying what stops the class today.
+      Incorrect: claims the job can be removed through the array that
+      `toArray` returns, or claims `dequeue` takes an index or a job.
+      `toArray` builds a fresh array and the nodes stay where they are, so an
+      answer that removes the job from that array has a wrong core claim and
+      names no change to the class; it is incorrect, not partial.
+
+  - id: two-questions
+    title: "What to ask before you write the class"
+    question: |
+      The chapter names two questions to ask before you write a class that
+      stores things. Name both of them, and give one example from your own
+      projects where the honest answer to both is "no collection at all".
+    evaluation: |
+      Expected: the two questions are "where do items go in and come out?"
+      and "how do you find one again?". An example that needs no collection:
+      the bracelet's single boolean field that remembers whether the color
+      warning has already been shown, or the bank account, which holds one
+      private number.
+      Required: (1) both questions in the student's own words, one about
+      where items enter and leave, one about how you find an item again;
+      (2) an example that stores a single value instead of a collection.
+      Partial: both questions with no example, or a good example with only
+      one of the two questions named.
+      Incorrect: neither question matches what the chapter asks, or the
+      example named is a collection after all, such as an array of warnings
+      or the playlist.

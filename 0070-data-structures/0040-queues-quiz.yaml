@@ -1,0 +1,204 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "Nobody jumps the line"
+# (0070-data-structures/0040-queues.qmd).
+# One quiz per chapter, at the end. The two research questions of the chapter's
+# research box come first (ids prefixed `research-`) and get the research
+# feedback rule (point at MDN or the Vitest docs, never the answer). The other
+# four cover the chapter's own points: FIFO against LIFO, what the tail pointer
+# buys, the edge case that only shows up three steps later, and why the tests
+# stay on the public API.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: queues-quiz
+name: "Quiz: Nobody jumps the line"
+
+title: "Check your understanding: nobody jumps the line"
+description: |
+  Six short questions about the chapter *Nobody jumps the line*, two of them
+  the research task. Answer in your own words; if you cannot answer a research
+  question yet, look it up and come back. One or two sentences are enough.
+  This quiz is anonymous and is here for you. Answering in German is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="const line = new WaitingLine<Customer>();"
+      scope="after the queues chapter of the data structures part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `toBeUndefined`, `beforeEach`, and `npm test`"
+        "generics: a type parameter `T`, `class Stack<T>`, generic functions, and a constraint such as `T extends { describe(): string }`"
+        "the command pattern with an abstract `Command` that has `execute`, `undo`, and `describe`"
+        "hand-built nodes: `Node<T>` with `value` and `next`, `null` as the end of the chain, a head pointer, and what walking a chain costs"
+        "a linked list with `find`, `insertAtBeginning`, `insertAfter`, `delete`, `toArray`, `forEach`, and a `length` getter"
+        "a node-based `Stack<T>` with `push`, `pop`, `peek`, and `isEmpty`, and LIFO as its rule"
+        "a node-based queue `WaitingLine<T>` with `enqueue`, `dequeue`, `length`, `isEmpty`, and `toArray`, head and tail pointers, and the two edge cases")
+      not_yet=(array
+        "which property of an `HTMLInputElement` reports a ticked checkbox, and what `expect.fail` does in a Vitest file (those are the research tasks right now)"
+        "`Symbol.iterator` and `for...of` on their own classes, which this course leaves out on purpose"
+        "`interface`, `keyof`, mapped types, and default type parameters"
+        "Playwright and end-to-end tests"
+        "`async`, `fetch`, and `localStorage`")}}
+
+questions:
+  - id: research-checkbox-checked
+    title: "Is that box ticked?"
+    question: |
+      The Add human form has `<input id="humanLongHair" type="checkbox">`,
+      and reading `.value` on it gives the string `'on'` whether the box is
+      ticked or not. Which property of an `HTMLInputElement` answers whether
+      the box is ticked, and what type does that property have? Say where you
+      read it.
+    evaluation: |
+      Expected: the `checked` property, and its type is `boolean`. So
+      `humanLongHair.checked` is `true` when the box is ticked and `false`
+      when it is not. Source is the MDN page for `HTMLInputElement` (or MDN's
+      page for the checkbox input).
+      Required: (1) names `checked`; (2) says the type is boolean (`true` or
+      `false` counts); (3) names the source.
+      Partial: names `checked` but says nothing about its type, or names no
+      source.
+      Incorrect: names `value`, `selected`, `checkedValue`, or
+      `getAttribute('checked')` in its place, or says `checked` gives back a
+      string such as `'on'` or `'true'`.
+
+  - id: research-expect-fail
+    title: "A test that fails on purpose"
+    question: |
+      Three tests in the copied `src/waiting-line.test.ts` have no
+      expectations in them, only the line
+      `expect.fail('Test not implemented yet')`. What does `expect.fail` do
+      when that test runs, and why would the author of a test file put it
+      there on purpose? Say where you read it.
+    evaluation: |
+      Expected: `expect.fail` fails that test straight away with the message
+      it is given, without checking anything. An author puts it into a test
+      that is planned but not written yet, so the missing test shows up as a
+      red test instead of quietly passing, and nobody can forget it. Source is
+      the Vitest documentation for `expect` (the `expect.fail` entry).
+      Required: (1) it makes the test fail immediately with that message;
+      (2) it marks a test that still has to be written, so the gap is visible
+      as a failure; (3) names the source.
+      Partial: says it fails the test but gives no reason why an author would
+      want that, or explains the purpose without saying that it fails the test
+      on the spot.
+      Incorrect: says it skips the test, marks it as passed, stops the whole
+      test run, or that it only prints a warning.
+
+  - id: fifo-vs-lifo
+    title: "Who gets the chair"
+    question: |
+      Anna walks into the salon first, then Ben, then Chiara. A classmate
+      stores them in a `Stack<string>` with `push` and serves customers with
+      `pop()`. Which name does `pop()` hand back, and which name would
+      `dequeue()` hand back if the same three had been enqueued into a
+      `WaitingLine<string>`?
+    evaluation: |
+      Expected: `pop()` hands back `'Chiara'`, because a stack gives back the
+      item that arrived last (LIFO). `dequeue()` hands back `'Anna'`, because
+      a queue gives back the item that arrived first (FIFO), which is the fair
+      order for a waiting line.
+      Required: (1) Chiara for the stack; (2) Anna for the queue. Naming LIFO
+      and FIFO is welcome but not required, as long as both names are right.
+      Partial: one of the two names right and the other wrong or missing.
+      Incorrect: both names wrong, or the two structures swapped (Anna for the
+      stack and Chiara for the queue).
+
+  - id: tail-pointer
+    title: "The class that lost its tail"
+    question: |
+      A classmate deletes the `tail` field from `WaitingLine<T>`. Their
+      `enqueue` starts at the head, follows `next` until it reaches the node
+      whose `next` is `null`, and hooks the new node on there. Every test in
+      the file still passes. What did the class lose?
+    evaluation: |
+      Expected: nothing about the answers changed, only the price. Without a
+      tail pointer, `enqueue` walks the whole line every single time, so the
+      work grows with the number of people waiting: 500 customers in the line
+      means 500 steps for the next one who joins. With the tail pointer,
+      `enqueue` touches two nodes no matter how long the line is.
+      Required: (1) `enqueue` now walks the whole chain, and the work grows
+      with the length of the line; (2) with a tail pointer the cost of
+      `enqueue` stays the same however long the line gets. Everyday wording
+      such as "it has to run through everybody first" counts for (1), and
+      "always the same amount of work" or "constant" counts for (2).
+      Partial: says only that it is slower, without tying the cost to the
+      length of the line.
+      Incorrect: says the queue now gives back wrong customers, that tests
+      would fail, that `dequeue` got slower, or that the change costs more
+      memory.
+
+  - id: forgotten-tail-reset
+    title: "The customer who never appears"
+    question: |
+      Here is a `dequeue` with one line missing:
+
+      ```ts
+      dequeue(): T | null {
+        if (this.head === null) {
+          return null;
+        }
+
+        const front = this.head;
+        this.head = front.next;
+        this.count--;
+        return front.value;
+      }
+      ```
+
+      Ida is the only customer in the line. You click Serve next, and the page
+      correctly shows `The line is empty.`. Then you add Rex the dog. What
+      does the page show now, and why?
+    evaluation: |
+      Expected: the page still shows `The line is empty.` while the counter
+      says `Customers in line: 1`, and Serve next stays gray. `dequeue` left
+      `tail` pointing at Ida's node after Ida had left, so `enqueue` hooked
+      Rex behind that node instead of setting `head`. `head` is still `null`,
+      so nothing is rendered, and Rex sits in a chain nobody can reach. The
+      missing line is `this.tail = null;` when the head becomes `null`.
+      Required: (1) the page keeps showing the empty line (Rex never appears);
+      (2) the cause is the stale `tail` still pointing at the node that left,
+      so the new node is hooked on behind it while `head` stays `null`.
+      Naming the missing `this.tail = null;` counts for (2). Mentioning the
+      counter showing 1 is a bonus, not a requirement.
+      Partial: says Rex does not show up but gives no usable cause, or names
+      the missing `tail = null` without saying what the page does.
+      Incorrect: says the page shows Rex, says the app crashes or throws, or
+      blames `count`, `toArray`, or the render function.
+
+  - id: public-api-tests
+    title: "Tests that never look inside"
+    question: |
+      The test file for `WaitingLine<T>` never mentions `head` or `tail`. It
+      asks `toArray()`, `length`, and `isEmpty()` instead, even in the tests
+      that are about the two pointers. Give two reasons why.
+    evaluation: |
+      Expected: `head` and `tail` are private, so code outside the class
+      cannot read them at all and TypeScript refuses the attempt. And tests
+      that only use the public methods keep working when the insides change,
+      which is how the same test file survived the move from an array to
+      hand-built nodes.
+      Required: (1) the two fields are private and not reachable from a test;
+      (2) tests on the public methods survive a rewrite of the insides.
+      Partial: only one of the two reasons.
+      Incorrect: says the pointers do not exist, says private fields are only
+      a naming convention that tests may ignore, or answers only that it is
+      "cleaner" or "faster" with no reason.

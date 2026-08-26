@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print queue</title>
+  </head>
+  <body>
+    <h1>Print queue</h1>
+
+    <form id="jobForm" class="controls">
+      <label for="documentName">Document</label>
+      <input id="documentName" type="text" placeholder="essay.txt" required>
+      <label for="pages">Pages</label>
+      <input id="pages" type="number" min="1" step="1" value="1" required>
+      <button type="submit">Add job</button>
+    </form>
+
+    <p class="controls">
+      <button id="printButton" type="button" disabled>Print next</button>
+    </p>
+
+    <p class="printing-line">Printing: <output id="printing">nothing</output></p>
+
+    <h2>Waiting</h2>
+    <p id="message" class="message"></p>
+    <ol id="queue"></ol>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

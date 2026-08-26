@@ -1,0 +1,76 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 40rem;
+  margin: 2rem auto;
+}
+
+.forms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.5rem;
+}
+
+.forms section {
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.forms h2 {
+  margin-top: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.6rem;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+
+.forms input[type="text"] {
+  padding: 0.3rem;
+}
+
+button {
+  padding: 0.4rem 0.9rem;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.message {
+  min-height: 1.4rem;
+  color: #b3261e;
+}
+
+#line {
+  border-left: 4px solid #4a7dff;
+  padding-left: 0.9rem;
+}
+
+.now-serving {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.next-up {
+  color: #444;
+}
+
+.empty {
+  color: #666;
+  font-style: italic;
+}
+
+.count {
+  color: #444;
+}

@@ -1,0 +1,87 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 40rem;
+  margin: 2rem auto;
+}
+
+h2 {
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.6rem;
+  padding: 0.6rem;
+  background: #f2f2f2;
+  border-radius: 6px;
+}
+
+.chain .node {
+  padding: 0.3rem 0.6rem;
+  background: #2a6ebb;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.chain .end {
+  background: #8a8a8a;
+  font-style: italic;
+}
+
+.chain .arrow {
+  color: #555;
+}
+
+#songForm {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#songForm input,
+#songForm select {
+  padding: 0.3rem;
+}
+
+#songForm button {
+  padding: 0.4rem 0.9rem;
+}
+
+.message {
+  min-height: 1.4rem;
+  margin: 0.75rem 0;
+  color: #b3261e;
+}
+
+#songs {
+  list-style: none;
+  padding: 0;
+}
+
+#songs li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+#songs .song-title {
+  font-weight: bold;
+}
+
+#songs li button {
+  margin-left: auto;
+  padding: 0.2rem 0.6rem;
+}

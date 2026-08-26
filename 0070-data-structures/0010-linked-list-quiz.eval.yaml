@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the linked list chapter quiz
+# (0070-data-structures/0010-linked-list.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: linked-list-quiz-eval
+target: ./0010-linked-list-quiz.yaml
+
+questions:
+  - question: research-null-matcher
+    answers:
+      - expect: correct
+        answer: |
+          toBeNull(). null is something you put there on purpose to say there
+          is nothing, undefined is what you get when nobody ever gave the
+          thing a value at all. vitest expect docs and the mdn page about
+          null.
+      # Matcher right, difference missing.
+      - expect: partial
+        answer: |
+          you write expect(playlist.find('Yellow')).toBeNull()
+      - expect: incorrect
+        answer: |
+          toBeUndefined works for that, null and undefined are the same thing
+          in js anyway
+
+  - question: research-option-element
+    answers:
+      - expect: correct
+        answer: |
+          it gives you an HTMLOptionElement. you set textContent so the user
+          sees the title and value so select.value gives the title back. mdn
+          page for HTMLOptionElement
+      # German correct answer.
+      - expect: correct
+        answer: |
+          man bekommt ein HTMLOptionElement. man setzt textContent fuer den
+          text den man sieht und value fuer das was spaeter bei select.value
+          rauskommt. steht auf mdn bei HTMLOptionElement.
+      # Element type right, only one property named.
+      - expect: partial
+        answer: |
+          an HTMLOptionElement, you just set the value on it. read it on mdn
+      - expect: incorrect
+        answer: |
+          createElement('option') gives you an HTMLSelectElement and you only
+          need value, the text shows up by itself
+
+  - question: research-pointer-in-c
+    answers:
+      - expect: correct
+        answer: |
+          in c a pointer is a variable that stores a memory address, so it
+          says where another value lives in memory and you can even do
+          arithmetic on it. in typescript nothing gets copied, next just
+          holds a reference so newNode.next and this.head are the same node.
+          found it in a c tutorial and on mdn about objects and references.
+      # Copying answered, C pointer missing.
+      - expect: partial
+        answer: |
+          nothing is copied, both point at the same node object
+      - expect: incorrect
+        answer: |
+          a pointer in c is just a variable, and in typescript the node gets
+          copied into next so you have two nodes afterwards
+
+  - question: cost-of-the-front
+    answers:
+      - expect: correct
+        answer: |
+          linked list. every message goes in at the front and in an array
+          that means shifting all the older messages one to the right, in a
+          list you only build one node and change one pointer. and they never
+          read by index so the array does not help.
+      # Right structure, no reason about the front.
+      - expect: partial
+        answer: |
+          i would take the linked list because it is faster for a chat
+      - expect: incorrect
+        answer: |
+          array, arrays are always faster because you can jump straight to
+          any message
+
+  - question: head-and-next
+    answers:
+      - expect: correct
+        answer: |
+          it only keeps head, the first node, and null when the list is
+          empty. toArray starts at head and follows next again and again
+          until it is null, so for the third song it walks two steps. there
+          is no index.
+      # Head named, walk described as indexing.
+      - expect: partial
+        answer: |
+          it stores the head. then toArray just takes the song at position 2
+          out of the chain
+      - expect: incorrect
+        answer: |
+          the classmate is right, the class has all the nodes in a field so
+          it can grab the third one directly
+
+  - question: tests-survived-rewrite
+    answers:
+      - expect: correct
+        answer: |
+          the tests only use the public methods and never look at songList or
+          head, so they say what a playlist does and not how it saves things.
+          if i renamed delete or made find return a node instead of a song i
+          would have to change the test file.
+      # Insight without a breaking change named.
+      - expect: partial
+        answer: |
+          they test the outside of the class and not the inside
+      - expect: incorrect
+        answer: |
+          nothing actually changed for the tests because vitest just used the
+          old results, and if i renamed the private songList field they would
+          all break

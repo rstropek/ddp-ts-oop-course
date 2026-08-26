@@ -1,0 +1,264 @@
+---
+title: "Picking the right structure"
+---
+
+You built three containers by hand in this part, and every one of them holds
+your songs just as happily as it holds the hairdresser's customers. That is what
+makes the choice hard: nothing in TypeScript stops you from putting a waiting
+line into a stack. You already made this choice four times in your own
+projects, so this chapter starts by reading the reasons back out of your own
+code.
+
+## Four projects, four answers {#sec-choosing-experiment}
+
+1. Open `homework/bracelet-tests` and find the field in `Bracelet` that holds
+   the beads.
+
+2. Open `coursework/playlist` and find the field in `Playlist` that holds the
+   songs.
+
+3. Open `homework/undo-counter` and find the fields inside `UndoStack`.
+
+4. Open `coursework/hairdresser` and find the fields inside `WaitingLine`.
+
+Four classes, four different answers. The bracelet keeps an array. The playlist
+keeps one pointer to the first node. The undo stack keeps one pointer and a
+counter. The waiting line keeps two pointers, one to each end.
+
+None of those four is better than the others. Each one is the cheapest way to
+do what its own app actually does, and you can say why in one sentence.
+That sentence is the skill this chapter is about. When somebody asks why the
+undo history is not an array, "because we did it that way in the book" is not
+an answer you want to give.
+
+## What each structure is good at {#sec-choosing-table}
+
+Six containers are yours by now, and this table is the short version of what
+each one is for. The reasons sit underneath it, because a table cell is too
+small to argue in.
+
+| Structure | Good at | Expensive or impossible | In this book |
+|---|---|---|---|
+| Array | Reaching item number 5 in one step, keeping a fixed order you loop over | Inserting or removing at the front, which shifts everything behind it | The aquarium's `private fishes: Fish[]` |
+| Linked list | Inserting and removing wherever you already stand, growing without copying | Reaching item number 5, because you walk there node by node | The playlist |
+| Stack | Handing back the newest item, over and over | Reaching anything but the top; there is no item number 5 | The undo history of the counter |
+| Queue | Serving the oldest item, so nobody jumps the line | Reaching into the middle, same as the stack | The hairdresser's waiting line |
+| `Map` | Finding a value by a key you already have | Anything you cannot phrase as a key, such as "which one is highlighted" | Paint's `Map<ToolType, HTMLButtonElement>` |
+| `Set` | Answering "is this in here", and removing the value itself with no index | Positions and keys; a duplicate silently disappears | Paint's `Set<Shape>` |
+
+The array is still the one you reach for first, and that is not laziness. An
+array reaches item number 5 in a single step because the items sit next to each
+other in memory, and the cost table in @sec-linked-list-costs put a price on
+that layout: the front. Everything behind an inserted item moves one slot to
+the right.
+
+A linked list pays the opposite bill. Nothing shifts, because a node lives
+wherever it happens to live and only the arrows change, so inserting is a
+couple of assignments no matter how long the chain is. What you give up is the
+index. Song number 5 costs five steps, song number 500 costs 500, and every
+`length` that walks the chain costs the same again.
+
+A stack and a queue are linked lists with a rule attached, and the rule is the
+whole point. `Stack<T>` has no method that reaches into the middle, so a bug
+cannot take the wrong action back. `WaitingLine<T>` serves the head and appends
+at the tail, so nobody jumps the line even when you are careless. Choosing one
+of these two tells the next reader of your code something no comment can
+promise: this collection is only ever touched at one end.
+
+`Map` and `Set` are not about order at all. They are about the question you
+ask. Paint keeps its buttons in a `Map` because a button has a name you look it
+up by, and it keeps its shapes in a `Set` because a shape has no name and gets
+deleted as itself, with no index to find first.
+
+::: {.callout-tip}
+## You will still write push and pop on an array
+
+In a real project you would not hand-write a stack. `push` and `pop` on a
+plain array are cheap, because both happen at the end, where nothing has to
+shift. A queue on an array is the one that hurts: `shift` takes the first item
+and moves every other item one slot left, so a long queue pays on every single
+`dequeue`.
+
+The hand-built versions still bought you two things. You can now read code that
+walks a chain of nodes, which is most of what a data structures course anywhere
+looks like, and you know what `push` costs instead of guessing. The exam wants
+the hand-built version, and your future job wants the array. Both are fine, as
+long as you know which one you are looking at.
+:::
+
+## Two questions to ask before you write the class {#sec-choosing-questions}
+
+Naming a structure is the last step, not the first. Two questions get you there
+almost every time, and both of them are about what the app does rather than
+about what TypeScript offers.
+
+**Where do items go in and come out?** In and out at the same end is a stack.
+In at one end and out at the other is a queue. A lot of coming and going in the
+middle is a linked list. Any position you can count to is an array.
+
+**How do you find one again?** By its position is an array. By a key you
+already hold is a `Map`. By nothing more than "is it in there at all" is a
+`Set`. By walking until something matches is a linked list, and if you catch
+yourself doing that on every click, the second question just told you to switch
+to a `Map`.
+
+Sometimes both answers are "neither", and the honest choice is no collection at
+all. The bracelet remembers whether it has already shown the color warning with
+a single boolean field, not with a list of warnings it has given. The bank
+account holds one private number. A structure you do not need is a structure
+that can go out of sync with the thing it is supposed to describe.
+
+## Exercise: pick one {#sec-choosing-exercise}
+
+Two apps, and you build exactly one of them. The browser history needs two
+stacks working against each other. The print queue needs one queue and a form.
+Read both, then pick the one whose structure you can already explain out loud.
+
+Both of them start by copying a class you wrote earlier in this part, tests
+included. That is the payoff for having kept the logic out of `index.ts` since
+Part 5.
+
+### Option A: the browser history {#sec-choosing-history}
+
+{{< exercise browser-history tests=true title="Files for the browser history" >}}
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `browser-history`. Delete `src/math.ts` and `src/math.test.ts`, and
+   cut `src/index.ts` down to one line, `import './styles.css';`.
+
+2. Copy `src/stack.ts` and `src/stack.test.ts` out of `coursework/train-builder`
+   into this project's `src/` folder and run `npm test`. Every test that was
+   green in the train builder is green here, and you changed nothing: a tested
+   class in its own file is the thing you get to carry from app to app.
+
+3. Write `src/browser-history.ts` test first, in the rhythm you know by now.
+   One `it`, watch it fail, make it pass. `BrowserHistory` keeps two
+   `Stack<string>` fields and a `currentPage: string | null`, and it offers
+   `visit(page)`,
+   `back()`, `forward()`, and the getters `current`, `canGoBack`, and
+   `canGoForward`. Four sentences to write as tests:
+
+   * a fresh history has no current page, and it can go neither back nor
+     forward
+   * after visiting two pages, `back()` puts the first page back on screen and
+     Forward becomes possible
+   * calling `forward()` right after that `back()` returns to the second page
+   * visiting a new page after a `back()` throws the forward pages away
+
+   The rules behind those four: `visit` pushes the page you are leaving onto
+   the back stack and then replaces the forward stack with a fresh one, `back`
+   pops the back stack and pushes the page you are leaving onto the forward
+   stack, and `forward` is the same two lines with the stacks swapped. Your
+   `Stack<T>` has no `clear`, so throwing the forward history away is
+   `this.forwardStack = new Stack<string>();`.
+
+4. Wire `src/index.ts`. Look up the form, the address input, the two buttons,
+   and the `<output>`, and stop the app with one `if` and a `throw` when any of
+   them is missing. Keep one `const pageHistory = new BrowserHistory();` next
+   to them. Write a `render()` that puts `pageHistory.current` into the output,
+   shows `nothing yet` while there is none, and disables each button when its
+   getter says `false`. The form's `submit` listener calls `preventDefault()`,
+   visits what the user typed, empties the input, and renders. Call `render()`
+   once at the end of the file.
+
+5. Run `npm start` and walk through it. Expected results:
+
+   * the fresh page shows `nothing yet` with both buttons gray
+   * after `news.example`, Back is still gray, because there is nowhere to go
+     back to
+   * after `sports.example` and then `weather.example`, Back is active and
+     Forward is gray
+   * Back twice shows `sports.example`, then `news.example`, with Back gray
+     again and Forward active
+   * Forward once returns to `sports.example`
+   * typing `maps.example` and pressing Go turns Forward gray again, because a
+     new visit throws the forward history away
+
+6. Add the `verify` script to `package.json` as in every new app, run
+   `npm run verify`, fix what it reports, and commit.
+
+### Option B: the print queue {#sec-choosing-printer}
+
+{{< exercise print-queue tests=true title="Files for the print queue" >}}
+
+1. Create a new app from our tests template inside `coursework/`, in a folder
+   called `print-queue`. Delete `src/math.ts` and `src/math.test.ts`, and cut
+   `src/index.ts` down to one line, `import './styles.css';`.
+
+2. Copy `src/waiting-line.ts` and `src/waiting-line.test.ts` out of
+   `coursework/hairdresser` into this project's `src/` folder and run
+   `npm test`. Everything is green here too, because `T` never mentioned a
+   customer.
+
+3. Create `src/print-job.ts` with one type:
+
+   ```ts
+   export type PrintJob = {
+     documentName: string;
+     pages: number;
+   };
+   ```
+
+   Then write `src/print-job.test.ts` with a single `it`: a
+   `new WaitingLine<PrintJob>()` that got two jobs hands back the one added
+   first, and its `length` is 1 afterwards. This test is green the moment you
+   save it, and that is exactly what it is there to prove. The queue you wrote
+   for people at a hairdresser works for print jobs without a single edit.
+
+4. Wire `src/index.ts`. Look up the form, both inputs, the Print next button,
+   the `<output>`, the `<ol>`, and the message paragraph in one `if`, and keep
+   one `const jobs = new WaitingLine<PrintJob>();` next to them. The `submit`
+   listener calls `preventDefault()`, enqueues a job built from the two inputs,
+   and clears the document name. The Print next listener dequeues, leaves right
+   away when the answer is `null`, writes the job into the output, and renders.
+   `render()` does three things:
+
+   * empty the list with `replaceChildren()` and add one `<li>` per entry of
+     `jobs.toArray()`, each showing the document name and its page count
+   * disable Print next while `jobs.isEmpty()`
+   * write `Nothing is waiting.` into the message paragraph, or the number of
+     jobs that are
+
+   Watch your plural in both places. One page is `1 page` and three are
+   `3 pages`, one job is `1 job waiting` and two are `2 jobs waiting`.
+
+5. Both inputs sit inside a `<form>` on this page, so `required`, `min="1"`,
+   and `step="1"` do more work than they did for the counter's Add button: the
+   browser checks them before it fires `submit`. Run `npm start`. Expected
+   results:
+
+   * the fresh page shows `Printing: nothing`, an empty list, `Nothing is
+     waiting.`, and a gray Print next
+   * add `essay.txt` with 3 pages and then `photo.png` with 1 page: two lines
+     in that order, `2 jobs waiting`, and Print next active
+   * Print next shows `essay.txt (3 pages)`, drops it from the list, and leaves
+     `1 job waiting`, because the job that waited longest goes first
+   * Print next again shows `photo.png (1 page)`, empties the list, and turns
+     itself gray
+   * typing `2.5` into Pages and pressing Add job gets you the browser's own
+     complaint, and nothing joins the queue
+
+6. Add the `verify` script to `package.json` as in every new app, run
+   `npm run verify`, fix what it reports, and commit.
+
+::: {.callout-tip}
+## When you finish early
+
+**Show the stacks.** In the browser history, put two `<ul>` elements on the
+page and fill them from `toArray()` on each stack, so you can watch a page name
+move from one stack to the other when you press Back. `toArray()` hands you the
+top first, which is the order Back would visit them in.
+
+**Cancel a job.** In the print queue, put a Cancel button next to every waiting
+job, and try to make it work. `WaitingLine<T>` only ever removes at the head,
+so canceling the third job is not something its methods can do. Decide what to
+change: a `delete` that walks the chain and unhooks one node, the way the
+playlist does it, or a different structure entirely. Whichever you pick, you
+just did the thing this chapter is about.
+:::
+
+## Check your understanding {#sec-choosing-quiz}
+
+Five short questions, all of them about picking a structure and saying why.
+
+{{< quiz choosing title="Picking the right structure" >}}

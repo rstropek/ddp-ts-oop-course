@@ -1,0 +1,24 @@
+An empty line
+
+        head    tail
+          |       |
+          v       v
+        null    null
+
+
+After the first enqueue, both pointers hold the one node
+
+        head    tail
+          |       |
+          v       v
+       +-------------+
+       |     Ida     |-----> null
+       +-------------+
+
+
+After the dequeue that hands Ida out, both are null again
+
+        head    tail
+          |       |
+          v       v
+        null    null

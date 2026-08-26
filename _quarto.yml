@@ -66,6 +66,13 @@ book:
       chapters:
         - 0060-generics/0010-generics.qmd
         - 0060-generics/0020-undo.qmd
+    - part: "Dynamic data structures"
+      chapters:
+        - 0070-data-structures/0010-linked-list.qmd
+        - 0070-data-structures/0020-iteration.qmd
+        - 0070-data-structures/0030-stacks.qmd
+        - 0070-data-structures/0040-queues.qmd
+        - 0070-data-structures/0050-choosing.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"

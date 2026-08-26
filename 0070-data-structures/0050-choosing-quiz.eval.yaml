@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the quiz of the chapter "Picking the
+# right structure" (0070-data-structures/0050-choosing.qmd). One correct, one
+# partial, and one incorrect answer per question, plus one German correct
+# answer.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: choosing-quiz-eval
+target: ./0050-choosing-quiz.yaml
+
+questions:
+  - question: chat-message-lookup
+    answers:
+      - expect: correct
+        answer: |
+          an array. you can just take messages[11] and you are there, with a
+          linked list you have to walk from the head through 11 nodes first
+      # Right structure, no reason at all.
+      - expect: partial
+        answer: |
+          i would take an array, that is the normal thing for a chat
+      - expect: incorrect
+        answer: |
+          a linked list, because new messages come at the end and a list can
+          grow without copying anything
+
+  - question: undo-with-a-queue
+    answers:
+      - expect: correct
+        answer: |
+          the circle is gone, because the queue gives back the oldest one
+          first and the circle went in first. undo needs a stack so the
+          newest action comes back first
+      # German correct answer.
+      - expect: correct
+        answer: |
+          der kreis verschwindet, weil eine queue immer den aeltesten
+          zuerst rausgibt und der kreis war der erste. fuer undo braucht man
+          einen stack, der gibt das neueste zuerst zurueck
+      # Structure right, nothing about what the user sees.
+      - expect: partial
+        answer: |
+          he has to use a stack for undo, a queue is the wrong thing here
+      - expect: incorrect
+        answer: |
+          the triangle goes away, that is what undo does, so the waiting line
+          works fine
+
+  - question: shape-by-id
+    answers:
+      - expect: correct
+        answer: |
+          Map<string, Shape>. the key is the id string like shape-7 and the
+          value is the shape object, then get(id) finds it without a loop
+      # Map named, keys and values not said.
+      - expect: partial
+        answer: |
+          use a Map, then you dont need the loop any more
+      - expect: incorrect
+        answer: |
+          a Set of shapes, because a Set can delete the shape itself without
+          an index
+
+  - question: cancel-in-the-middle
+    answers:
+      - expect: correct
+        answer: |
+          dequeue only takes the one at the head so there is no method that
+          reaches the third job. i would write a delete that walks the chain
+          and unhooks that node like the playlist does
+      # The limit is named, no change proposed.
+      - expect: partial
+        answer: |
+          a queue can only remove at the front so you cannot get a job out of
+          the middle
+      - expect: incorrect
+        answer: |
+          just call toArray, remove the job from that array and the line is
+          updated too
+
+  - question: two-questions
+    answers:
+      - expect: correct
+        answer: |
+          where do things go in and come out, and how do you find one again.
+          the bracelet only needs one boolean that says if the color warning
+          was already shown, that is no collection
+      # Both questions, example missing.
+      - expect: partial
+        answer: |
+          you ask where items go in and out and how you look one up again
+      - expect: incorrect
+        answer: |
+          you ask if it is fast and if it uses much memory, for example the
+          playlist where all the songs are stored

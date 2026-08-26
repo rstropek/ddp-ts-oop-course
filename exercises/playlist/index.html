@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist</title>
+  </head>
+  <body>
+    <h1>Playlist</h1>
+
+    <h2>The chain</h2>
+    <p id="chain" class="chain"></p>
+
+    <h2>Add a song</h2>
+    <form id="songForm" novalidate>
+      <div class="field">
+        <label for="songTitle">Title</label>
+        <input id="songTitle" type="text">
+      </div>
+      <div class="field">
+        <label for="songArtist">Artist</label>
+        <input id="songArtist" type="text">
+      </div>
+      <div class="field">
+        <label for="afterTitle">Insert after</label>
+        <select id="afterTitle"></select>
+      </div>
+      <button id="addSong" type="submit">Add song</button>
+    </form>
+
+    <p id="message" class="message"></p>
+
+    <h2>Songs</h2>
+    <ul id="songs"></ul>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

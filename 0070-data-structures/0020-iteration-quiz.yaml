@@ -1,0 +1,168 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "A loop your own class understands"
+# (0070-data-structures/0020-iteration.qmd).
+# One quiz per chapter, at the end. This chapter has no research box, so there
+# are no `research-` questions and no research fragment. The four questions
+# cover the chapter's own points: why `for...of` refused the playlist, who
+# calls a callback and how often, what a counter field costs compared with the
+# walking getter, and when an array beats a visit.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: iteration-quiz
+name: "Quiz: A loop your own class understands"
+
+title: "Check your understanding: a loop your own class understands"
+description: |
+  Four short questions about the chapter *A loop your own class understands*.
+  Answer in your own words; there is nothing to pick from a list. One or two
+  sentences are enough. This quiz is anonymous and is here for you, so you can
+  see what already sits and what you should read again. Answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="playlist.forEach((song) => { console.log(song.title); });"
+      scope="after the iteration chapter of the data structures part"
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "callbacks: a function handed to another object, which calls it back later, and a callback type such as `(song: Song) => void`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `toBeUndefined`, `beforeEach`, and `npm test`"
+        "generics: a type parameter `T`, `class Stack<T>`, generic functions, and a constraint such as `T extends { describe(): string }`"
+        "the command pattern with an abstract `Command` that has `execute`, `undo`, and `describe`"
+        "linked lists by hand: a `Node<T>` with `value` and `next`, `null` as the end of the chain, a head pointer, and a `Playlist` with `find`, `insertAtBeginning`, `insertAfter`, `delete`, and `toArray`"
+        "walking that chain from the outside: a `forEach(callback)` method on the class and a `length` getter that counts by walking")
+      not_yet=(array
+        "writing `[Symbol.iterator]()` yourself, which this course leaves out on purpose"
+        "stacks and queues, which the next chapters build from the same nodes"
+        "`interface`, `keyof`, mapped types, and default type parameters"
+        "Playwright and end-to-end tests"
+        "`async`, `fetch`, and `localStorage`")}}
+
+questions:
+  - id: for-of-refused
+    title: "The loop that refused"
+    question: |
+      A classmate writes this next to the finished playlist, and it does not
+      run:
+
+      ```ts
+      for (const song of playlist) {
+        console.log(song.title);
+      }
+      ```
+
+      The same loop over `playlist.toArray()` runs fine. Explain why the first
+      version fails.
+    evaluation: |
+      Expected: `for...of` only works on a value that can hand out its items
+      one at a time, which the language checks by asking for a
+      `[Symbol.iterator]()` method. `Playlist` is a hand-written class and has
+      no such method, so the loop has nothing to ask. `toArray()` gives back a
+      real array, and arrays have that method.
+      Required: (1) the `Playlist` class does not offer the thing `for...of`
+      needs, described as `[Symbol.iterator]()` or in everyday words such as
+      "it was never taught how to hand out its songs one by one";
+      (2) `toArray()` returns an array and arrays can do that.
+      Partial: says arrays work and the class does not, without naming what the
+      array has and the class lacks.
+      Incorrect: claims `for...of` works on arrays only, says the playlist is
+      empty or the songs are missing, or says the fix is a type annotation or
+      `extends Array`.
+
+  - id: foreach-callback
+    title: "Who runs the arrow function"
+    question: |
+      The playlist holds three songs, and this code runs on it:
+
+      ```ts
+      let longest = '';
+      playlist.forEach((song) => {
+        if (song.title.length > longest.length) {
+          longest = song.title;
+        }
+      });
+      ```
+
+      Who runs the arrow function, and how often does it run?
+    evaluation: |
+      Expected: the `forEach` method inside `Playlist` runs it. `forEach` walks
+      the chain from the head and calls the arrow function once per song, so it
+      runs three times, each time with that song as the `song` parameter.
+      Required: (1) the playlist itself, that is the `forEach` method of the
+      class, calls the function (the code that passed it in does not);
+      (2) three times, once for every song in the playlist.
+      Partial: gives the count of three without saying that `forEach` inside
+      the class does the calling, or names `forEach` as the caller with a wrong
+      count.
+      Incorrect: says the arrow function runs once, says it runs itself or runs
+      when the file loads, or claims `forEach` gives back an array of titles.
+
+  - id: length-counter-field
+    title: "A counter that stopped counting"
+    question: |
+      A classmate replaces the walking `length` getter of `Playlist` with a
+      stored number:
+
+      ```ts
+      private count = 0;
+
+      get length(): number {
+        return this.count;
+      }
+      ```
+
+      They add `this.count += 1;` to `insertAtBeginning` and to `insertAfter`,
+      and stop there. The user adds three songs and then deletes one. What does
+      the page show, and what is the general danger of a counter field?
+    evaluation: |
+      Expected: the page says 3 songs while the chain really holds two, because
+      `delete` never lowers the counter. The danger: with a counter, every
+      method that adds or removes has to remember the extra line, today and for
+      every method added later, and one forgotten line makes `length` lie while
+      the chain itself is still correct.
+      Required: (1) the count shown is 3 and it is too high, with `delete` named
+      as the method that does not update it; (2) a counter field must be kept up
+      to date by every method that changes the list, so a forgotten update makes
+      `length` wrong.
+      Partial: names the missing update in `delete` with nothing about the
+      general danger, or states the general danger without the wrong number.
+      Incorrect: the number on the page is 3, so an answer that says 2, says the
+      count is right, or says the deleted song is still in the chain is
+      incorrect, even when it also blames `delete`. The chain is fine here; only
+      the counter is wrong.
+
+  - id: toarray-or-foreach
+    title: "Now playing"
+    question: |
+      The playlist page gets a new line that names the first song in the
+      playlist. Your class offers both `forEach` and `toArray`. Which of the two
+      fits this line better, and what makes the other one clumsy here?
+    evaluation: |
+      Expected: `toArray`, because the job needs a position and
+      `playlist.toArray()[0]` is the first song. `forEach` has no index and
+      visits every song no matter what, so you would need an extra variable and
+      a check to keep only the first one.
+      Required: (1) picks `toArray`, ideally with the index `[0]`; (2) says
+      `forEach` gives no way to pick by position and walks the whole chain
+      anyway, so it needs an extra variable or flag.
+      Partial: picks `toArray` with no usable reason, or explains the index idea
+      correctly but picks `forEach`.
+      Incorrect: claims `toArray` changes or empties the playlist, claims
+      `forEach` can return a value, or picks `forEach` because `toArray` is said
+      to be impossible here.

@@ -1,0 +1,90 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 46rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.train {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4rem;
+  min-height: 6rem;
+  padding: 1rem 0.5rem;
+  overflow-x: auto;
+  border-bottom: 4px solid #555;
+}
+
+.hint {
+  color: #666;
+  font-style: italic;
+}
+
+.part {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+  flex: 0 0 auto;
+  width: 6.5rem;
+  height: 4rem;
+  padding: 0.4rem;
+  border: 2px solid #333;
+  border-radius: 0.3rem;
+  color: #fff;
+  text-align: center;
+}
+
+.part-kind {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.part-detail {
+  font-size: 0.8rem;
+}
+
+.locomotive {
+  background-color: #2b2b2b;
+  border-width: 4px;
+}
+
+.passenger {
+  background-color: #1e5aa8;
+  border-radius: 1rem;
+}
+
+.cargo {
+  background-color: #7a4b1e;
+  border-style: dashed;
+}
+
+.dining {
+  background-color: #2f6b3a;
+  border-top-width: 8px;
+}
+
+.caboose {
+  background-color: #a52a2a;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.controls button {
+  padding: 0.4rem 0.9rem;
+}
+
+.controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.message {
+  min-height: 1.4rem;
+  color: #b3261e;
+}

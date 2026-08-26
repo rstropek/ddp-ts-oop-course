@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the iteration chapter quiz
+# (0070-data-structures/0020-iteration.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: iteration-quiz-eval
+target: ./0020-iteration-quiz.yaml
+
+questions:
+  - question: for-of-refused
+    answers:
+      - expect: correct
+        answer: |
+          for of needs the thing to have a Symbol.iterator method so it can
+          give out its items one by one. Playlist is our own class and nobody
+          wrote that method into it. toArray gives back a normal array and
+          arrays have it, so there it works.
+      # Notices the difference but never says what arrays have.
+      - expect: partial
+        answer: |
+          because a playlist is not an array. arrays work with for of and our
+          own class does not
+      - expect: incorrect
+        answer: |
+          for of only works with arrays, everything else you have to loop with
+          a normal for loop and an index
+
+  - question: foreach-callback
+    answers:
+      - expect: correct
+        answer: |
+          the forEach method inside the Playlist class calls it. it walks from
+          the head and calls the arrow function for every song, so 3 times.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          die forEach methode von der playlist ruft die pfeilfunktion auf, nicht
+          der code der sie uebergeben hat. sie laeuft dreimal, einmal pro song.
+      # Right count, nothing about who does the calling.
+      - expect: partial
+        answer: |
+          three times because there are three songs
+      - expect: incorrect
+        answer: |
+          it runs one time and forEach gives you back an array with all the
+          titles in it
+
+  - question: length-counter-field
+    answers:
+      - expect: correct
+        answer: |
+          the page still says 3 songs but there are only 2 in the chain,
+          because delete never takes 1 off the counter. thats the problem with
+          a counter, every method that adds or removes has to remember to
+          change it and if you forget one the length is a lie.
+      # The bug, but no general lesson.
+      - expect: partial
+        answer: |
+          it shows 3 songs even though one is deleted, they forgot to do
+          this.count -= 1 in delete
+      - expect: incorrect
+        answer: |
+          it shows 2 songs, the getter always reads the real value. the delete
+          method is what is broken because the song stays in the list
+
+  - question: toarray-or-foreach
+    answers:
+      - expect: correct
+        answer: |
+          toArray, then you can just write playlist.toArray()[0] for the first
+          song. with forEach you cant say which position you want, it goes
+          through all of them and you would need an extra variable.
+      # Right pick, no reason at all.
+      - expect: partial
+        answer: |
+          i would use toArray for that line
+      - expect: incorrect
+        answer: |
+          forEach, because toArray takes the songs out of the playlist and then
+          the chain is empty

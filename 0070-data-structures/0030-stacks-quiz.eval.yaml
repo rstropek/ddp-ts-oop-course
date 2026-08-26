@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the stacks chapter quiz
+# (0070-data-structures/0030-stacks.qmd). One correct, one partial, one
+# incorrect per question, plus one German correct answer per quiz.
+# Teacher-only test data; never publish as an activity. Grading runs on the
+# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# frontier judge via --judge-llm-* and costs money, so run it after rubric
+# changes.
+
+id: stacks-quiz-eval
+target: ./0030-stacks-quiz.yaml
+
+questions:
+  - question: research-exhaustive-switch
+    answers:
+      - expect: correct
+        answer: |
+          its called exhaustiveness checking. when every string of the union
+          has a case ts narrows whats left to never so it knows the function
+          always returns. if you add a sixth kind and forget the case you get
+          an error that the function lacks an ending return statement. found
+          it in the typescript handbook on the narrowing page.
+      # Describes the error but names neither the check nor `never`.
+      - expect: partial
+        answer: |
+          you get a compiler error that not every path returns something
+      - expect: incorrect
+        answer: |
+          typescript does not care, at runtime the function just returns
+          undefined for the new kind. thats why you always need a default.
+
+  - question: research-listener-in-loop
+    answers:
+      - expect: correct
+        answer: |
+          because option is a const inside the for of loop, so every round of
+          the loop makes a new option variable. the arrow function is a
+          closure and holds on to the one from its own round. with var they
+          would all share one and all show the caboose. mdn closures page.
+      # German correct answer.
+      - expect: correct
+        answer: |
+          jede runde der schleife bekommt eine eigene option, weil const im
+          loop steht. die pfeilfunktion ist eine closure und merkt sich genau
+          diese option von ihrer runde. mit var haetten alle die gleiche
+          variable und alle wuerden die letzte sehen. steht auf mdn bei
+          closures.
+      # Right outcome, no per-turn binding, no closure, no source.
+      - expect: partial
+        answer: |
+          every button just keeps its own option somehow so it still works
+      - expect: incorrect
+        answer: |
+          they all see the caboose one because the loop is finished when you
+          click
+
+  - question: head-pointer-is-enough
+    answers:
+      - expect: correct
+        answer: |
+          he is wrong, push and pop both work at the head. push puts the new
+          node in front of the head and pop moves the head one further, so
+          they only ever touch the first node. with a million items its
+          exactly as fast as with three.
+      # Head-only named, nothing about cost.
+      - expect: partial
+        answer: |
+          a stack only adds and removes at the head so it never goes into the
+          middle of the chain
+      - expect: incorrect
+        answer: |
+          push has to walk to the last node to hang the new one on, so with a
+          million items it gets slow. thats why you want a tail pointer.
+
+  - question: pop-return-contract
+    answers:
+      - expect: correct
+        answer: |
+          no the test is fine, the change is wrong. we were only supposed to
+          swap the inside of the class. the return type is what the class
+          promises to everyone who calls it, so changing it changes what all
+          the callers get. put it back to T | undefined.
+      # Keeps the test, no contract reasoning.
+      - expect: partial
+        answer: |
+          the test is right, you should not touch the tests, change the class
+          back
+      - expect: incorrect
+        answer: |
+          the test is old, just change it to toBeNull, null and undefined
+          mean the same thing anyway
+
+  - question: peek-answers-the-caboose-rule
+    answers:
+      - expect: correct
+        answer: |
+          because a new part can only go on top and thats exactly what peek
+          gives you. so the only part it could end up behind is that one. and
+          a caboose can never be in the middle because after it nothing gets
+          added anymore.
+      # LIFO restated, no link to where a new part lands.
+      - expect: partial
+        answer: |
+          because a stack is last in first out and peek shows the newest part
+      - expect: incorrect
+        answer: |
+          you would have to go through all the parts to find the caboose, one
+          peek only works because the train is short
+
+  - question: counter-field-price
+    answers:
+      - expect: correct
+        answer: |
+          the price is that every method that changes the chain has to update
+          count, and if you add a new method later and forget it size is
+          wrong and nobody notices. what you get is that size is just reading
+          a number, and render reads it on every click so a walk every time
+          would be a waste.
+      # Only the gain.
+      - expect: partial
+        answer: |
+          reading size is faster because you dont walk the whole chain
+      - expect: incorrect
+        answer: |
+          it saves memory because you dont build an array, and walking the
+          chain would give you the wrong number anyway

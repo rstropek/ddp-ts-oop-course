@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser history</title>
+  </head>
+  <body>
+    <h1>Browser history</h1>
+
+    <form id="addressForm" class="controls">
+      <label for="address">Page</label>
+      <input id="address" type="text" placeholder="news.example" required>
+      <button type="submit">Go</button>
+    </form>
+
+    <p class="controls">
+      <button id="backButton" type="button" disabled>Back</button>
+      <button id="forwardButton" type="button" disabled>Forward</button>
+    </p>
+
+    <p class="current-line">You are on <output id="currentPage">nothing yet</output></p>
+
+    <script src="./src/index.ts" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,202 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "A chain you can rewire"
+# (0070-data-structures/0010-linked-list.qmd).
+# One quiz per chapter, at the end. The three research questions of the
+# chapter's research box come first (ids prefixed `research-`) and get the
+# research feedback rule (point at the source, never the answer). The last
+# three cover the chapter's own points: reading the cost table, what the head
+# pointer actually holds, and why the 15 tests survived the rewrite.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: linked-list-quiz
+name: "Quiz: A chain you can rewire"
+
+title: "Check your understanding: a chain you can rewire"
+description: |
+  Six short questions about the chapter *A chain you can rewire*, three of
+  them the research task. Answer in your own words; if you cannot answer a
+  research question yet, look it up and come back. One or two sentences are
+  enough. This quiz is anonymous and is here for you. Answering in German is
+  fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+  {{fragment "shared.research_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="newNode.next = this.head;"
+      scope="after the linked list chapter of the data structures part"
+      reveal=false
+      knows=(array
+        "variables, conditions, loops, arrays, and functions in TypeScript from year one"
+        "the DOM: `querySelector` with a null check, `textContent`, `createElement`, `replaceChildren`, and events"
+        "own classes with fields, methods, `private`, `readonly`, getters, and parameter properties"
+        "`extends`, `super`, `abstract`, polymorphism, and ES modules with one class per file"
+        "`throw`, `try`/`catch`, own error classes, `Map`, and `Set`"
+        "Vitest: `describe`, `it`, `expect`, `toBe`, `toEqual`, `toThrow`, `toBeUndefined`, `beforeEach`, and `npm test`"
+        "generics: a type parameter `T`, `class Stack<T>`, generic functions, and a constraint such as `T extends { describe(): string }`"
+        "the command pattern with an abstract `Command` that has `execute`, `undo`, and `describe`"
+        "the cost table of this chapter: an array is instant by index and expensive at the front, a linked list is the other way round"
+        "linked lists by hand: a private `Node<T>` with `value` and `next`, `null` as the end of the chain, a `head` field, and walking with `while (current !== null)`"
+        "the playlist class with `find`, `insertAtBeginning`, `insertAfter`, `delete`, and `toArray`, built first on an array and then on nodes with the same tests")
+      not_yet=(array
+        "which Vitest matcher checks for `null`, how `null` and `undefined` differ, which element `document.createElement('option')` gives you, and what a pointer in C is (those are the research tasks right now)"
+        "`forEach` and a `length` getter on their own collection, which the next chapter adds to the playlist"
+        "stacks and queues built on nodes, and the tail pointer a queue needs"
+        "`Symbol.iterator` and `for...of` over their own class, which this course leaves out on purpose"
+        "`interface`, `keyof`, mapped types, and default type parameters"
+        "Playwright and end-to-end tests"
+        "`async`, `fetch`, and `localStorage`")}}
+
+questions:
+  - id: research-null-matcher
+    title: "Checking for nothing"
+    question: |
+      Two of your playlist tests check that `find` gave nothing back. Which
+      Vitest matcher checks that a value is exactly `null`? And what is the
+      difference between `null` and `undefined` in JavaScript? Say where you
+      read it.
+    evaluation: |
+      Expected: `toBeNull()`, from the Vitest `expect` documentation.
+      `null` is a value someone put there on purpose to mean "nothing here";
+      `undefined` is what JavaScript hands you when no value was ever put
+      there, for example a variable that was never assigned, a property that
+      does not exist, or a function that returns nothing. Sources are the
+      Vitest `expect` page and the MDN page for `null`.
+      Required: (1) `toBeNull` (writing `toBe(null)` counts too); (2) a
+      workable difference: `null` is set deliberately, `undefined` means no
+      value was ever given; (3) names a source (Vitest docs, MDN).
+      Partial: names the matcher but gets the difference wrong or leaves it
+      out, or explains the difference with no matcher or no source.
+      Incorrect: names `toBeUndefined`, `toBeFalsy`, or `toBeDefined` as the
+      matcher for `null`, or claims `null` and `undefined` are the same
+      thing.
+
+  - id: research-option-element
+    title: "Filling a dropdown from code"
+    question: |
+      The **Insert after** dropdown is empty in `index.html`, and your code
+      fills it. Which element does `document.createElement('option')` hand
+      you, and which two properties do you set on it so that the dropdown
+      shows a song title and gives that same title back through
+      `select.value`? Say where you read it.
+    evaluation: |
+      Expected: an `HTMLOptionElement`. You set `textContent` for the text
+      the user sees in the list, and `value` for what `select.value` hands
+      back once that option is picked. Source is the MDN page for
+      `HTMLOptionElement` or for the `<option>` element.
+      Required: (1) `HTMLOptionElement`; (2) both properties, one for the
+      visible text (`textContent`, `text`, `innerText`, or `label` all
+      count) and `value` for what comes back; (3) names the source.
+      Partial: names the element type but only one of the two properties, or
+      names both properties without the element type or without a source.
+      Incorrect: says `createElement('option')` gives an `HTMLSelectElement`
+      or a plain `HTMLElement`, or claims that setting `value` alone already
+      makes the text appear in the dropdown.
+
+  - id: research-pointer-in-c
+    title: "Where the word pointer comes from"
+    question: |
+      The word **pointer** comes from languages such as C. What is a pointer
+      there? And when TypeScript runs `newNode.next = this.head;`, does the
+      node on the right get copied into `next`, or do both names then mean
+      the very same node? Say where you read it.
+    evaluation: |
+      Expected: in C a pointer is a variable that holds a memory address,
+      the place in memory where another value lives, and the program can
+      read that address and calculate with it. TypeScript never shows you an
+      address. `next` holds a reference to the node object, so nothing is
+      copied and `newNode.next` and `this.head` mean the very same node.
+      Sources are any C reference or tutorial for the first half, and MDN's
+      pages about objects and references for the second.
+      Required: (1) a pointer in C holds the memory address of another
+      value; (2) nothing is copied, both names mean the same node object;
+      (3) names a source.
+      Partial: answers the copying question correctly but describes a C
+      pointer wrongly or not at all, or describes the C pointer correctly
+      and says nothing usable about copying.
+      Incorrect: says the node gets copied into `next`, or claims TypeScript
+      gives you real memory addresses you can read and calculate with.
+
+  - id: cost-of-the-front
+    title: "Which structure for the chat"
+    question: |
+      A chat app keeps every message of the evening in one collection. New
+      messages arrive several times per second and always go to the front,
+      and the app never asks for message number 40; it only ever draws the
+      whole list from the newest down. Array or linked list, and which cost
+      from the chapter decides it?
+    evaluation: |
+      Expected: the linked list. Every new message goes in at the front, and
+      on an array that means moving every message already stored one slot to
+      the right, while the linked list builds one node and rewires one
+      pointer. The array's own strength, jumping to an item by index, is
+      never used by this app, so it buys nothing here.
+      Required: (1) picks the linked list; (2) names inserting at the front
+      as the cost that decides it, expensive on an array because everything
+      shifts, cheap on a list because only a pointer changes.
+      Partial: picks the linked list but only says it is faster, with
+      nothing about the front; or explains the front cost correctly but
+      picks no structure.
+      Incorrect: picks the array, or picks the linked list with a reason
+      that is wrong, such as a linked list using less memory or being faster
+      to read by index.
+
+  - id: head-and-next
+    title: "What the playlist remembers"
+    question: |
+      A classmate says: "The `Playlist` class keeps all its nodes in a field,
+      that is how it gets to them." What does the node version of `Playlist`
+      really keep in a field, and how does `toArray` reach the third song?
+    evaluation: |
+      Expected: it keeps one field, `head`, holding the first node of the
+      chain, and `null` when the playlist is empty. Every other node is
+      reached through the `next` of the node in front of it, so `toArray`
+      starts at `head`, collects `value`, follows `next`, and repeats until
+      `next` is `null`. Reaching the third song means two steps along the
+      chain; there is no index and no way to jump.
+      Required: (1) only the head, the first node, is stored (`null` when
+      empty); (2) `toArray` walks from the head along `next` step by step
+      instead of jumping to a position.
+      Partial: names the head but describes `toArray` as reading a position
+      or an index, or describes the walk correctly but still claims the
+      class stores every node in a field.
+      Incorrect: agrees with the classmate, or claims a node can be reached
+      directly by its position in the playlist.
+
+  - id: tests-survived-rewrite
+    title: "The tests that did not move"
+    question: |
+      You replaced the array inside `Playlist` with hand-built nodes without
+      changing one character of `src/playlist.test.ts`, and all 15 tests
+      stayed green. What does that say about those 15 tests? Name one change
+      to `Playlist` that would have forced you to edit the test file.
+    evaluation: |
+      Expected: the tests only describe what a playlist does, through the
+      public methods. `songList` and `head` never appear in them, so the
+      storage underneath was free to change. What would break them is a
+      change to the public interface: renaming a method, changing its
+      parameters, or changing what it hands back, for example letting `find`
+      return a node instead of a `Song`, or letting `insertAtBeginning`
+      return nothing instead of a boolean.
+      Required: (1) the tests check behavior through the public methods and
+      never touch the private field; (2) names one public-interface change
+      (a method name, its parameters, or its return value or type) as what
+      would force a test edit.
+      Partial: only one of the two, for example "they test the outside, not
+      the inside" with no example of a breaking change.
+      Incorrect: claims the tests passed because nothing really changed or
+      because Vitest reused an old result, or names a purely private change
+      (renaming `songList`, using a different loop) as one that would break
+      the tests.
