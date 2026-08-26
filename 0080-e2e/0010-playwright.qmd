@@ -406,7 +406,10 @@ no class to unit test here, only clicks and what they leave on the screen.
      `Walk the dog`, click the `x` button that belongs to `Buy milk`, and check
      that exactly one list item is left and that it is `Walk the dog`. There are
      two `x` buttons on that page, so read your third research answer before you
-     write this one.
+     write this one. One more catch waits in the assertion: the `x` button
+     lives inside the list item, so `toHaveText('Walk the dog')` fails with
+     `Received: "Walk the dogx"`. `toContainText` is the forgiving cousin that
+     checks the text is in there without demanding the whole element match.
 
 6. Run `npm run test:e2e`. Expected result:
 

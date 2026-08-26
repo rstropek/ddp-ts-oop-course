@@ -167,6 +167,11 @@ needs. When your buddy puts a class into `index.ts` twice in one week, the fix
 is one line in `AGENTS.md`, not a third reminder in the chat that you throw away
 when the session ends.
 
+The salon probably has no `AGENTS.md` yet, because the file grows per project
+and this one never got its start. Create it now from the example above, trimmed
+to what is true for your code. The exercise below expects a file it can add a
+rule to.
+
 The line between the two files is the trigger. A rule that is true for every
 task belongs in `AGENTS.md`. A procedure for one kind of task belongs in a
 skill, where it stays out of the way until that task shows up.
@@ -351,8 +356,9 @@ starting point, and let the two attempts argue for themselves.
    hand instead.
 
 10. Run `npm run verify`, then commit the kept change together with
-    `SKILL.md` and `AGENTS.md`. Expected result: green, and one test more than
-    the verify run in step 1 printed.
+    `SKILL.md` and `AGENTS.md`. Expected result: green, and more tests than
+    the verify run in step 1 printed. How many more is the agent's choice; two
+    tests for one small class is thoroughness, not a mistake.
 
 ::: {.callout-tip}
 ## The same prompt twice
