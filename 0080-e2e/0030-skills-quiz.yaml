@@ -132,6 +132,11 @@ questions:
       never follows the steps. What is wrong, and what do you tell them to
       change?
     evaluation: |
+      First check the diagnosis: an answer that does not name the vague
+      description as the reason the skill never runs is incorrect, whatever
+      else it proposes. Blaming the steps, the file name, or the folder, or
+      claiming the whole SKILL.md is always in the model's context, are all
+      that failure.
       Expected: only the name and the description of a skill sit in the model's
       context. The agent reads the rest of the file when a task sounds like the
       description, and "Helps with tests." names no situation, so nothing ever
@@ -153,6 +158,10 @@ questions:
       no entry for the `tested-class` skill you wrote yourself. What does the
       file record about `find-docs`, and why is your own skill missing from it?
     evaluation: |
+      First check for the classic wrong model: an answer saying the file
+      holds the skills' instructions, switches skills on or off, or that a
+      skill without an entry does not run, is incorrect no matter what else
+      it gets right.
       Expected: the entry records where the borrowed skill came from, the
       GitHub project `upstash/context7` and the path of the file inside it,
       plus a hash of the text as it arrived. That lets you check later whether
