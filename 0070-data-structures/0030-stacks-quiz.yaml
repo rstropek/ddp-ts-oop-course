@@ -176,10 +176,12 @@ questions:
       (2) the return type is part of the class's public contract, so
       callers (and the tests that stand for them) depend on it, and a
       rewrite of the insides must leave it alone.
+      First check the conclusion: any answer whose bottom line is that the
+      test should be changed or updated is incorrect, no matter how well it
+      explains `null` versus `undefined` on the way there.
       Partial: says the test should not be changed but gives no reason about
-      the public contract, or explains the contract and still concludes the
-      test should be updated.
-      Incorrect: says the test is out of date and should be changed to
+      the public contract.
+      Incorrect: concludes the test is out of date and should be changed to
       `toBeNull`, says `null` and `undefined` are the same thing here, or
       says the failure comes from the nodes rather than from the return
       type.
