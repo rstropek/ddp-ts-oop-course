@@ -4,26 +4,26 @@ import { WaitingLine } from './waiting-line';
 
 const line = new WaitingLine<Customer>();
 
+const humanForm = document.querySelector<HTMLFormElement>('#humanForm');
 const humanFirstName = document.querySelector<HTMLInputElement>('#humanFirstName');
 const humanLastName = document.querySelector<HTMLInputElement>('#humanLastName');
 const humanLongHair = document.querySelector<HTMLInputElement>('#humanLongHair');
-const addHumanButton = document.querySelector<HTMLButtonElement>('#addHumanButton');
+const dogForm = document.querySelector<HTMLFormElement>('#dogForm');
 const dogName = document.querySelector<HTMLInputElement>('#dogName');
 const dogBreed = document.querySelector<HTMLInputElement>('#dogBreed');
-const addDogButton = document.querySelector<HTMLButtonElement>('#addDogButton');
 const serveButton = document.querySelector<HTMLButtonElement>('#serveButton');
 const lineDisplay = document.querySelector<HTMLDivElement>('#line');
 const countLine = document.querySelector<HTMLParagraphElement>('#countLine');
 const message = document.querySelector<HTMLParagraphElement>('#message');
 
 if (
+  !humanForm ||
   !humanFirstName ||
   !humanLastName ||
   !humanLongHair ||
-  !addHumanButton ||
+  !dogForm ||
   !dogName ||
   !dogBreed ||
-  !addDogButton ||
   !serveButton ||
   !lineDisplay ||
   !countLine ||
@@ -64,7 +64,9 @@ const render = (): void => {
   serveButton.disabled = line.isEmpty();
 };
 
-addHumanButton.addEventListener('click', () => {
+humanForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+
   const firstName = humanFirstName.value.trim();
   const lastName = humanLastName.value.trim();
 
@@ -83,7 +85,9 @@ addHumanButton.addEventListener('click', () => {
   render();
 });
 
-addDogButton.addEventListener('click', () => {
+dogForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+
   const name = dogName.value.trim();
   const breed = dogBreed.value.trim();
 

@@ -289,8 +289,8 @@ turning it into an object is the first half of half the exercises you will get.
    customer at the front and the one behind them to `describe()` themselves, two
    build a `Human` and a `Dog` from the form and enqueue them, one clears the
    checkbox after a human joined, and the last one dequeues when Serve next is
-   clicked. The element lookups, the render helper, and the two form checks are
-   already wired.
+   clicked. The element lookups, the render helper, and the two `submit`
+   listeners with their empty-field checks are already wired.
 
 9. Run `npm start` and walk through the salon. Expected results:
 

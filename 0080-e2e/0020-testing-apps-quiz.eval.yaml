@@ -91,20 +91,21 @@ questions:
     answers:
       - expect: correct
         answer: |
-          enter in a textfield only fires submit on the form around it and
-          there was no form, just divs and a button with a click listener. so
-          you wrap the fields and the button in a <form id="humanForm">, make
-          the button type submit and put the listener on the form with submit
-          and event.preventDefault() first.
-      # The missing form, nothing about the listener move.
+          pressing enter in a text field fires submit on the form, and now
+          nobody listens to submit anymore so nothing happens at all. the
+          click still works because the click listener sits right on the
+          button and the form is not involved, and the mouse test only clicks
+          too, so it cannot see that anything is gone.
+      # Only the missing submit listener, nothing about why clicking is blind.
       - expect: partial
         answer: |
-          there was no form element on the page so enter could not submit
-          anything
+          the submit listener is gone so enter does not reach any code anymore
+      # Fluent and confident, but the bottom line blames the test.
       - expect: incorrect
         answer: |
-          the test was wrong, press('Enter') does not work on an input, you
-          have to use page.keyboard and give the assertion more time
+          the app is fine, clicking proves it. the enter test is the broken
+          one, press('Enter') is not reliable on an input and the 5 second
+          timeout is too short, so just delete that test or give it more time
 
   - question: e2e-in-ci
     answers:

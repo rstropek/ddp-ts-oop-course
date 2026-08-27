@@ -5,8 +5,9 @@
 # research box come first (ids prefixed `research-`) and get the research
 # feedback rule (point at the Playwright documentation, never the answer). The
 # other four cover the chapter's own points: what a codegen recording is and is
-# not, why the strict mode error appears, what the Enter test found, and why
-# the end-to-end tests live in CI instead of in `verify`.
+# not, why the strict mode error appears, what the Enter test catches when the
+# form loses its `submit` listener, and why the end-to-end tests live in CI
+# instead of in `verify`.
 # Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
 # students 16-17).
 
@@ -147,30 +148,36 @@ questions:
       loaded too slowly, or suggests adding a wait.
 
   - id: enter-key-bug
-    title: "The test that was right"
+    title: "Green for the mouse, red for the key"
     question: |
-      The test that fills both name fields and presses Enter failed on the
-      salon page, and the fix was in the app, not in the test. Why did pressing
-      Enter do nothing, and what changed in `index.html` and `src/index.ts` to
-      make it work?
+      Somebody tidies up the salon app. The `<form>` around the human fields
+      stays in `index.html`, but the Add human button becomes `type="button"`,
+      and its `submit` listener becomes a `click` listener on the button.
+      Clicking Add human still adds the customer and the mouse test stays
+      green, while the Enter test goes red. What did that change break, and why
+      did clicking through the app never show it?
     evaluation: |
+      First check the conclusion: any answer whose bottom line is that the test
+      is wrong, that `press('Enter')` or the timeout needs fixing, or that the
+      Enter test should be deleted or skipped, is incorrect no matter how well
+      it describes the code on the way there.
       Expected: Enter in a text field fires a `submit` event on the form around
-      that field, and the Add a human section had no `<form>` in it, only divs
-      and a button with a `click` listener. The fix wraps the fields and the
-      button in a `<form>`, makes the button `type="submit"`, and turns the
-      listener into a `submit` listener on the form whose first line is
-      `event.preventDefault()`.
-      Required: (1) the page had no `<form>`, so the Enter key fired no
-      `submit` event; (2) a `<form>` was added and the listener moved to the
-      form's `submit` event. Mentioning `preventDefault` or the
-      `type="submit"` button is a bonus.
-      Partial: names the missing form without saying what replaced the click
-      listener, or describes the fix without naming why Enter did nothing.
-      Incorrect: the answer puts the fault anywhere other than the missing
-      form. Anything that blames the test, `press('Enter')`, the timeout, or
-      Playwright is incorrect even when it sounds confident and even when it
-      also proposes some change, because the question already says the fix was
-      in the app. A `keydown` listener on the button is incorrect too.
+      it, and after the change nothing listens to that event any more, so the
+      keyboard reaches no code at all. Clicking is untouched because a click
+      runs the button's own `click` listener straight away and never asks the
+      form for anything, and the mouse test walks that same path, so neither
+      the hand nor the mouse test can see the loss.
+      Required: (1) Enter works through the form's `submit` event, which now
+      has no listener; (2) a click goes directly to the button's `click`
+      listener and never involves the form, which is why clicking by hand and
+      the mouse test both stay happy.
+      Partial: names only one of the two halves, for example says the `submit`
+      listener is gone without explaining why clicking still works, or says
+      mouse and keyboard take different paths without naming the `submit`
+      event.
+      Incorrect: says the `<form>` was deleted from the HTML, although the
+      question says it is still there, or says the `click` listener no longer
+      runs, or blames Playwright.
 
   - id: e2e-in-ci
     title: "Two commands, two places"

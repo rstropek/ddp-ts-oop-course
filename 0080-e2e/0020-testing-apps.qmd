@@ -126,7 +126,7 @@ npm run test:e2e
 ```text
 Running 1 test using 1 worker
 
-  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (368ms)
+  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (376ms)
 
   1 passed (1.4s)
 ```
@@ -245,6 +245,58 @@ test('adds a human when you press Enter in the form', async ({ page }) => {
 name of that key. Run `npm run test:e2e`:
 
 ```text
+Running 2 tests using 1 worker
+
+  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (384ms)
+  ✓  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (126ms)
+
+  2 passed (1.5s)
+```
+
+Green on the first run, and you wrote no app code for it. The Add a human
+section is a `<form>`, and its button carries `type="submit"`. Your listener
+sits on the form's `submit` event, and Enter in a text field fires exactly that
+event (@sec-forms-submit), so that one listener has been answering the keyboard
+since the day you built the salon.
+
+A test that is green the moment you type it feels like a test that proves
+nothing. Take the salon's form apart and watch what this one catches.
+
+Here is a change somebody makes six months from now, in a tidying mood. The
+form wraps three fields and a button, the button is what people press, and the
+wrapper looks like one element too many. In `index.html`, give the button an
+`id` and take the submit job away from it:
+
+```html
+<button id="addHumanButton" type="button">Add human</button>
+```
+
+In `src/index.ts`, look the button up instead of the form:
+
+```ts
+const addHumanButton = document.querySelector<HTMLButtonElement>('#addHumanButton');
+```
+
+Swap the name in the null check as well, and listen for the click:
+
+```ts
+addHumanButton.addEventListener('click', () => {
+  const firstName = humanFirstName.value.trim();
+  const lastName = humanLastName.value.trim();
+  // the rest of the listener stays exactly as it was
+```
+
+The `event` parameter went out with the `submit` event, and `preventDefault()`
+went with it, because a button with `type="button"` submits nothing. The type
+check stays green. So does the app: run `npm start`, type Mia and Berger, tick
+Long hair, click Add human, then click Serve next. Every click does what it
+always did.
+
+Now run `npm run test:e2e`:
+
+```text
+Running 2 tests using 1 worker
+
   ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (377ms)
   ✘  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (5.1s)
 
@@ -263,73 +315,33 @@ name of that key. Run `npm run test:e2e`:
       - waiting for getByText('Now serving: 🧑 Tom Novak (short hair)')
 ```
 
-Five seconds of asking, and Tom never showed up. The test is right and the app
-is wrong. Enter in a text field fires a `submit` event on the form around it
-(@sec-forms-submit), and the Add a human section of your salon has no form in
-it. Two `<div>`s, a checkbox, and a button with a click listener answer the
-mouse and have nothing to say to the keyboard.
+Five seconds of asking, and Tom never showed up. The `<form>` is still in
+`index.html`, still wrapped around the same three fields, and the page looks
+exactly the way it looked yesterday. Nobody listens to its `submit` event any
+more, so pressing Enter in a name field goes nowhere.
 
-Open `index.html` and put a form around the human fields, with the button
-inside it:
-
-```html
-<form id="humanForm">
-  <div class="field">
-    <label for="humanFirstName">First name</label>
-    <input id="humanFirstName" type="text">
-  </div>
-  <div class="field">
-    <label for="humanLastName">Last name</label>
-    <input id="humanLastName" type="text">
-  </div>
-  <div class="checkbox-field">
-    <input id="humanLongHair" type="checkbox">
-    <label for="humanLongHair">Long hair</label>
-  </div>
-  <button type="submit">Add human</button>
-</form>
-```
-
-The button lost its `id` and gained `type="submit"`, so `src/index.ts` looks up
-the form instead of the button:
-
-```ts
-const humanForm = document.querySelector<HTMLFormElement>('#humanForm');
-```
-
-Change that name in the null check too, and turn the listener into a `submit`
-listener whose first line is the one you have written since the forms chapter:
-
-```ts
-humanForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-
-  const firstName = humanFirstName.value.trim();
-  const lastName = humanLastName.value.trim();
-  // the rest of the listener stays exactly as it was
-```
-
-Run the tests again:
+Undo all four edits and run the tests again:
 
 ```text
 Running 2 tests using 1 worker
 
-  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (382ms)
-  ✓  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (158ms)
+  ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (364ms)
+  ✓  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (161ms)
 
-  2 passed (1.4s)
+  2 passed (1.5s)
 ```
 
-The first test still passes without a single edit, because a click on a submit
-button fires the same `submit` event. One listener now answers the mouse and
-the keyboard, and five lines of test found something that clicking through the
-app by hand never did.
+That `<form>` element does real work, and the work stays invisible until
+somebody uses the keyboard. Clicking through the salon by hand never sees it
+go, because a mouse asks nothing of a form. The first test drives that same
+mouse and stayed green through the whole detour, for the same reason. Five
+lines that press one key are the only thing in the project that noticed.
 
 ## Both kinds of test on every push {#sec-testing-apps-ci}
 
 `npm run verify` runs the type check, Biome, and Vitest, and it has never
 started a browser. That stays that way. Your 16 Vitest tests in the salon
-project finish in 183 milliseconds, while the four Playwright tests need 1.8
+project finish in 156 milliseconds, while the four Playwright tests need 1.7
 seconds plus the time Vite takes to start, and `verify` is the command you run
 before every commit. Speed is what makes you run it.
 
@@ -403,8 +415,9 @@ has no browser, and the log line that says so is easy to miss.
 
 ## Exercise: the salon under test {#sec-testing-apps-exercise}
 
-Your `coursework/hairdresser` project has two end-to-end tests and a form that
-answers the keyboard. This exercise finishes the suite and puts it on GitHub.
+Your `coursework/hairdresser` project has two end-to-end tests, one that clicks
+and one that presses a key. This exercise finishes the suite and puts it on
+GitHub.
 
 1. Open `coursework/hairdresser` and add a third test to `e2e/salon.e2e.ts`,
    called `'starts with an empty line and a dead Serve next button'`. It goes
@@ -424,12 +437,12 @@ answers the keyboard. This exercise finishes the suite and puts it on GitHub.
    ```text
    Running 4 tests using 1 worker
 
-     ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (366ms)
-     ✓  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (129ms)
-     ✓  3 e2e/salon.e2e.ts:33:1 › starts with an empty line and a dead Serve next button (104ms)
+     ✓  1 e2e/salon.e2e.ts:3:1 › serves the customers in the order they arrived (371ms)
+     ✓  2 e2e/salon.e2e.ts:23:1 › adds a human when you press Enter in the form (113ms)
+     ✓  3 e2e/salon.e2e.ts:33:1 › starts with an empty line and a dead Serve next button (116ms)
      ✓  4 e2e/salon.e2e.ts:41:1 › refuses a human without a name (134ms)
 
-     4 passed (1.8s)
+     4 passed (1.7s)
    ```
 
    Your line numbers and times differ. The four names and the green ticks do
@@ -475,9 +488,10 @@ answers the keyboard. This exercise finishes the suite and puts it on GitHub.
 ::: {.callout-tip}
 ## When you finish early
 
-**Test the dog form too.** The Add a dog section still has no form around it,
-so Enter does nothing there either. Give it the same treatment and prove it
-with a fifth test.
+**Put a guard on the dog form.** The Add a dog section is a `<form>` as well,
+so Enter in the Breed field already sends Rex to the back of the line, and no
+test in your suite would notice if that stopped. Write the fifth one: fill Name
+and Breed, `press('Enter')` on Breed, and expect `Now serving: 🐕 Rex (Beagle)`.
 
 **Test the beehive.** Your beehive game from the SVG part sits on the plain
 starter, which has no Playwright in it. Create a new app from the tests
