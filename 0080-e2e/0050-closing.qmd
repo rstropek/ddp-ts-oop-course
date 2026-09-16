@@ -1,0 +1,180 @@
+---
+title: "Where you are now"
+---
+
+Open your course repository and run `git log --oneline`. The newest commit is at
+the top, so scroll down to the very first one, the one from September, and read
+your way back up. A to-do list turns into a class blog. A bracelet editor grows
+a test file. Somewhere near the top a browser starts clicking through your app
+without you, and the last commits belong to a project nobody specified for you.
+This short chapter is the pause between that log and whatever you build next.
+
+## What you carry out of this book {#sec-closing-what-you-have}
+
+Read the part titles in the table of contents from the top. Every part added one
+idea, and each idea only worked because the part before it was already yours.
+
+- **A page is a tree of objects.** You find elements with a selector, change
+  them, build new ones, and hand them event listeners. The DOM is the browser's
+  living model of the page, not the file on your disk, which is why your code
+  can change it while it runs (@sec-elements-are-objects-dom).
+- **Pictures you can address.** An SVG shape is an element like any other, so
+  the code that changes a heading also moves a circle. You scaled real numbers
+  into a chart that fits its box (@sec-charts-scale) and asked the browser for
+  one frame at a time (@sec-animation-loop).
+- **Classes of your own.** Fields, a constructor, methods, `private` for what
+  nobody outside should touch, `extends` for what two classes share, and an
+  abstract member every subclass fills in differently. A variable typed as the
+  base class calls that member without asking which kind it holds
+  (@sec-polymorphism-name).
+- **Errors that travel.** `throw` stops the code where the problem is, and the
+  `catch` far above decides what the user reads on the page
+  (@sec-exceptions-where).
+- **Proof instead of hope.** Tests that read like sentences, arranged the same
+  way every time (@sec-vitest-aaa), `npm run verify` before a commit, and a
+  workflow that runs the same checks on a computer that is not yours
+  (@sec-verify-ci-workflow).
+- **One class, any type.** A type parameter is a hole in a class that the caller
+  fills, which is how `Stack<number>` and `Stack<Command>` come from one file
+  (@sec-generics-type-parameter).
+- **Structures made of boxes and pointers.** A linked list, a stack, a queue,
+  each built from your own `Node<T>` with no array hiding inside. You can also
+  say why a queue and not a stack, in two questions
+  (@sec-choosing-questions).
+- **A project other people can trust.** Playwright drives the real app in a real
+  browser using the words a user sees (@sec-playwright-locators), and your
+  `AGENTS.md` tells the next agent, or the next human, how this project works
+  (@sec-skills-agents-md).
+
+None of that is a school version of the real thing. `class`, `extends`,
+`private`, `Map`, `describe`, and `page.getByRole` are the words somebody types
+at work on a Monday morning. Your apps were small so that every part of them
+stayed visible on one screen, and that is the whole difference.
+
+## Habits worth more than any keyword {#sec-closing-habits}
+
+Keywords are easy to look up again. Three things from this year are harder to
+find in a reference, and they are the ones to keep.
+
+**Design before you type.** You drew the aquarium as boxes and arrows before a
+single class existed (@sec-class-diagrams-mermaid), and you wrote the bracelet's
+model before its page (@sec-bracelet-model). Ten minutes with a pen costs less
+than an afternoon spent rewriting a class that carries the wrong fields.
+
+**Red before green.** Every structure in Part 7 started with a test that failed
+because the method did not exist yet (@sec-undo-experiment). A test written
+afterwards only proves that the code does what the code does. A test written
+first says what the code should do, and the red run tells you the test itself
+works before you trust it.
+
+**Explain every line, especially now.** You had a coding buddy all year, and the
+Part 8 one writes a whole class while you watch. That makes the rule from
+your first week heavier rather than lighter (@sec-buddy-what). The exam happens
+without internet and without AI (@sec-from-canvas-to-page-rules), so the honest
+test is whether you can rebuild something from this book and your own notes.
+Outside the exam the reason is different and it does not go away: the line you
+cannot explain is the line that breaks on the day somebody is watching, and no
+agent will stand next to you and take the blame for it.
+
+## Keep the repository alive {#sec-closing-keep-going}
+
+The folder on your computer does not disappear when the course ends, and neither
+does what you know. Until your next programming lessons start, build something
+small. Give the beehive a second bee and a rule about who moves first. Put a
+waiting time on the salon screen. Let Paint remember the drawing after a reload.
+Redraw the energy chart with numbers you actually care about, your bus times or
+your phone battery over a week. Take the bracelet editor and make it something
+you would show a friend.
+
+None of it has to be good. What matters is that you open VS Code with nobody
+asking you to, and that the session still ends the way it did all year, with
+`npm run verify`, a commit, and a push (@sec-git-loop).
+
+## TypeScript worth researching on your own {#sec-closing-typescript}
+
+This book taught the TypeScript the course needed and stopped there. You are now
+at the point where you can read about a feature in the morning and use it the
+same afternoon, which is exactly what the research boxes were training. The
+[TypeScript handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+is the reference for the language itself, and MDN stays the reference for
+everything the browser does.
+
+### Types that describe your data more exactly {#sec-closing-types}
+
+- **`interface`, and how it differs from a class.** An interface describes the
+  shape an object must have and carries no code at all. Look up why a class can
+  promise to match an interface, and when people reach for `interface` instead
+  of `type`.
+- **Discriminated unions and narrowing.** You already gave a variable exactly
+  two allowed values (@sec-callbacks-maps-enum). Objects can carry such a tag
+  too, and inside an `if` that checks the tag, the compiler knows which fields
+  exist. Search the handbook for "Narrowing".
+- **Utility types.** `Partial`, `Pick`, and `Record` build a new type out of one
+  you already have, instead of you copying it and editing the copy.
+- **`readonly` and `as const`.** Two ways to tell the compiler that data must not
+  be changed after it is created, which catches a whole family of bugs before
+  the program runs.
+
+### The browser, past what this book used {#sec-closing-browser}
+
+- **Promises, `async`, `await`, and `fetch`.** You typed `await` in every
+  Playwright test and were told to keep it out of `src/`. Find out what a
+  Promise is, then read MDN on the Fetch API. Asking a server for data is the
+  step that turns your apps into apps that talk to the world, and everything in
+  Part 8 that felt like magic gets explained on the way.
+- **`localStorage` and JSON.** Your apps forget everything on reload.
+  `JSON.stringify` turns an object into text, and `localStorage` keeps that text
+  between visits. This one is an afternoon of work and it changes how finished
+  your projects feel.
+- **Custom elements.** You can define your own tag, `<my-chart>`, backed by a
+  class you write. It is the DOM and your classes meeting in one place, and it is
+  how a chart becomes something you reuse instead of copying it.
+- **The `<canvas>` element.** Last year's p5.js was drawing on one the whole
+  time. Compare it with SVG and you will understand why this book chose SVG for
+  charts and would not choose it for a particle storm.
+- **Accessibility.** Roles and labels are already in your vocabulary, because
+  Playwright finds elements by them (@sec-playwright-locators). The same
+  attributes are what a screen reader announces to somebody who never sees your
+  layout.
+
+### The craft around the code {#sec-closing-craft}
+
+- **Complexity.** `O(1)` and `O(n)` showed up once, when an array made you shift
+  every element (@sec-linked-list-costs). The notation has a whole field behind
+  it, and it is how programmers compare two solutions without running either.
+- **Recursion, and trees.** A method that calls itself sounds like a trick until
+  you meet a structure that is shaped like a tree. The DOM is one. Your file
+  system is one.
+- **More design patterns.** Undo used the command pattern (@sec-undo-command).
+  Observer, factory, and strategy are the next three you will recognize in code
+  you did not write.
+- **A framework, later.** React, Angular, Svelte, and Vue all do by machine what
+  you did by hand this year, turning data into elements and keeping them in sync.
+  Having done it by hand is the reason they will make sense to you.
+
+One tool belongs here too, and it is not a topic. Learn the debugger, in VS Code
+and in your browser's developer tools. A breakpoint that pauses the program and
+lets you read every variable beats a fifth `console.log`, and it takes about
+twenty minutes to learn.
+
+## What comes next at school {#sec-closing-next-years}
+
+There is no third Creative Coding book. What follows is the rest of your school's
+programming lessons, and which subjects you get depends on your school and your
+branch, so read this as the shape of it rather than a timetable. Databases and
+the language used to query them. Programming on the server, where your code
+answers requests instead of clicks. Networks, so `fetch` stops being a mystery.
+More software design, in bigger teams and on longer projects, ending in a
+diploma project that lasts a school year. Somewhere in there another language
+arrives, usually Java, C#, or Python.
+
+That last one worries people more than it should. A class is a class in all
+three of them, `private` still hides a field, and a unit test is still arrange,
+act, assert. What changes is mostly spelling. The year you spent learning what
+an object is transfers whole, and so does git, and so does the habit of running
+the tests before you say you are done.
+
+Somebody who has never met you can clone your repository, run `npm install` and
+`npm start`, and use what you built, with a green check mark on GitHub telling
+them it works before they even click. That was not true of you twelve months
+ago. Take the summer, and then push a commit that nobody assigned you.

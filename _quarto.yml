@@ -79,6 +79,7 @@ book:
         - 0080-e2e/0020-testing-apps.qmd
         - 0080-e2e/0030-skills.qmd
         - 0080-e2e/0040-final-project.qmd
+        - 0080-e2e/0050-closing.qmd
   page-footer:
     left: "© 2026 — Creative Coding 2"
     right: "Made with [Quarto](https://quarto.org)"
