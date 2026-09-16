@@ -10,7 +10,11 @@ to 17 in Austrian schools (English book, German-speaking students).
 One `quarto render` produces two outputs from the same sources:
 
 * an HTML book (chapter sidebar, prev/next navigation) in `_output/`
-* one combined PDF handout, `_output/Creative-Coding-2.pdf`, laid out for print
+* one combined PDF handout, `_output/book.pdf`, laid out for print
+
+Every push to `main` publishes both to GitHub Pages: the book at
+<https://rstropek.github.io/ddp-ts-oop-course/> and the PDF at
+<https://rstropek.github.io/ddp-ts-oop-course/book.pdf>.
 
 The technical setup (Quarto book, shortcodes, Novedu activity registry, authoring
 skills, CI) is inherited unchanged from the first-year book. Its README documents the
