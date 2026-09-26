@@ -65,6 +65,11 @@ PDF, and `rsvg-convert` so SVG diagrams survive the LaTeX pass.
   the copy instructions. The playground-era `example` shortcode is gone.
 * The book is tested by letting a smaller LLM work through it, so every exercise
   must be fully specified from the chapter text and its `exercises/` files alone.
+* Novedu runs as two separate apps, PROD (`app.novedu.at`) and DEV (`dev.novedu.at`).
+  The book's codes live on PROD, the CLI's default: every code in the lock file is a PROD
+  code, and `novedu-base-url` in `_quarto.yml`, `models.json`, and the base URL in
+  chapter 1.2 all name `app.novedu.at`. Never run `codes sync` for this registry with
+  `--server https://dev.novedu.at` or with `NOVEDU_SERVER` set to DEV.
 * The `base-url` in `ddp-activities.yaml` must point at this repository's public URL
   before the first Novedu activity is minted: `codes sync` fetches each activity file
   from that URL and fails with `FETCH_FAILED` until the repo is pushed.
@@ -97,7 +102,7 @@ The chapter that opens a part links its buddy by registry key:
 {{< coding coding-buddy-svg >}}
 ```
 
-The **code is not an API key**. A student opens `novedu.at/<code>`, signs in with their
+The **code is not an API key**. A student opens `app.novedu.at/<code>`, signs in with their
 school account, and that page mints them a personal `nvk-…` key, stable across visits
 and devices, which goes into `~/.pi/agent/auth.json`. That is why a code can be printed
 in the book at all, and why the box's fixed body text says the code alone opens nothing:

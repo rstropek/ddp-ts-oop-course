@@ -135,7 +135,7 @@ OpenAI-compatible endpoint reaches the course model, for example
 [opencode](https://opencode.ai). Whatever you pick needs the same four
 settings:
 
-* the base URL `https://novedu.at/api/coding/v1`
+* the base URL `https://app.novedu.at/api/coding/v1`
 * an OpenAI chat completions API, which most agents call "OpenAI compatible"
 * the model id `coding`
 * your key from the connection page as the API key

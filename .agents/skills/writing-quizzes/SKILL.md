@@ -240,11 +240,15 @@ interpretation.
 
 Quizzes are served straight from the book's public GitHub repo
 (`rstropek/ddp-ts-oop-course`); the Novedu server re-reads the raw
-URL on every load, so publishing an edit = `git push`. The CLI runs from the
-Novedu repo (`cd ~/github/chat-prototype`, prefix commands with
-`npm run cli --silent --`, and pass ABSOLUTE paths for files in the book
-repo); `codes sync` and `eval` need a signed-in teacher (`whoami` to check;
-`login` opens a browser the human must finish). Validation needs no sign-in.
+URL on every load, so publishing an edit = `git push`. Run the CLI from the
+book-repo root as `npx @novedu/cli@latest <command>` (`@latest` skips a stale
+npx cache copy). Novedu runs as two separate apps, PROD (`app.novedu.at`, the
+CLI default) and DEV (`dev.novedu.at`); the book's codes, hosted images, and
+lock file all belong to PROD, so never pass `--server https://dev.novedu.at`
+or set `NOVEDU_SERVER` to DEV for `codes sync` or `images upload`.
+`codes sync` and `eval` need a signed-in teacher (`whoami` shows user AND
+environment; `login` opens a browser the human must finish, one sign-in per
+environment). Validation needs no sign-in.
 
 1. Author/edit the quiz YAML and its sibling golden-answer eval in the book
    repo.
@@ -266,7 +270,7 @@ repo); `codes sync` and `eval` need a signed-in teacher (`whoami` to check;
          note: "Creative Coding book: <chapter title> (<nr>) — GitHub-hosted"
    ```
 
-   and run `codes sync <abs path>/ddp-activities.yaml`. That mints the new
+   and run `codes sync ddp-activities.yaml`. That mints the new
    code, reuses every existing one, and rewrites `ddp-activities.lock.yaml`;
    commit registry AND lock file. Book quizzes carry no `start`/`end` and no
    `llm` override. Later edits need no new code and no sync (the code points
@@ -298,7 +302,7 @@ behavior, validate the chapter eval files and, when authorized, run the affected
 eval suite; `discussion_frame`-only changes do not need grader evals.
 
 (Alternative: `files upload <name>` app-hosts a file at
-`https://novedu.at/api/files/<name>`; only relevant if a quiz must not live
+`https://app.novedu.at/api/files/<name>`; only relevant if a quiz must not live
 in the public repo.)
 
 ## Student feedback loop

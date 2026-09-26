@@ -96,9 +96,12 @@ exercises-base-url: "https://github.com/rstropek/ddp-ts-oop-course/tree/main/exe
 exercises-raw-base-url: "https://raw.githubusercontent.com/rstropek/ddp-ts-oop-course/main/exercises"
 
 # Base URL of the Novedu chat app. The `quiz` and `tutor` shortcodes turn an
-# activity code into a link built from this base (<base>/<code>). If the app
-# ever moves, edit ONLY this line.
-novedu-base-url: "https://novedu.at"
+# activity code into a link built from this base (<base>/<code>). This is
+# Novedu's PROD environment; the codes in ddp-activities.lock.yaml exist only
+# there (DEV at dev.novedu.at is a separate app with its own codes). If the app
+# ever moves, edit this line, models.json, and the base URL in chapter 1.2
+# (0010-welcome/0020-coding-buddy-setup.qmd).
+novedu-base-url: "https://app.novedu.at"
 
 # The generated key -> code map for every Novedu activity this book links to.
 # A chapter names a quiz or a tutor by its registry KEY ({{< quiz

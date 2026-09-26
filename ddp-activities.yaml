@@ -10,8 +10,10 @@
 #
 #     npx @novedu/cli codes sync ddp-activities.yaml
 #
-# Commit BOTH this file and ddp-activities.lock.yaml. Full format reference:
-# https://github.com/Teaching-HTL-Leonding/novedu-chat-mvp/blob/main/docs/registry.md
+# Commit BOTH this file and ddp-activities.lock.yaml. The codes live on Novedu's
+# PROD environment (app.novedu.at, the CLI default): never sync this registry
+# against DEV. Full format reference:
+# https://app.novedu.at/docs/30-sharing-activities/08-activity-registry/
 
 # Novedu re-reads the activity YAML from this repository's raw URLs on every
 # load, so publishing a quiz or tutor edit stays a plain `git push`.

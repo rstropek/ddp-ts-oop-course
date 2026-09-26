@@ -8,7 +8,7 @@
 # student has learned by now and what must not appear in generated code yet, so
 # the buddy never asks which part they are in and never guesses. The chapter
 # that opens the part prints this activity's code with {{< coding <key> >}};
-# the student opens novedu.at/<code>, signs in, and puts the personal key that
+# the student opens app.novedu.at/<code>, signs in, and puts the personal key that
 # page mints into ~/.pi/agent/auth.json. The code is not the key.
 #
 # Everything this buddy shares with the other six lives in

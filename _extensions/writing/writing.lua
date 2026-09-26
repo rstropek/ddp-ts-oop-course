@@ -242,7 +242,7 @@ local function writing(args, kwargs, meta)
 
   local cta = pandoc.Div(
     pandoc.Para(pandoc.Link(
-      cta_label("Open the writing activity on novedu.at"),
+      cta_label("Open the writing activity on app.novedu.at"),
       url
     )),
     pandoc.Attr("", { "writing-cta" })

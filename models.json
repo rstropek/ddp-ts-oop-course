@@ -2,7 +2,7 @@
   "providers": {
     "novedu": {
       "api": "openai-completions",
-      "baseUrl": "https://novedu.at/api/coding/v1",
+      "baseUrl": "https://app.novedu.at/api/coding/v1",
       "apiKey": "dummy",
       "models": [
         {
