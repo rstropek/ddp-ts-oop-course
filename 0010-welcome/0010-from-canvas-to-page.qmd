@@ -256,7 +256,8 @@ every question has an answer.
 **Most chapters end with a quiz** on the Novedu platform. You answer in your
 own words, an AI reads your answers and tells you what is solid and what to
 read again, and the whole thing is anonymous. German answers are fine. This
-chapter has no quiz, because so far nothing has been explained.
+chapter's quiz covers the terminal commands, because the page itself gets
+explained from Part 2 on.
 
 ## Two rules for the whole year {#sec-from-canvas-to-page-rules}
 
@@ -276,3 +277,9 @@ Your `hello-page` folder holds a real web page, served by your own development
 server, with a heading that carries your name. Keep the folder. The next
 chapter puts a coding buddy on your machine, and Part 2 then opens these same
 two files and starts naming what is inside them.
+
+## Check your understanding {#sec-quiz-from-canvas-to-page}
+
+Seven short questions about the terminal commands from the survival kit.
+
+{{< quiz from-canvas-to-page title="From canvas to page" >}}
