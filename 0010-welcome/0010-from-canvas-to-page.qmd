@@ -84,6 +84,143 @@ been explained: not the `<h1>` around the text, not the `id` on it, not
 first line. That is on purpose. The next chapters take this project apart, one
 piece per chapter, and you will meet every one of those words again.
 
+## A survival kit for the terminal {#sec-from-canvas-to-page-terminal}
+
+You just typed `npm install` and `npm start` into a terminal. A few more
+commands get you around your files without the mouse, and you'll need them all
+year, because the coding buddy and git both live in the terminal.
+
+These are Linux commands. On Windows you run them in WSL, the Windows
+Subsystem for Linux, which gives you a real Linux terminal next to Windows. If
+WSL isn't set up on your computer yet, Microsoft's WSL documentation walks you
+through it. On a Mac, the built-in Terminal app understands the same commands.
+
+### Find out where you are
+
+The terminal always works inside one folder, the **current folder**. `pwd`
+(print working directory) prints its full path:
+
+```text
+/home/lena/terminal-practice
+```
+
+`cd` (change directory) moves you to another folder. `cd terminal-practice`
+steps into the folder `terminal-practice` inside the current one. `cd ..` goes
+up one level, because `..` is the name every folder gives its parent. `cd` on
+its own, with no folder name at all, takes you back to your home folder. To
+create a new folder in the first place, use `mkdir` (make directory), as in
+`mkdir terminal-practice`.
+
+### Look inside folders and files
+
+`ls` (list) prints the names in the current folder. `ls -la` prints the long
+version, one entry per line with size and date, and it includes hidden
+entries. Linux treats every name that starts with a dot as hidden, such as
+`.gitignore`, and a plain `ls` skips them:
+
+```text
+total 4
+drwxrwxr-x 2 lena lena 60 Oct  1 09:34 .
+drwxrwxr-x 3 lena lena 60 Oct  1 09:34 ..
+-rw-rw-r-- 1 lena lena  9 Oct  1 09:34 shopping.txt
+```
+
+The first two lines are `.`, the current folder itself, and `..`, its parent.
+A `d` at the very start of a line marks a folder.
+
+`cat` prints what is inside a file. `cat package.json` shows the file right in
+the terminal, without opening an editor.
+
+### Open the folder in VS Code
+
+`code .` starts VS Code with the current folder open. The `.` is the same one
+from the `ls -la` list, the current folder itself, so `cd` into your project
+first and then run `code .`. In WSL, VS Code runs on Windows and connects to
+your Linux files. The very first `code .` takes a little longer, because VS
+Code sets up that connection.
+
+### Move, rename, and delete
+
+`mv` (move) takes two names and looks at the second one. If it is a folder
+that exists, the file moves into it, so `mv shopping.txt done` puts the file
+into `done`. Otherwise the file gets that name, so `mv shopping.txt
+bought.txt` renames it.
+
+`rm` (remove) deletes a file, and `rm -r` deletes a folder with everything
+inside it. Neither one asks "are you sure?", and nothing lands in a recycle
+bin. Run `pwd` and `ls` before every `rm -r`, so you know exactly what is
+about to go.
+
+### Run one command as administrator
+
+Some commands change the system itself, for example installing a program for
+every user, and Linux allows that only for the administrator account, called
+`root`. Put `sudo` in front of a command and Linux runs that one command as
+`root`, after asking for your own password. `ls /root` answers
+`Permission denied`, while `sudo ls /root` lists the folder.
+
+When an installation guide says `sudo`, that's normal. Inside your project
+folders you never need it. `sudo npm install` in a project creates files that
+belong to `root`, and after that your normal commands can't change them any
+more.
+
+### All of it in one script
+
+The script below uses every command from this section in one small story. It
+builds a practice folder with a file in it and then takes it all apart again.
+One line uses `echo` and `>` to create the file, because
+none of the survival commands writes text into a file. Each comment says what
+the lines below it do.
+
+```bash
+#!/bin/bash
+
+# Start in your home folder and check where you are.
+cd
+pwd
+
+# Create a practice folder and step into it.
+mkdir terminal-practice
+cd terminal-practice
+pwd
+
+# Create a file with one line of text, then print what is inside.
+echo "Buy milk" > shopping.txt
+cat shopping.txt
+
+# Open the practice folder in VS Code and watch its file list as you go on.
+code .
+
+# List the folder: first short, then long with hidden entries.
+ls
+ls -la
+
+# Create a subfolder and move the file into it.
+mkdir done
+mv shopping.txt done
+ls done
+
+# Rename the file: mv with a new name and the same folder.
+mv done/shopping.txt done/bought.txt
+ls done
+
+# Delete the file. The last ls prints nothing, because done is empty now.
+rm done/bought.txt
+ls done
+
+# Go back up one level and delete the practice folder with everything in it.
+cd ..
+rm -r terminal-practice
+ls
+
+# Read a folder that only the administrator may open. This asks for your password.
+sudo ls /root
+```
+
+Type the lines into your WSL terminal one at a time and compare each result
+with its comment. Or save the whole thing as `survival.sh` and run it with
+`bash survival.sh`.
+
 ## What you know, what is new {#sec-from-canvas-to-page-new}
 
 Most of your first year still counts. Here is what carries over and what
