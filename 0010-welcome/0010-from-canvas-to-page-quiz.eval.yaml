@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# Golden-answer regression cases for the "From canvas to page" quiz
+# (0010-welcome/0010-from-canvas-to-page.qmd, terminal survival kit). One
+# correct, one partial, one incorrect per question, plus one German correct
+# answer per quiz. Teacher-only test data; never publish as an activity.
+# Grading runs on the quiz's own small model (Qwen on SCCH, free); the
+# feedback audit uses a frontier judge via --judge-llm-* and costs money, so
+# run it after rubric changes, not routinely.
+
+id: from-canvas-to-page-quiz-eval
+target: ./0010-from-canvas-to-page-quiz.yaml
+
+questions:
+  - question: cd-up-and-home
+    answers:
+      - expect: correct
+        answer: |
+          /home/lena/projects because cd .. goes one folder up. cd alone
+          brings me back home to /home/lena
+      # Right path, nothing about cd on its own.
+      - expect: partial
+        answer: |
+          it prints /home/lena/projects
+      # Classic misconception: cd .. undoes all the cd commands.
+      - expect: incorrect
+        answer: |
+          /home/lena, cd .. takes you back to where you started. cd alone does
+          nothing
+
+  - question: ls-hidden-files
+    answers:
+      - expect: correct
+        answer: |
+          files with a dot at the start are hidden and ls doesnt show them.
+          ls -la shows them
+      # Knows the command, not the reason.
+      - expect: partial
+        answer: |
+          you need ls -la
+      - expect: incorrect
+        answer: |
+          ls only shows folders, not files. use cat to see the files
+
+  - question: cat-on-folder
+    answers:
+      - expect: correct
+        answer: |
+          cat shows whats inside a file, but done is a folder. she needs
+          ls done
+      # German correct answer.
+      - expect: correct
+        answer: |
+          cat zeigt den inhalt von einer datei an, done ist aber ein ordner.
+          richtig wäre ls done
+      # Right fix, no word on what cat does.
+      - expect: partial
+        answer: |
+          she should type ls done
+      - expect: incorrect
+        answer: |
+          cat needs admin rights for folders, so sudo cat done works
+
+  - question: mv-move-or-rename
+    answers:
+      - expect: correct
+        answer: |
+          the first one moves shopping.txt into the done folder. the second
+          one renames it to list.txt
+      # First half right, second half wrong (a copy instead of a rename).
+      - expect: partial
+        answer: |
+          first it goes into done. second one makes a copy called list.txt
+      - expect: incorrect
+        answer: |
+          both make copies, the first in done and the second with the name
+          list.txt
+
+  - question: rm-folder-safely
+    answers:
+      - expect: correct
+        answer: |
+          rm -r old-tests. before that run pwd and ls so you know where you
+          are, there is no recycle bin
+      # Right command, no check before it.
+      - expect: partial
+        answer: |
+          rm -r old-tests
+      - expect: incorrect
+        answer: |
+          rm old-tests, and if its wrong you can get it back from the trash
+
+  - question: sudo-npm-install
+    answers:
+      - expect: correct
+        answer: |
+          sudo runs it as root, the admin. then the files belong to root and
+          normal commands cant change them anymore
+      # Knows what sudo is, not why it hurts here.
+      - expect: partial
+        answer: |
+          sudo means run as administrator, you dont need that for npm
+      - expect: incorrect
+        answer: |
+          sudo makes the install safer because it checks the packages for
+          viruses
+
+  - question: code-dot
+    answers:
+      - expect: correct
+        answer: |
+          the dot is the folder you are in right now. first cd hello-page,
+          then code .
+      # Knows the fix, not what the dot means.
+      - expect: partial
+        answer: |
+          type cd hello-page first
+      - expect: incorrect
+        answer: |
+          the dot always means your home folder, so you have to open the
+          project with file > open folder instead

@@ -66,6 +66,9 @@ activities:
   # One quiz per chapter, keyed by chapter slug. Each quiz also asks the
   # chapter's research-box questions (ids `research-*`).
   quizzes:
+    from-canvas-to-page:
+      file: 0010-welcome/0010-from-canvas-to-page-quiz.yaml
+      note: "Creative Coding 2 book: From canvas to page (0010) — GitHub-hosted"
     elements-are-objects:
       file: 0020-dom/0010-elements-are-objects-quiz.yaml
       note: "Creative Coding 2 book: Elements are objects (0010) — GitHub-hosted"

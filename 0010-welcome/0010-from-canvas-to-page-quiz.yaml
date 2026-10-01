@@ -1,0 +1,170 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# Quiz for the book chapter "From canvas to page"
+# (0010-welcome/0010-from-canvas-to-page.qmd).
+# The chapter explains no TypeScript or HTML yet, so the quiz covers its
+# terminal survival kit only: pwd, cd, mkdir, ls, ls -la, cat, mv, rm, rm -r,
+# sudo, and code . in WSL. Rubrics list only the expected answer and the
+# aspects the student must state; the shared fragments carry every generic
+# rule.
+# Part of the "Creative Coding 2" course (TypeScript + HTML + CSS + SVG,
+# students 16-17).
+
+id: from-canvas-to-page-quiz
+name: "Quiz: From canvas to page"
+
+title: "Check your understanding: the terminal survival kit"
+description: |
+  Seven short questions about the terminal commands from the chapter
+  *From canvas to page*. Answer in your own words. There are no answer
+  options to pick from, and this quiz is anonymous: it's here for you, so
+  you can see what you already understand and what you should read again.
+  One or two sentences are enough for most answers, and answering in German
+  is fine too.
+
+llm:
+  model: Qwen/Qwen3.8-27B-FP8
+  provider: SCCH
+
+fragment_files:
+  - id: shared
+    url: "../ddp-quiz-fragments.yaml"
+instructions: |
+  {{fragment "shared.quiz_context"}}
+
+discussion:
+  instructions: |
+    {{fragment "shared.discussion_frame"
+      example="cd terminal-practice"
+      scope="after the first chapter of the book, before any HTML or DOM"
+      knows=(array
+        "TypeScript from year one: variables, if/switch, loops, arrays, and functions"
+        "the starter project with `npm install` and `npm start`"
+        "the Linux terminal in WSL (or the Terminal app on a Mac)"
+        "`pwd`, `cd <folder>`, `cd ..`, `cd` on its own, and `mkdir`"
+        "`ls`, `ls -la`, hidden dot files, and `cat`"
+        "`mv` to move or rename, `rm` and `rm -r` to delete, and that the terminal has no recycle bin"
+        "`sudo` runs one command as `root`, and `code .` opens VS Code on the current folder")
+      not_yet=(array
+        "any other options of these commands, such as `rm -rf`, `ls -R`, or `mv -i`"
+        "file permissions, `chmod`, `chown`, pipes, or shell scripting beyond running a list of commands"
+        "git, HTML, CSS, and the DOM"
+        "classes, inheritance, generics, or testing")}}
+
+questions:
+  - id: cd-up-and-home
+    title: "Where cd takes you"
+    question: |
+      `pwd` prints `/home/lena`. Then you type these three commands:
+
+      ```bash
+      cd projects
+      cd hello-page
+      cd ..
+      ```
+
+      What does `pwd` print now? And where do you land if you then type
+      `cd` on its own?
+    evaluation: |
+      Expected: `/home/lena/projects`, because `cd ..` goes up one level to
+      the parent of `hello-page`; `cd` on its own goes to the home folder,
+      `/home/lena`.
+      Required: (1) `/home/lena/projects`; (2) `cd` alone leads to the home
+      folder (`/home/lena` or `~`).
+      Partial: exactly one of the two aspects.
+      Incorrect: says `cd ..` goes back to `/home/lena` or to the very top
+      folder `/`.
+
+  - id: ls-hidden-files
+    title: "The missing .gitignore"
+    question: |
+      VS Code shows a file `.gitignore` in your starter project, but `ls` in
+      the terminal does not list it. Why not, and which command lists it?
+    evaluation: |
+      Expected: names that start with a dot are hidden, and a plain `ls`
+      skips hidden entries; `ls -la` lists them (`ls -a` also counts).
+      Required: (1) the dot at the start makes the file hidden; (2) `ls -la`
+      or `ls -a`.
+      Partial: exactly one of the two aspects.
+      Incorrect: claims the file does not exist or that `ls` only lists
+      folders.
+
+  - id: cat-on-folder
+    title: "cat and a folder"
+    question: |
+      Lena wants to see what is inside her folder `done` and types
+      `cat done`. The terminal answers `cat: done: Is a directory`. What
+      does `cat` do, and which command should she have typed?
+    evaluation: |
+      Expected: `cat` prints the content of a file, and `done` is a folder;
+      `ls done` lists what is inside the folder.
+      Required: (1) `cat` prints what is inside a file (not a folder);
+      (2) `ls done` (or `cd done` followed by `ls`).
+      Partial: exactly one of the two aspects.
+      Incorrect: suggests `cat -r done`, `sudo cat done`, or another `cat`
+      form as the fix.
+
+  - id: mv-move-or-rename
+    title: "One command, two jobs"
+    question: |
+      The current folder holds a file `shopping.txt` and a folder `done`,
+      and nothing else. What happens with `mv shopping.txt done`, and what
+      happens with `mv shopping.txt list.txt`?
+    evaluation: |
+      Expected: `mv shopping.txt done` moves the file into the folder `done`,
+      because `done` is an existing folder; `mv shopping.txt list.txt`
+      renames the file to `list.txt`, because no folder of that name exists.
+      Required: (1) the first command moves the file into `done`; (2) the
+      second renames it to `list.txt`.
+      Partial: exactly one of the two aspects.
+      Incorrect: says either command makes a copy, or that the second
+      command creates a folder `list.txt`.
+
+  - id: rm-folder-safely
+    title: "Deleting a folder"
+    question: |
+      You want to delete the folder `old-tests` with all the files inside
+      it. Which command does that, and what should you run before it to be
+      safe?
+    evaluation: |
+      Expected: `rm -r old-tests`; before it, `pwd` and `ls` to check where
+      you are and what is about to go, because `rm` asks no question and
+      nothing lands in a recycle bin.
+      Required: (1) `rm -r old-tests`; (2) a check before deleting, `pwd`
+      and/or `ls`, or an equivalent check of the current folder and its
+      content.
+      Partial: exactly one of the two aspects.
+      Incorrect: names `rm old-tests` without `-r`, or claims deleted files
+      can be restored from a recycle bin.
+
+  - id: sudo-npm-install
+    title: "sudo in a project"
+    question: |
+      A classmate types `sudo npm install` in their project folder, "just to
+      be safe". What does `sudo` do, and why does it cause trouble here?
+    evaluation: |
+      Expected: `sudo` runs that one command as the administrator `root`
+      (after asking for the password); the new files in the project then
+      belong to `root`, so later normal commands cannot change them.
+      Project folders never need `sudo`.
+      Required: (1) `sudo` runs the command as administrator / `root`;
+      (2) the created files belong to `root`, so normal commands can no
+      longer change them.
+      Partial: exactly one of the two aspects, or only "you don't need it"
+      without the reason.
+      Incorrect: claims `sudo` makes the install safer or faster, or that it
+      is required for `npm install`.
+
+  - id: code-dot
+    title: "The dot in code ."
+    question: |
+      Your terminal is in your home folder and you type `code .`. VS Code
+      opens with your whole home folder instead of your project
+      `hello-page`. What does the `.` stand for, and what should you type
+      first?
+    evaluation: |
+      Expected: `.` is the current folder, here the home folder; type
+      `cd hello-page` first (or the path to the project), then `code .`.
+      Required: (1) `.` means the current folder; (2) `cd` into the project
+      before running `code .`.
+      Partial: exactly one of the two aspects.
+      Incorrect: claims `.` always means the home folder, or "all folders".
