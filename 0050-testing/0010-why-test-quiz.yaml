@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/htl-leo-novedu/novedu-app/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
 # Quiz for the book chapter "Why test, and what can be tested"
 # (0050-testing/0010-why-test.qmd).
 # The chapter has no research box, so there are no `research-` questions and

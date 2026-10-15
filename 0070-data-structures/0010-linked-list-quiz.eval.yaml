@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/htl-leo-novedu/novedu-app/refs/heads/main/activities/evals/eval-yaml.schema.json
 # Golden-answer regression cases for the linked list chapter quiz
 # (0070-data-structures/0010-linked-list.qmd). One correct, one partial, one
 # incorrect per question, plus one German correct answer per quiz.

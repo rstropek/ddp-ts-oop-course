@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/coding/coding-yaml.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/htl-leo-novedu/novedu-app/refs/heads/main/activities/coding/coding-yaml.schema.json
 # Coding activity for Part 4 of the Creative Coding 2 book: the
 # OpenAI-compatible endpoint a student points the `pi` coding agent at while
 # they work through "Your own classes", inside VS Code and a copy of

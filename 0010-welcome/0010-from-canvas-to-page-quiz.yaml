@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/htl-leo-novedu/novedu-app/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
 # Quiz for the book chapter "From canvas to page"
 # (0010-welcome/0010-from-canvas-to-page.qmd).
 # The chapter explains no TypeScript or HTML yet, so the quiz covers its

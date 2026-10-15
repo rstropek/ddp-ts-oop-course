@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/htl-leo-novedu/novedu-app/refs/heads/main/activities/quizzes/quiz-yaml.schema.json
 # Quiz for the book chapter "Events: the page talks back"
 # (0020-dom/0020-events.qmd). The first three questions are the chapter's
 # research box, word for word (ids prefixed `research-`), so the student looks

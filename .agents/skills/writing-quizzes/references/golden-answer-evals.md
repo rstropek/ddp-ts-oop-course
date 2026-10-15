@@ -17,7 +17,7 @@ when a real grading failure shows the gap.
 ## File skeleton
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Teaching-HTL-Leonding/novedu-chat-mvp/refs/heads/main/activities/evals/eval-yaml.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/htl-leo-novedu/novedu-app/refs/heads/main/activities/evals/eval-yaml.schema.json
 id: <quiz-id>-eval
 target: ./<chapter>-quiz.yaml # relative to THIS eval file
 
@@ -81,7 +81,8 @@ write a new synthetic answer with the same misconception and add that instead.
 
 ## Validate before spending tokens
 
-Run commands from `~/github/chat-prototype`, and pass the absolute eval path in
+Run commands from `~/github/chat-prototype` (the local clone of
+`htl-leo-novedu/novedu-app`), and pass the absolute eval path in
 this book repository:
 
 ```bash
