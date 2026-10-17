@@ -3,7 +3,7 @@
 # (0030-svg/0060-toolchain-assets.qmd). One correct, one partial, one
 # incorrect per question, plus one German correct answer per quiz.
 # Teacher-only test data; never publish as an activity. Grading runs on the
-# quiz's own small model (Qwen on SCCH, free); the feedback audit uses a
+# quiz's own model (GPT-6 Luna via OpenRouter); the feedback audit uses a
 # frontier judge via --judge-llm-* and costs money, so run it after rubric
 # changes.
 

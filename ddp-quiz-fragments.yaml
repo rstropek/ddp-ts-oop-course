@@ -7,11 +7,11 @@
 #                                the quiz has `research-*` questions)
 #   discussion.instructions: -> {{fragment "shared.discussion_frame" ...}}
 #
-# Grading runs on a small model (Qwen 3.8 27B on SCCH). Everything generic
+# Grading runs on GPT-6 Luna via OpenRouter. Everything generic
 # about verdicts (what partial means, paraphrases count, no length reward) is
 # said ONCE here; the per-question rubric in a quiz lists only the expected
 # answer and the aspects the student must state, and grows only when its
-# golden-answer eval shows the small grader needs more. Edit the text here,
+# golden-answer eval shows the grader needs more. Edit the text here,
 # push, and every quiz serves the new wording immediately (the server
 # re-reads the raw URL).
 #
@@ -48,10 +48,11 @@ fragments:
         idea is right; never require a technical term the criteria don't name.
       - A concise answer scores equal to or better than a long one at the same
         correctness. Never reward length.
-      - Feedback is in simple English a 16-year-old English learner
-        understands. When the verdict is not `correct`, state the correct
-        answer, unless a research rule below says otherwise. When `partial`,
-        name what is right and then what is missing.
+      - Feedback is always in simple English a 16-year-old English learner
+        understands, even when the student answers in German. When the
+        verdict is not `correct`, state the correct answer, unless a research
+        rule below says otherwise. When `partial`, name what is right and
+        then what is missing.
       - Never mention scores, grades, marks, or the grading criteria, and
         never write the verdict or a label such as `Verdict:` into the
         feedback; start with the content.

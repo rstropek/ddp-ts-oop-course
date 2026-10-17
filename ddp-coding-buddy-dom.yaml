@@ -24,8 +24,9 @@ name: "Creative Coding 2: coding buddy, Part 2 The DOM"
 title: "Coding buddy for the Creative Coding 2 course"
 
 llm:
-  model: Qwen/Qwen3.8-27B-FP8
-  provider: SCCH
+  model: openai/gpt-6-luna
+  provider: OpenRouter
+  reasoning: medium
 
 fragment_files:
   - id: shared

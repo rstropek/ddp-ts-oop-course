@@ -62,8 +62,9 @@ description: |
   answers, and answering in German is fine too.
 
 llm:
-  model: Qwen/Qwen3.8-27B-FP8
-  provider: SCCH
+  model: openai/gpt-6-luna
+  provider: OpenRouter
+  reasoning: medium
 
 # BOTH host texts below pull from the shared fragment library — never inline
 # their wording, never edit it per chapter (edit ddp-quiz-fragments.yaml at
@@ -123,7 +124,7 @@ on each other), `question_count` (chapter quizzes ask everything).
 
 ## Rubric (`evaluation`) template
 
-Grading runs on a small model (`Qwen/Qwen3.8-27B-FP8` on SCCH, free).
+Grading runs on GPT-6 Luna (`openai/gpt-6-luna` via OpenRouter, reasoning `medium`).
 Everything generic about verdicts lives ONCE in `ddp-quiz-fragments.yaml`
 (what `partial` means, paraphrases count, no length reward, fail safe,
 feedback rules), so a rubric starts with only what the grader must verify:
@@ -139,7 +140,7 @@ one>.
 
 Technical correctness is the whole rubric. Start WITHOUT paraphrase lists,
 procedural verdict bullets, per-question feedback wording, or tone rules.
-Then run the golden-answer eval: where the small grader gets a case wrong,
+Then run the golden-answer eval: where the grader gets a case wrong,
 add the one line that fixes it (an accepted paraphrase, a sharper `partial`
 boundary, the literal value) and nothing more. A rubric grows only on
 evidence from its eval. Stay under ~8 lines unless evals forced more. The
@@ -229,8 +230,8 @@ synthetic student answers pin down what `correct`, `partial`, and
 - Keep a one-line comment above a non-obvious case.
 
 Run the eval after writing or changing a quiz. Grading runs on the quiz's
-own small model; the audit of the feedback text uses a frontier judge via
-`--judge-llm-provider "Azure Foundry" --judge-llm-model <frontier model>`
+own model; the audit of the feedback text uses a frontier judge via
+`--judge-llm-provider OpenRouter --judge-llm-model openai/gpt-6.1-sol`
 (costs money, so `--no-judge-feedback` for a verdict-only check). A failing
 case is the trigger, and the only trigger, for adding context to that
 question's rubric. The reference has the skeleton, CLI commands, and report

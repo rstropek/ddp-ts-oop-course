@@ -11,17 +11,18 @@ do this once, at the start of the year.
 The course suggests `pi`, an open source agent you run in a terminal, from
 [pi.dev](https://pi.dev). It is deliberately minimal. Out of the box it edits
 files and runs shell commands, and almost everything past that you add
-yourself. Behind `pi` sits the model that does the actual thinking, Qwen 3.8
-27B, served by your school's Novedu platform.
+yourself. Behind `pi` sits the model that does the actual thinking, GPT-6
+Luna from OpenAI, which your school's Novedu platform connects you to.
 
-## What a small model means for you {#sec-buddy-setup-model}
+## What the model means for you {#sec-buddy-setup-model}
 
-By the standards of 2026, Qwen 3.8 27B is a small model. It writes decent
-TypeScript and it follows clear instructions, and it gets lost when a task runs
-long or a prompt stays vague. Cutting a job into steps the model can finish in
-one turn is the skill you are here for, and a bigger model would let you skip
-that practice by absorbing your sloppy prompt anyway. Nobody is billing you for
-a run that goes wrong either, so a bad answer costs you one retry.
+GPT-6 Luna follows clear instructions well, and like every model it still gets
+lost when a task runs long or a prompt stays vague. Cutting a job into steps
+the model can finish in one turn is the skill you are here for. A strong model
+often rescues a sloppy prompt anyway, and that hides exactly the habit this
+year trains, so cut the job into steps even when one long prompt happens to
+work. Your school pays for the model, not you, so a run that goes wrong costs
+you one retry.
 
 ## Install pi {#sec-buddy-setup-install}
 
