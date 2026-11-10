@@ -173,6 +173,12 @@ prints a **call stack**: the function that threw sits at the top, the one that
 called it is underneath, and reading down that list walks you back to where the
 trouble started.
 
+The whiteboard tutor from the linked list chapter draws stacks too. Ask it to
+push a wagon onto a train of three and pop it off again, and watch which arrow
+the head gives up.
+
+{{< tutor data-structures-board-tutor title="Draw it on the whiteboard" >}}
+
 ::: {.callout-tip}
 ## From last year's exam sheet
 

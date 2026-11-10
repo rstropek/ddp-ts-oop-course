@@ -53,7 +53,13 @@ activities:
       file: ddp-coding-buddy-e2e.yaml
       note: "Creative Coding 2 book: coding buddy, Part 8 End-to-end testing — GitHub-hosted"
 
-  tutors: {}
+  # AI tutors: a chat that explains and asks questions, with no code access.
+  # The data structures tutor draws on Novedu's whiteboard (the `board` tool)
+  # and is linked from 7.1, 7.3, and 7.4 with {{< tutor <key> >}}.
+  tutors:
+    data-structures-board-tutor:
+      file: 0070-data-structures/data-structures-board-tutor.yaml
+      note: "Creative Coding 2 book: whiteboard tutor, Part 7 Data structures — GitHub-hosted"
 
   # Writing activities: the student drafts a text, an AI coach reads it and
   # asks questions but cannot edit it. Not anonymous: the teacher reads the

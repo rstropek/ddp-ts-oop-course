@@ -541,6 +541,14 @@ what a test suite is worth. The 15 sentences describe what a playlist does, they
 never describe how it is stored, and that is why they could sit still through a
 rewrite that touched every line of the class.
 
+The figures in this chapter show three fixed moments. The whiteboard tutor draws
+whichever moment you ask about, on a board next to the chat. Ask it what
+`insertAfter` rewires in a playlist of three songs, or what happens when you swap
+the two lines of `insertAtBeginning`, and then keep asking: it changes the same
+drawing, so you watch the arrows move.
+
+{{< tutor data-structures-board-tutor title="Draw it on the whiteboard" >}}
+
 ## Exercise: the playlist on the page {#sec-linked-list-exercise}
 
 `Playlist` is tested and has never seen the DOM. Everything below happens in

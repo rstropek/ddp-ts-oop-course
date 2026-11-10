@@ -197,6 +197,12 @@ for. Among the tests you copy in for the exercise, one is called `takes new
 items again`: it enqueues one item, dequeues it, and then enqueues two more.
 That is the only test in the file that a forgotten `tail = null` turns red.
 
+Three steps are a lot to hold in your head at once, so let the whiteboard tutor
+draw them. Ask it what happens when Ida leaves and `tail = null` is missing, then
+ask for the next `enqueue`.
+
+{{< tutor data-structures-board-tutor title="Draw it on the whiteboard" >}}
+
 ::: {.research title="Two things the exercise needs"}
 The Add human form has a Long hair checkbox, and the test file you copy in
 carries three tests that do not test anything yet. This chapter answers neither
